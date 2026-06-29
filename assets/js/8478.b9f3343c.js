@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmc_monorepo_docs=globalThis.webpackChunkmc_monorepo_docs||[]).push([[8478],{8478(e,o,c){c.d(o,{createWardleyServices:()=>s.J});var s=c(8937);c(1400)}}]);

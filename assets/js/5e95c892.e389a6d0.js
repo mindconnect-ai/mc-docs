@@ -1,0 +1,1 @@
+"use strict";(globalThis.webpackChunkmc_monorepo_docs=globalThis.webpackChunkmc_monorepo_docs||[]).push([[9647],{7121(e,o,s){s.r(o),s.d(o,{default:()=>d});s(6540);var r=s(4164),c=s(7559),a=s(5500),n=s(2831),u=s(9139),l=s(4848);function d(e){return(0,l.jsx)(a.e3,{className:(0,r.A)(c.G.wrapper.docsPages),children:(0,l.jsx)(u.A,{children:(0,n.v)(e.route.routes)})})}}}]);
