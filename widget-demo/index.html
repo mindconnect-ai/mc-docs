@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Semantic UI — Widget Showcase</title>
+
+    <!--
+        Both theme stylesheets are loaded up front. Only one is active at a
+        time, selected by the class on <html>:
+          (none)          → default light theme (sui.css)
+          sui-theme-dark  → dark overrides (sui-dark.css)
+        The theme <select> in the top bar toggles that class — no reload.
+    -->
+    <link rel="stylesheet" href="./sui/sui.css">
+    <link rel="stylesheet" href="./sui/sui-dark.css">
+
+    <style>
+        /* Demo chrome only — the widgets themselves are styled entirely by sui.css. */
+        body { margin: 0; }
+        .demo-topbar {
+            display: flex; align-items: center; gap: 16px;
+            padding: 12px 20px; border-bottom: 1px solid var(--sui-color-border);
+            background: var(--sui-color-surface); position: sticky; top: 0; z-index: 10;
+        }
+        .demo-topbar h1 { font-size: 15px; font-weight: 600; margin: 0; }
+        .demo-topbar .demo-spacer { margin-left: auto; }
+        .demo-topbar label { font-size: 13px; color: var(--sui-color-text-muted); }
+        .demo-topbar select { padding: 5px 8px; font-size: 13px; }
+        .demo-main { max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; }
+        /* Section sub-heading + spacing between showcased widgets. */
+        .demo-h { display: block; font-size: 12px; font-weight: 700; letter-spacing: .06em;
+                  text-transform: uppercase; color: var(--sui-color-text-subtle); margin: 8px 0 2px; }
+        .demo-note { display: block; font-size: 13px; color: var(--sui-color-text-muted); }
+        .demo-intro { display: block; font-size: 13px; color: var(--sui-color-text-muted);
+                      background: var(--sui-color-surface-alt); border: 1px solid var(--sui-color-border);
+                      border-radius: var(--sui-radius-md); padding: 10px 14px; line-height: 1.5; }
+        /* Give a simple SVG chart a sensible box. */
+        .sui-chart svg { width: 100%; height: auto; max-width: 420px; }
+        /* Code panels (JSON / Java) shown under each widget. */
+        .demo-code { margin: 0; background: var(--sui-color-code-bg); color: var(--sui-color-code-fg);
+                     padding: 14px 16px; border-radius: var(--sui-radius-md); font-size: 12px;
+                     line-height: 1.5; overflow: auto; max-height: 380px; }
+        .demo-code code { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; white-space: pre; }
+        /* Tighten the collapsible "Show code" disclosure inside a widget stack. */
+        details.sui-section--collapsible { margin: 2px 0 0; }
+    </style>
+</head>
+<body>
+    <div class="demo-topbar">
+        <h1>Semantic UI · Widget Showcase</h1>
+        <span class="demo-note">Static demo — no backend, no build step. Every widget below is a plain JS object.</span>
+        <span class="demo-spacer"></span>
+        <label for="demo-theme">Theme</label>
+        <select id="demo-theme">
+            <option value="">Light</option>
+            <option value="sui-theme-dark">Dark</option>
+        </select>
+    </div>
+
+    <main class="demo-main">
+        <!-- The renderer paints everything into this root. -->
+        <div id="sui-root"></div>
+    </main>
+
+    <script type="module" src="./demo.js"></script>
+</body>
+</html>

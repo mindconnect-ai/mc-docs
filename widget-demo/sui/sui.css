@@ -1,0 +1,613 @@
+/*
+ * Semantic UI — default stylesheet.
+ *
+ * Ships with the mc-semantic-ui-core JAR under META-INF/resources/sui/sui.css
+ * so Spring-Boot consumers can pull it in with a single <link> tag:
+ *
+ *   <link rel="stylesheet" href="/sui/sui.css">
+ *
+ * Everything is themable through the CSS custom properties declared on
+ * :root. Override them in your app stylesheet (or in a <style> block on the
+ * host page) to change colours, spacing, or radii without forking this file.
+ */
+
+:root {
+    /* Palette — surfaces & text */
+    --sui-color-bg:            #f5f5f5;
+    --sui-color-surface:       #ffffff;
+    --sui-color-surface-alt:   #f8fafc;
+    --sui-color-text:          #1a1a1a;
+    --sui-color-text-strong:   #111827;
+    --sui-color-text-body:     #374151;
+    --sui-color-text-muted:    #6b7280;
+    --sui-color-text-subtle:   #94a3b8;
+    --sui-color-border:        #e2e8f0;
+    --sui-color-border-soft:   #f1f5f9;
+    --sui-color-border-strong: #d1d5db;
+
+    /* On-primary text (white text on coloured buttons / avatar). Themes can
+       flip this if the primary color is light enough to need dark text. */
+    --sui-color-on-primary:    #ffffff;
+
+    --sui-color-primary:       #2563eb;
+    --sui-color-primary-hover: #1d4ed8;
+    --sui-color-primary-soft:  #eff6ff;
+
+    --sui-color-danger:        #dc2626;
+    --sui-color-danger-bg:     #fee2e2;
+    --sui-color-danger-bg-hover: #fecaca;
+
+    --sui-color-required:      #ef4444;
+    --sui-color-empty:         #9ca3af;
+
+    /* Header band — a dark, rounded, floating bar by default. Every value is a
+       variable so apps/themes can restyle the header without overriding rules.
+       Set --sui-header-bg to a light color (and the text vars to dark) for a
+       light header. */
+    --sui-header-bg:            #1e293b;
+    --sui-header-fg:            #e2e8f0;
+    --sui-header-brand-fg:      #ffffff;
+    --sui-header-nav-fg:        #94a3b8;
+    --sui-header-nav-fg-hover:  #ffffff;
+    --sui-header-nav-bg-hover:  #334155;
+    --sui-header-radius:        var(--sui-radius-lg);
+    --sui-header-shadow:        0 4px 14px rgba(15, 23, 42, .25);
+    /* Logo recolor: source SVGs stroke dark, so invert to white on the dark
+       band. Apps with a light header or a pre-colored logo set this to "none". */
+    --sui-header-logo-filter:   brightness(0) invert(1);
+
+    /* Code / pre — dark slab by default, themes may invert. */
+    --sui-color-code-bg:       #1e293b;
+    --sui-color-code-fg:       #e2e8f0;
+    --sui-color-blockquote-border: #cbd5e1;
+
+    /* Shape */
+    --sui-radius-sm:    4px;
+    --sui-radius-md:    6px;
+    --sui-radius-lg:    8px;
+    --sui-radius-pill:  50%;
+
+    /* Type */
+    --sui-font-family:  -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    --sui-font-mono:    ui-monospace, "SF Mono", SFMono-Regular, Menlo, Monaco, Consolas, monospace;
+    --sui-font-size:    14px;
+
+    /* Effects */
+    --sui-shadow-card:  0 1px 3px rgba(0, 0, 0, .1);
+    --sui-focus-ring:   0 0 0 2px rgba(37, 99, 235, .15);
+}
+
+/* ── Base reset ─────────────────────────────────────────────────────────── */
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+    font-family: var(--sui-font-family);
+    font-size: var(--sui-font-size);
+    color: var(--sui-color-text);
+    background: var(--sui-color-bg);
+    /* Native browser scroll anchoring keeps the user's read position stable
+       when content above the viewport changes (most relevant during a patch
+       that prepends rows). Disable per element with overflow-anchor:none. */
+    overflow-anchor: auto;
+}
+
+/* ── Header ─────────────────────────────────────────────────────────────── */
+
+/* Page-level header: brand on the left, user widget on the right. A dark,
+   rounded, floating band by default — restyle via the --sui-header-* vars. */
+.sui-header {
+    display: flex; align-items: center; justify-content: space-between;
+    gap: 32px;
+    padding: 0 24px; height: 56px;
+    background: var(--sui-header-bg);
+    color: var(--sui-header-fg);
+    border-radius: var(--sui-header-radius);
+    box-shadow: var(--sui-header-shadow);
+    margin-bottom: 24px;
+}
+.sui-header-brand {
+    display: inline-flex; align-items: center; gap: 10px;
+    font-size: 16px; font-weight: 600;
+    color: var(--sui-header-brand-fg); text-decoration: none;
+}
+.sui-header-brand:hover { text-decoration: none; }
+/* Logo image sits left of the brand text; constrained to the header height so
+   any source SVG/PNG scales down cleanly. --sui-header-logo-filter recolors it
+   to suit the band (white on dark by default; set to "none" for a light header
+   or a pre-colored logo). */
+.sui-header-logo {
+    height: 36px; width: auto; display: block; flex: 0 0 auto;
+    filter: var(--sui-header-logo-filter);
+}
+/* User widget: avatar circle + name, clickable as a whole. */
+.sui-header-user {
+    display: flex; align-items: center; gap: 10px;
+    color: var(--sui-header-fg); text-decoration: none;
+    padding: 4px 10px 4px 4px; border-radius: 999px;
+    transition: background .15s;
+}
+.sui-header-user:hover { background: var(--sui-header-nav-bg-hover); text-decoration: none; }
+.sui-header-avatar {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 32px; height: 32px; border-radius: 50%;
+    background: var(--sui-color-primary); color: var(--sui-color-on-primary);
+    font-size: 12px; font-weight: 600; letter-spacing: .5px;
+}
+.sui-header-username { font-size: 13px; font-weight: 500; color: var(--sui-header-fg); }
+/* Right side container: extras (nav links, theme picker, …) sit to the LEFT of
+   the user widget so the avatar stays anchored to the page edge. */
+.sui-header-right { display: flex; align-items: center; gap: 12px; }
+.sui-header-extras { display: flex; align-items: center; gap: 4px; }
+/* Nav links / plain links in the extras area, styled for the dark band. */
+.sui-header-extras a {
+    color: var(--sui-header-nav-fg); text-decoration: none;
+    padding: 6px 12px; border-radius: var(--sui-radius-sm); font-size: 13px;
+}
+.sui-header-extras a:hover {
+    color: var(--sui-header-nav-fg-hover); background: var(--sui-header-nav-bg-hover);
+}
+.sui-header-extras a.active {
+    color: var(--sui-header-nav-fg-hover); background: var(--sui-header-nav-bg-hover);
+    font-weight: 600;
+}
+/* Inline forms inside extras shouldn't carry their default card chrome —
+   the header is the chrome. */
+.sui-header-extras .sui-form { box-shadow: none; background: transparent; padding: 0; }
+.sui-header-extras .sui-form .sui-form-footer { display: none; }
+.sui-header-extras .sui-field { margin: 0; gap: 0; }
+.sui-header-extras .sui-field label { display: none; }
+.sui-header-extras select { padding: 6px 10px; font-size: 13px; }
+
+/* ── Lists ──────────────────────────────────────────────────────────────── */
+
+.sui-list { background: var(--sui-color-surface); border-radius: var(--sui-radius-lg); box-shadow: var(--sui-shadow-card); }
+.sui-list-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--sui-color-border);
+}
+.sui-list-header h2 { font-size: 16px; font-weight: 600; }
+.sui-list ul { list-style: none; }
+.sui-list-item {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 12px 20px; border-bottom: 1px solid var(--sui-color-border-soft);
+}
+.sui-list-item:last-child { border-bottom: none; }
+.sui-list-item-main { display: flex; flex-direction: column; gap: 2px; }
+.sui-list-item-label { font-weight: 500; color: var(--sui-color-primary); text-decoration: none; cursor: pointer; }
+.sui-list-item-label:hover { text-decoration: underline; }
+.sui-list-item-desc { font-size: 12px; color: var(--sui-color-text-muted); }
+.sui-list-item-actions { display: flex; gap: 8px; }
+
+/* ── Tree ───────────────────────────────────────────────────────────────── */
+
+.sui-tree { background: var(--sui-color-surface); border-radius: var(--sui-radius-lg); box-shadow: var(--sui-shadow-card); padding: 8px 12px; }
+.sui-tree-title { font-size: 16px; font-weight: 600; padding: 8px 4px; }
+.sui-tree-list, .sui-tree-children { list-style: none; margin: 0; padding: 0; }
+/* Indent + guide line for nested levels. */
+.sui-tree-children { margin-left: 10px; padding-left: 10px; border-left: 1px solid var(--sui-color-border-soft); }
+
+/* One row (leaf div or expandable <summary>). */
+.sui-tree-row {
+    display: flex; align-items: center; gap: 6px;
+    padding: 3px 6px; border-radius: var(--sui-radius-sm);
+    font-size: 13px; line-height: 1.5;
+}
+.sui-tree-row:hover { background: var(--sui-color-border-soft); }
+/* Leaf rows have no twisty — align them with the summary's text. */
+.sui-tree-node--leaf > .sui-tree-row { padding-left: 22px; }
+
+/* Expandable node: native <details> with a rotating twisty on the summary. */
+details.sui-tree-item { border: none; }
+summary.sui-tree-summary { cursor: pointer; user-select: none; list-style: none; }
+summary.sui-tree-summary::-webkit-details-marker { display: none; }
+summary.sui-tree-summary::before {
+    content: "▶"; flex: 0 0 auto;
+    color: var(--sui-color-text-muted); font-size: 10px;
+    width: 10px; text-align: center; transition: transform .15s;
+}
+details.sui-tree-item[open] > summary.sui-tree-summary::before { transform: rotate(90deg); }
+
+.sui-tree-icon { flex: 0 0 auto; }
+.sui-tree-label { color: var(--sui-color-text-body); text-decoration: none; }
+a.sui-tree-label { color: var(--sui-color-primary); cursor: pointer; }
+a.sui-tree-label:hover { text-decoration: underline; }
+.sui-tree-label.is-selected { font-weight: 600; color: var(--sui-color-primary); }
+
+/* Body wraps rich content + child list, indented under the twisty. */
+.sui-tree-content { padding: 4px 0 4px 22px; }
+
+/* ── Forms & details ────────────────────────────────────────────────────── */
+
+.sui-form, .sui-detail {
+    background: var(--sui-color-surface); border-radius: var(--sui-radius-lg);
+    box-shadow: var(--sui-shadow-card); padding: 24px;
+}
+.sui-form h2, .sui-detail h2 { margin-bottom: 20px; font-size: 16px; font-weight: 600; }
+.sui-field { display: flex; flex-direction: column; gap: 4px; margin-bottom: 16px; }
+.sui-field label { font-size: 12px; font-weight: 500; color: var(--sui-color-text-body); }
+.sui-field input, .sui-field textarea, .sui-field select {
+    padding: 8px 10px;
+    border: 1px solid var(--sui-color-border-strong);
+    border-radius: var(--sui-radius-md);
+    background: var(--sui-color-surface);
+    color: var(--sui-color-text);
+    font-size: var(--sui-font-size); font-family: inherit; width: 100%;
+}
+.sui-field input:focus, .sui-field textarea:focus, .sui-field select:focus {
+    outline: none; border-color: var(--sui-color-primary); box-shadow: var(--sui-focus-ring);
+}
+.sui-field textarea { resize: vertical; min-height: 100px; }
+.sui-hint { font-size: 11px; color: var(--sui-color-empty); }
+.sui-required { color: var(--sui-color-required); }
+.sui-value { color: var(--sui-color-text-body); }
+.sui-empty { color: var(--sui-color-empty); font-style: italic; }
+.sui-form-footer { display: flex; align-items: center; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--sui-color-border-soft); }
+
+.sui-detail-grid { display: grid; grid-template-columns: 180px 1fr; gap: 0; }
+.sui-detail-row { display: contents; }
+.sui-detail-row dt { padding: 10px 0; font-size: 12px; font-weight: 500; color: var(--sui-color-text-muted); border-bottom: 1px solid var(--sui-color-border-soft); }
+.sui-detail-row dd { padding: 10px 0; border-bottom: 1px solid var(--sui-color-border-soft); }
+
+/* ── Buttons ────────────────────────────────────────────────────────────── */
+
+.sui-btn {
+    padding: 7px 14px; border: none; border-radius: var(--sui-radius-md);
+    font-size: 13px; font-weight: 500; cursor: pointer;
+    font-family: inherit; transition: opacity .15s;
+    /* SSR renders some actions as <a> (anchor-style triggers) and others
+       as <button> (form-wrapped). They must look identical, so neutralise
+       the anchor defaults: no underline, no inherited text color, sit
+       inline-block so padding behaves the same as on a <button>. */
+    display: inline-block; line-height: 1; text-decoration: none;
+}
+.sui-btn:hover { text-decoration: none; }
+.sui-btn:disabled, .sui-btn[aria-disabled="true"] { opacity: .45; cursor: not-allowed; }
+
+/* SSR wraps mutating actions (POST/DELETE/PUT) in their own <form> so a
+   browser submits them natively. Without this rule each form would take
+   its own line — making a row of [View] [Edit] [Delete] stack vertically.
+   Inline-block keeps the form group on the same baseline as anchor-style
+   action buttons. */
+.sui-ssr-form { display: inline-block; margin: 0; }
+.sui-btn--primary   { background: var(--sui-color-primary); color: var(--sui-color-on-primary); }
+.sui-btn--primary:hover:not(:disabled)   { background: var(--sui-color-primary-hover); }
+.sui-btn--secondary { background: var(--sui-color-border-soft); color: var(--sui-color-text-body); }
+.sui-btn--secondary:hover:not(:disabled) { background: var(--sui-color-border); }
+.sui-btn--danger    { background: var(--sui-color-danger-bg); color: var(--sui-color-danger); }
+.sui-btn--danger:hover:not(:disabled)    { background: var(--sui-color-danger-bg-hover); }
+
+/* Icon buttons: compact glyph-only variant, reuses the colour suffixes. */
+.sui-icon-btn {
+    display: inline-flex; align-items: center; justify-content: center;
+    min-width: 28px; height: 28px; padding: 0 6px;
+    border: none; border-radius: var(--sui-radius-md);
+    font-size: 14px; line-height: 1; cursor: pointer;
+    font-family: inherit; transition: opacity .15s, background .15s;
+}
+.sui-icon-btn:disabled { opacity: .45; cursor: not-allowed; }
+.sui-icon-btn--primary   { background: var(--sui-color-primary); color: var(--sui-color-on-primary); }
+.sui-icon-btn--primary:hover:not(:disabled)   { background: var(--sui-color-primary-hover); }
+.sui-icon-btn--secondary { background: transparent; color: var(--sui-color-text-muted); }
+.sui-icon-btn--secondary:hover:not(:disabled) { background: var(--sui-color-border-soft); color: var(--sui-color-text-strong); }
+.sui-icon-btn--danger    { background: transparent; color: var(--sui-color-danger); }
+.sui-icon-btn--danger:hover:not(:disabled)    { background: var(--sui-color-danger-bg); }
+
+/* ── Misc ───────────────────────────────────────────────────────────────── */
+
+.sui-pagination { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--sui-color-text-muted); font-size: 13px; }
+.sui-link { color: var(--sui-color-primary); text-decoration: none; font-size: 13px; cursor: pointer; }
+.sui-link:hover { text-decoration: underline; }
+.sui-actions { display: flex; gap: 8px; }
+
+/* ── Tables ─────────────────────────────────────────────────────────────── */
+
+.sui-table { background: var(--sui-color-surface); border-radius: var(--sui-radius-lg); box-shadow: var(--sui-shadow-card); overflow: hidden; }
+.sui-table-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 16px 20px; border-bottom: 1px solid var(--sui-color-border);
+}
+.sui-table-header h2 { font-size: 16px; font-weight: 600; }
+.sui-table table { width: 100%; border-collapse: collapse; }
+.sui-table thead th {
+    padding: 10px 16px; text-align: left; font-size: 12px;
+    font-weight: 600; color: var(--sui-color-text-muted); background: var(--sui-color-surface-alt);
+    border-bottom: 1px solid var(--sui-color-border);
+}
+.sui-table tbody td {
+    padding: 10px 16px; font-size: 13px; border-bottom: 1px solid var(--sui-color-border-soft);
+    color: var(--sui-color-text-body);
+}
+.sui-table tbody tr:last-child td { border-bottom: none; }
+.sui-table tbody tr:hover { background: var(--sui-color-surface-alt); }
+.sui-table tbody tr.sui-row--selected { background: var(--sui-color-primary-soft); }
+.sui-table tbody tr.sui-row--selected td { font-weight: 500; }
+.sui-table-row-actions { text-align: right; white-space: nowrap; }
+/* Leading selection column (radio / checkbox) — narrow, centered. */
+.sui-table-selection { width: 32px; text-align: center; padding: 0 4px; }
+.sui-table-selection input { margin: 0; cursor: pointer; }
+.sui-table-empty { color: var(--sui-color-empty); font-style: italic; text-align: center; padding: 24px !important; }
+
+/* ── Standalone renderings of structural sub-nodes ──────────────────────────
+   Used by the editor preview when the user selects a column / row /
+   section-entry in the tree. The actual table / section keeps rendering
+   them inline as <th> / <tr> / tab buttons. */
+.sui-column { display: flex; flex-direction: column; gap: 4px;
+              padding: 12px; border: 1px dashed var(--sui-color-border);
+              border-radius: var(--sui-radius-sm); }
+.sui-column-label    { font-weight: 600; }
+.sui-column-key      { color: var(--sui-color-text-muted); font-family: monospace; }
+.sui-column-template { margin-top: 8px; padding-top: 8px;
+                       border-top: 1px solid var(--sui-color-border); }
+.sui-row { display: grid; grid-template-columns: max-content 1fr; gap: 4px 12px;
+           padding: 12px; border: 1px dashed var(--sui-color-border);
+           border-radius: var(--sui-radius-sm); margin: 0; }
+.sui-row dt { font-weight: 600; color: var(--sui-color-text-muted); }
+.sui-row dd { margin: 0; }
+.sui-row-empty { font-style: italic; color: var(--sui-color-empty); grid-column: 1 / -1; }
+.sui-section-entry { padding: 12px;
+                     border: 1px dashed var(--sui-color-border);
+                     border-radius: var(--sui-radius-sm); }
+.sui-section-entry-title { margin: 0 0 8px; font-size: 14px; font-weight: 600; }
+
+/* ── Stack (plain composition box) ─────────────────────────────────────── */
+
+.sui-stack            { display: flex; gap: 16px; }
+.sui-stack--vertical  { flex-direction: column; }
+.sui-stack--horizontal{ flex-direction: row; align-items: center; }
+
+/* ── Sections (tabs + collapsible) ──────────────────────────────────────── */
+
+details.sui-section--collapsible {
+    border: 1px solid var(--sui-color-border);
+    border-radius: var(--sui-radius-md);
+    background: var(--sui-color-surface-alt);
+    margin: 6px 0;
+}
+details.sui-section--collapsible > summary.sui-section-summary {
+    cursor: pointer; user-select: none; list-style: none;
+    padding: 8px 12px; font-size: 13px; font-weight: 500; color: var(--sui-color-text);
+}
+details.sui-section--collapsible > summary.sui-section-summary::-webkit-details-marker { display: none; }
+details.sui-section--collapsible > summary.sui-section-summary::before {
+    content: "▶ ";
+    display: inline-block; color: var(--sui-color-text-muted); font-size: 10px;
+    margin-right: 4px; transition: transform .15s;
+}
+details.sui-section--collapsible[open] > summary.sui-section-summary::before {
+    transform: rotate(90deg);
+}
+details.sui-section--collapsible > summary.sui-section-summary:hover { background: var(--sui-color-border-soft); }
+
+.sui-tabs { display: flex; gap: 4px; border-bottom: 1px solid var(--sui-color-border); margin-bottom: 20px; }
+.sui-tab {
+    padding: 8px 16px; border: none; background: none; cursor: pointer;
+    font-size: 13px; color: var(--sui-color-text-muted); border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+}
+.sui-tab.active { color: var(--sui-color-primary); border-bottom-color: var(--sui-color-primary); font-weight: 500; }
+.sui-tab:hover:not(.active) { color: var(--sui-color-text-body); }
+
+/* ── Activity (collapsible detail) ──────────────────────────────────────── */
+
+.sui-activity { border: none; }
+.sui-activity-summary {
+    font-size: 12px; color: var(--sui-color-text-subtle); cursor: pointer;
+    user-select: none; list-style: none; padding: 2px 0;
+}
+.sui-activity-summary::-webkit-details-marker { display: none; }
+.sui-activity-summary::before { content: "▶ "; font-size: 10px; }
+details[open] .sui-activity-summary::before { content: "▼ "; }
+.sui-activity-body { padding: 4px 0 0 12px; }
+
+/* ── Loading overlay (drawn by SuiRenderer.showLoading) ─────────────────── */
+
+/* The overlay covers the root element while a request is in flight. It is
+   pointer-event-disabled by default so the user can still scroll the
+   content underneath (matching the previous in-place loading bar). The
+   visual is intentionally subtle — a top-edge progress bar — because most
+   admin pages should not feel modal during a routine fetch. */
+.sui-loading-overlay {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    z-index: 50;
+    opacity: 0;
+    transition: opacity .15s ease;
+}
+.sui-loading > .sui-loading-overlay { opacity: 1; }
+
+/* The loading overlay is purely informational (top-edge progress bar) —
+   it no longer disables triggerable controls. A blanket "every button
+   off while loading" rule was too restrictive: it broke the chat Stop
+   button during a streaming turn (the whole turn is "loading" from the
+   bus's POV), and locked the user out of pagination / nav while small
+   patches were in flight. Double-fire prevention belongs on a per-action
+   basis instead (e.g. the form-submit handler clearing its own button)
+   rather than blanket-disabling everything. */
+
+.sui-loading-bar {
+    position: absolute;
+    top: 0; left: 0;
+    height: 3px; width: 0;
+    background: var(--sui-color-primary);
+    border-radius: 0 var(--sui-radius-md) var(--sui-radius-md) 0;
+    animation: sui-loading-grow 8s ease-out forwards;
+}
+.sui-loading > .sui-loading-overlay > .sui-loading-bar { width: 90%; }
+@keyframes sui-loading-grow {
+    0%   { width: 0; }
+    30%  { width: 60%; }
+    70%  { width: 80%; }
+    100% { width: 90%; }
+}
+
+/* ── Dialogs ────────────────────────────────────────────────────────────── */
+
+/* Host: full-viewport flex container so the dialog centres itself. Sits
+   above page content via z-index. Pointer events pass through to the
+   children — the backdrop catches clicks to close (handled by JS or by the
+   SSR fallback link). */
+.sui-dialog-host {
+    position: fixed;
+    inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    z-index: 500;
+}
+.sui-dialog-backdrop {
+    position: absolute; inset: 0;
+    background: rgba(15, 23, 42, .45);
+    /* Click-through is the SSR default; the SPA wiring catches the click
+       on this element if it wants close-on-backdrop. */
+}
+.sui-dialog {
+    position: relative;
+    background: var(--sui-color-surface);
+    border-radius: var(--sui-radius-lg);
+    box-shadow: 0 10px 40px rgba(0, 0, 0, .25);
+    max-width: min(640px, calc(100vw - 32px));
+    max-height: calc(100vh - 64px);
+    display: flex; flex-direction: column;
+    overflow: hidden;
+    animation: sui-dialog-in .15s ease-out;
+}
+.sui-dialog-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--sui-color-border-soft);
+}
+.sui-dialog-title { font-size: 15px; font-weight: 600; color: var(--sui-color-text); }
+.sui-dialog-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--sui-color-text-muted);
+    font-size: 22px; line-height: 1; padding: 0 4px;
+    font-family: inherit; text-decoration: none;
+}
+.sui-dialog-close:hover { color: var(--sui-color-text); }
+.sui-dialog-body { padding: 20px; overflow: auto; }
+/* The form's own <h2> is redundant when the dialog header already shows the
+   title. Hide it inside dialogs so we don't get two stacked titles. */
+.sui-dialog-body .sui-form > h2 { display: none; }
+/* Form inside a dialog: drop the card chrome — the dialog *is* the card. */
+.sui-dialog-body .sui-form { box-shadow: none; padding: 0; background: transparent; }
+@keyframes sui-dialog-in {
+    from { transform: translateY(-10px); opacity: 0; }
+    to   { transform: translateY(0);     opacity: 1; }
+}
+
+/* ── Toasts ─────────────────────────────────────────────────────────────── */
+
+/* Fixed top-right stack. Container is always present so the SPA EventBus
+   can append into it without a DOM-shape change between SSR and SPA. */
+.sui-toast-container {
+    position: fixed;
+    top: 16px; right: 16px;
+    display: flex; flex-direction: column; gap: 8px;
+    z-index: 1000;
+    pointer-events: none;
+    max-width: min(420px, calc(100vw - 32px));
+}
+.sui-toast {
+    pointer-events: auto;
+    display: flex; align-items: flex-start; gap: 10px;
+    padding: 10px 12px;
+    background: var(--sui-color-surface);
+    border: 1px solid var(--sui-color-border);
+    border-left: 4px solid var(--sui-color-text-muted);
+    border-radius: var(--sui-radius-md);
+    box-shadow: var(--sui-shadow-card);
+    font-size: 13px;
+    color: var(--sui-color-text);
+    animation: sui-toast-in .15s ease-out;
+}
+.sui-toast--leaving { animation: sui-toast-out .2s ease-in forwards; }
+.sui-toast-title    { font-weight: 600; margin-bottom: 2px; }
+.sui-toast-message  { flex: 1; line-height: 1.4; }
+.sui-toast-close {
+    background: none; border: none; cursor: pointer;
+    color: var(--sui-color-text-muted);
+    font-size: 18px; line-height: 1; padding: 0 4px;
+    font-family: inherit;
+}
+.sui-toast-close:hover { color: var(--sui-color-text); }
+
+.sui-toast--info    { border-left-color: var(--sui-color-primary); }
+.sui-toast--success { border-left-color: #16a34a; }
+.sui-toast--warn    { border-left-color: #d97706; }
+.sui-toast--error   { border-left-color: var(--sui-color-danger); }
+
+@keyframes sui-toast-in {
+    from { transform: translateX(20px); opacity: 0; }
+    to   { transform: translateX(0);    opacity: 1; }
+}
+@keyframes sui-toast-out {
+    from { transform: translateX(0);    opacity: 1; }
+    to   { transform: translateX(20px); opacity: 0; }
+}
+
+/* Floating "agent still running" indicator. Mounted on body, not in the
+   toast container, so it persists across navigations independently of
+   the regular toast queue. */
+.sui-stream-status {
+    position: fixed;
+    bottom: 16px;
+    right: 16px;
+    z-index: 1500;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 14px;
+    background: var(--sui-color-surface, #fff);
+    border: 1px solid var(--sui-color-border, #d4d4d8);
+    border-left-width: 4px;
+    border-left-color: var(--sui-color-primary, #3b82f6);
+    border-radius: 6px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+    font-size: 14px;
+}
+.sui-stream-status .sui-toast-link {
+    background: none;
+    border: none;
+    color: var(--sui-color-primary, #3b82f6);
+    cursor: pointer;
+    font-weight: 600;
+    padding: 0;
+}
+.sui-stream-status .sui-toast-link:hover { text-decoration: underline; }
+
+/* ── Markdown (rendered by the markdown extension) ──────────────────────── */
+
+.sui-markdown { line-height: 1.6; color: var(--sui-color-text); }
+.sui-markdown h1, .sui-markdown h2, .sui-markdown h3,
+.sui-markdown h4, .sui-markdown h5, .sui-markdown h6 {
+    margin: 1em 0 .4em; font-weight: 600; line-height: 1.3;
+}
+.sui-markdown h1 { font-size: 1.4em; }
+.sui-markdown h2 { font-size: 1.2em; }
+.sui-markdown h3 { font-size: 1.05em; }
+.sui-markdown p  { margin: 0 0 .75em; }
+.sui-markdown p:last-child { margin-bottom: 0; }
+.sui-markdown ul, .sui-markdown ol { margin: 0 0 .75em 1.4em; }
+.sui-markdown li { margin-bottom: .2em; }
+.sui-markdown code {
+    font-family: var(--sui-font-mono);
+    font-size: .85em; background: var(--sui-color-border-soft);
+    padding: 1px 5px; border-radius: 3px;
+}
+.sui-markdown pre {
+    background: var(--sui-color-code-bg); color: var(--sui-color-code-fg);
+    padding: 12px 16px; border-radius: var(--sui-radius-md);
+    overflow-x: auto; margin: 0 0 .75em;
+}
+.sui-markdown pre code { background: none; padding: 0; color: inherit; font-size: .82em; }
+.sui-markdown blockquote {
+    border-left: 3px solid var(--sui-color-blockquote-border); margin: 0 0 .75em;
+    padding: 4px 12px; color: var(--sui-color-text-muted);
+}
+.sui-markdown table { border-collapse: collapse; width: 100%; margin-bottom: .75em; }
+.sui-markdown th, .sui-markdown td {
+    border: 1px solid var(--sui-color-border); padding: 6px 10px; text-align: left;
+}
+.sui-markdown th { background: var(--sui-color-surface-alt); font-weight: 600; }
+.sui-markdown a { color: var(--sui-color-primary); }
+.sui-markdown hr { border: none; border-top: 1px solid var(--sui-color-border); margin: 1em 0; }
