@@ -1,16 +1,16 @@
 {
   "page" : {
     "type" : "page",
-    "id" : "page-3prg9j"
+    "id" : "page-27gjgl"
   },
   "stack" : {
     "type" : "stack",
-    "id" : "stack-3projw",
+    "id" : "stack-27gr3i",
     "children" : [ ]
   },
   "form" : {
     "type" : "form",
-    "id" : "form-3prsx1",
+    "id" : "form-27gu4g",
     "fields" : [ ],
     "actions" : [ ],
     "links" : [ ],
@@ -18,32 +18,32 @@
   },
   "section" : {
     "type" : "section",
-    "id" : "section-3prx7j",
+    "id" : "section-27gxau",
     "title" : "New section",
     "sections" : [ ],
     "collapseOpen" : false
   },
   "section-entry" : {
     "type" : "section-entry",
-    "id" : "tab-3pryts",
+    "id" : "tab-27gzu0",
     "title" : "New tab"
   },
   "detail" : {
     "type" : "detail",
-    "id" : "detail-3ps0cc",
+    "id" : "detail-27h0zf",
     "fields" : [ ],
     "actions" : [ ],
     "links" : [ ]
   },
   "list" : {
     "type" : "list",
-    "id" : "list-3ps1jc",
+    "id" : "list-27h1vz",
     "items" : [ ],
     "actions" : [ ]
   },
   "table" : {
     "type" : "table",
-    "id" : "table-3ps4sr",
+    "id" : "table-27h5ky",
     "columns" : [ ],
     "rows" : [ ],
     "actions" : [ ],
@@ -53,35 +53,35 @@
   },
   "column" : {
     "type" : "column",
-    "id" : "col-col-3ps9d0-3ps9",
+    "id" : "col-col-27h9r8-27h9",
     "label" : "Column",
-    "dataKey" : "col-3ps9d0",
+    "dataKey" : "col-27h9r8",
     "sortable" : false,
     "filterable" : false
   },
   "row" : {
     "type" : "row",
-    "id" : "row-3pse7x",
+    "id" : "row-27hd1t",
     "data" : { }
   },
   "text" : {
     "type" : "text",
-    "id" : "text-3pshfr",
+    "id" : "text-27hf8s",
     "text" : "Text"
   },
   "header" : {
     "type" : "header",
-    "id" : "header-3psi08",
+    "id" : "header-27hfsb",
     "brand" : "Brand"
   },
   "chart" : {
     "type" : "chart",
-    "id" : "chart-3psk8x",
+    "id" : "chart-27hgnq",
     "chartType" : "BAR"
   },
   "field" : {
     "type" : "field",
-    "id" : "field-3pslb7",
+    "id" : "field-27hhi2",
     "label" : "Label",
     "fieldType" : "TEXT",
     "editable" : true,
@@ -92,7 +92,7 @@
   },
   "action" : {
     "type" : "action",
-    "id" : "action-3psoce",
+    "id" : "action-27hj9u",
     "label" : "Action",
     "style" : "SECONDARY",
     "appearance" : "BUTTON",
@@ -100,8 +100,8 @@
   },
   "link" : {
     "type" : "link",
-    "id" : "link-3psrom",
-    "rel" : "link-3psrom",
+    "id" : "link-27hkk1",
+    "rel" : "link-27hkk1",
     "href" : "#",
     "label" : "Link",
     "external" : false

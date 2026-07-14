@@ -39,12 +39,13 @@ export class TreeView {
             }
         }
         // Each row carries the path so the click handler can address it
-        // without walking the DOM back up. The trash button is rendered
-        // only when the node is selectable (everything except the root —
-        // deleting the root clears the tree, exposed via the toolbar).
-        const trash = path.length === 0
-            ? ""
-            : `<button class="sui-tree-action" data-action="delete" data-path='${escapeAttr(JSON.stringify(path))}' title="Delete">×</button>`;
+        // without walking the DOM back up. Every node — including the root —
+        // gets a trash button: deleting the root clears the tree and the
+        // "+ Add root node" prompt returns, which is how you swap the root for
+        // a different type.
+        const isRoot = path.length === 0;
+        const trash = `<button class="sui-tree-action" data-action="delete" data-path='${escapeAttr(JSON.stringify(path))}' ` +
+            `title="${isRoot ? "Delete the root (clears the page)" : "Delete"}">×</button>`;
         const row = `<div class="sui-tree-node${isSelected ? " is-selected" : ""}" data-path='${escapeAttr(JSON.stringify(path))}'>` +
             `<span class="sui-tree-type">${escapeHtml(node.type)}</span>` +
             (id ? `<span class="sui-tree-id">#${escapeHtml(id)}</span>` : "") +
@@ -111,7 +112,10 @@ export class TreeView {
             if (!raw)
                 return;
             const path = JSON.parse(raw);
-            if (window.confirm("Delete this node?"))
+            const msg = path.length === 0
+                ? "Delete the root node? This clears the page — you can then add a different root."
+                : "Delete this node?";
+            if (window.confirm(msg))
                 this.state.deleteAt(path);
             return;
         }
