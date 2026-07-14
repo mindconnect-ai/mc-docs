@@ -2,53 +2,402 @@
   "index": {
     "projects": [
       {
-        "id": "proj-contacts",
-        "name": "Contacts App",
+        "id": "proj-demo",
+        "name": "Demo App",
         "createdAt": 0,
         "pages": [
-          { "id": "page-list", "name": "Contact List", "updatedAt": 0 },
-          { "id": "page-new", "name": "New Contact", "updatedAt": 0 }
+          {
+            "id": "page-home",
+            "name": "Home",
+            "updatedAt": 0
+          },
+          {
+            "id": "page-contacts",
+            "name": "Contacts",
+            "updatedAt": 0
+          },
+          {
+            "id": "page-form",
+            "name": "New Contact",
+            "updatedAt": 0
+          }
         ]
       }
     ]
   },
   "pages": {
-    "proj-contacts/page-list": {
+    "proj-demo/page-home": {
       "root": {
-        "type": "stack", "id": "root", "gap": 16,
+        "type": "stack",
+        "id": "home",
+        "gap": 16,
         "children": [
-          { "type": "header", "id": "hdr", "brand": "📇 Contacts" },
           {
-            "type": "table", "id": "contacts", "title": "All contacts",
-            "columns": [
-              { "type": "column", "id": "c-name", "label": "Name", "dataKey": "name" },
-              { "type": "column", "id": "c-email", "label": "Email", "dataKey": "email" },
-              { "type": "column", "id": "c-city", "label": "City", "dataKey": "city" }
-            ],
-            "rows": [
-              { "type": "row", "id": "r1", "data": { "name": "Ada Lovelace", "email": "ada@example.com", "city": "London" } },
-              { "type": "row", "id": "r2", "data": { "name": "Alan Turing", "email": "alan@example.com", "city": "Manchester" } }
-            ],
-            "actions": [
-              { "type": "action", "id": "add", "label": "＋ New contact", "style": "PRIMARY",
-                "onClick": { "behavior": "APPLY_RESPONSE", "method": "GET", "url": "page:page-new" } }
+            "type": "header",
+            "id": "home-hdr",
+            "brand": "🧪 Demo App"
+          },
+          {
+            "type": "text",
+            "id": "home-intro",
+            "text": "An interactive prototype. Every button below runs a UiPatch in the browser — navigation, a modal dialog, a toast, and a form with a validation error. No server."
+          },
+          {
+            "type": "text",
+            "id": "home-nav-h",
+            "text": "Navigate",
+            "cssClass": "demo-h"
+          },
+          {
+            "type": "stack",
+            "id": "home-nav",
+            "direction": "HORIZONTAL",
+            "gap": 8,
+            "children": [
+              {
+                "type": "action",
+                "id": "go-contacts",
+                "label": "📇 Contacts",
+                "style": "PRIMARY",
+                "onClick": {
+                  "behavior": "APPLY_RESPONSE",
+                  "method": "GET",
+                  "url": "page:page-contacts"
+                }
+              },
+              {
+                "type": "action",
+                "id": "go-form",
+                "label": "＋ New contact",
+                "style": "SECONDARY",
+                "onClick": {
+                  "behavior": "APPLY_RESPONSE",
+                  "method": "GET",
+                  "url": "page:page-form"
+                }
+              }
+            ]
+          },
+          {
+            "type": "text",
+            "id": "home-dyn-h",
+            "text": "Dynamics (UiPatch)",
+            "cssClass": "demo-h"
+          },
+          {
+            "type": "stack",
+            "id": "home-dyn",
+            "direction": "HORIZONTAL",
+            "gap": 8,
+            "children": [
+              {
+                "type": "action",
+                "id": "btn-toast",
+                "label": "🔔 Show toast",
+                "style": "SECONDARY",
+                "onClick": {
+                  "behavior": "PATCH",
+                  "patch": {
+                    "patches": [],
+                    "toasts": [
+                      {
+                        "level": "SUCCESS",
+                        "message": "Hello from a UiPatch!",
+                        "durationMs": 3000
+                      }
+                    ]
+                  }
+                }
+              },
+              {
+                "type": "action",
+                "id": "btn-dialog",
+                "label": "🪟 Open dialog",
+                "style": "SECONDARY",
+                "onClick": {
+                  "behavior": "PATCH",
+                  "patch": {
+                    "patches": [],
+                    "dialog": {
+                      "type": "dialog",
+                      "id": "about-dialog",
+                      "title": "About this prototype",
+                      "node": {
+                        "type": "stack",
+                        "id": "about-body",
+                        "gap": 10,
+                        "children": [
+                          {
+                            "type": "text",
+                            "id": "about-t",
+                            "text": "This modal was opened by a UiPatch (behavior: PATCH with a `dialog`). Closing it is a UiPatch too (closeDialog) — all in the browser, no backend."
+                          },
+                          {
+                            "type": "stack",
+                            "id": "about-actions",
+                            "direction": "HORIZONTAL",
+                            "gap": 8,
+                            "children": [
+                              {
+                                "type": "action",
+                                "id": "about-toast",
+                                "label": "🔔 …and a toast",
+                                "style": "SECONDARY",
+                                "onClick": {
+                                  "behavior": "PATCH",
+                                  "patch": {
+                                    "patches": [],
+                                    "toasts": [
+                                      {
+                                        "level": "INFO",
+                                        "message": "Toast fired from inside the dialog!",
+                                        "durationMs": 3000
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                              {
+                                "type": "action",
+                                "id": "about-close",
+                                "label": "Got it",
+                                "style": "PRIMARY",
+                                "onClick": {
+                                  "behavior": "PATCH",
+                                  "patch": {
+                                    "patches": [],
+                                    "closeDialog": true
+                                  }
+                                }
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+                  }
+                }
+              }
             ]
           }
         ]
       }
     },
-    "proj-contacts/page-new": {
+    "proj-demo/page-contacts": {
       "root": {
-        "type": "form", "id": "newform", "title": "New contact",
-        "fields": [
-          { "type": "field", "id": "f-name", "label": "Name", "fieldType": "TEXT", "editable": true },
-          { "type": "field", "id": "f-email", "label": "Email", "fieldType": "TEXT", "editable": true },
-          { "type": "field", "id": "f-city", "label": "City", "fieldType": "TEXT", "editable": true }
-        ],
-        "actions": [
-          { "type": "action", "id": "back", "label": "← Back to list", "style": "SECONDARY",
-            "onClick": { "behavior": "APPLY_RESPONSE", "method": "GET", "url": "page:page-list" } },
-          { "type": "action", "id": "save", "label": "Save", "style": "PRIMARY" }
+        "type": "stack",
+        "id": "contacts-root",
+        "gap": 16,
+        "children": [
+          {
+            "type": "header",
+            "id": "c-hdr",
+            "brand": "📇 Contacts"
+          },
+          {
+            "type": "table",
+            "id": "contacts-table",
+            "title": "All contacts",
+            "columns": [
+              {
+                "type": "column",
+                "id": "c-name",
+                "label": "Name",
+                "dataKey": "name"
+              },
+              {
+                "type": "column",
+                "id": "c-email",
+                "label": "Email",
+                "dataKey": "email"
+              },
+              {
+                "type": "column",
+                "id": "c-city",
+                "label": "City",
+                "dataKey": "city"
+              }
+            ],
+            "rows": [
+              {
+                "type": "row",
+                "id": "r1",
+                "data": {
+                  "name": "Ada Lovelace",
+                  "email": "ada@example.com",
+                  "city": "London"
+                }
+              },
+              {
+                "type": "row",
+                "id": "r2",
+                "data": {
+                  "name": "Alan Turing",
+                  "email": "alan@example.com",
+                  "city": "Manchester"
+                }
+              }
+            ]
+          },
+          {
+            "type": "action",
+            "id": "c-back",
+            "label": "← Home",
+            "style": "SECONDARY",
+            "onClick": {
+              "behavior": "APPLY_RESPONSE",
+              "method": "GET",
+              "url": "page:page-home"
+            }
+          }
+        ]
+      }
+    },
+    "proj-demo/page-form": {
+      "root": {
+        "type": "stack",
+        "id": "form-root",
+        "gap": 16,
+        "children": [
+          {
+            "type": "header",
+            "id": "f-hdr",
+            "brand": "＋ New contact"
+          },
+          {
+            "type": "text",
+            "id": "f-hint",
+            "text": "Click Save with an empty/invalid email → a UiPatch replaces the form with one showing a validation error."
+          },
+          {
+            "type": "form",
+            "id": "contact-form",
+            "title": "New contact",
+            "fields": [
+              {
+                "type": "field",
+                "id": "f-name",
+                "label": "Name",
+                "fieldType": "TEXT",
+                "editable": true
+              },
+              {
+                "type": "field",
+                "id": "f-email",
+                "label": "Email",
+                "fieldType": "TEXT",
+                "editable": true,
+                "placeholder": "name@example.com"
+              }
+            ],
+            "actions": [
+              {
+                "type": "action",
+                "id": "f-save",
+                "label": "Save",
+                "style": "PRIMARY",
+                "onClick": {
+                  "behavior": "PATCH",
+                  "patch": {
+                    "patches": [
+                      {
+                        "op": "REPLACE",
+                        "targetId": "contact-form",
+                        "node": {
+                          "type": "form",
+                          "id": "contact-form",
+                          "title": "New contact",
+                          "fields": [
+                            {
+                              "type": "field",
+                              "id": "f-name",
+                              "label": "Name",
+                              "fieldType": "TEXT",
+                              "editable": true
+                            },
+                            {
+                              "type": "field",
+                              "id": "f-email",
+                              "label": "Email",
+                              "fieldType": "TEXT",
+                              "editable": true,
+                              "placeholder": "name@example.com",
+                              "validationError": "Please enter a valid email address."
+                            }
+                          ],
+                          "actions": [
+                            {
+                              "type": "action",
+                              "id": "f-force",
+                              "label": "Submit anyway →",
+                              "style": "PRIMARY",
+                              "onClick": {
+                                "behavior": "PATCH",
+                                "patch": {
+                                  "patches": [
+                                    {
+                                      "op": "REPLACE",
+                                      "targetId": "form-root",
+                                      "node": {
+                                        "type": "stack",
+                                        "id": "form-root",
+                                        "gap": 16,
+                                        "children": [
+                                          {
+                                            "type": "header",
+                                            "id": "s-hdr",
+                                            "brand": "✓ Saved"
+                                          },
+                                          {
+                                            "type": "text",
+                                            "id": "s-msg",
+                                            "text": "Contact saved. (This screen was swapped in by a UiPatch REPLACE.)"
+                                          },
+                                          {
+                                            "type": "action",
+                                            "id": "s-home",
+                                            "label": "← Home",
+                                            "style": "PRIMARY",
+                                            "onClick": {
+                                              "behavior": "APPLY_RESPONSE",
+                                              "method": "GET",
+                                              "url": "page:page-home"
+                                            }
+                                          }
+                                        ]
+                                      }
+                                    }
+                                  ],
+                                  "toasts": [
+                                    {
+                                      "level": "SUCCESS",
+                                      "message": "Contact saved!",
+                                      "durationMs": 3000
+                                    }
+                                  ]
+                                }
+                              }
+                            }
+                          ]
+                        }
+                      }
+                    ]
+                  }
+                }
+              }
+            ]
+          },
+          {
+            "type": "action",
+            "id": "f-back",
+            "label": "← Home",
+            "style": "SECONDARY",
+            "onClick": {
+              "behavior": "APPLY_RESPONSE",
+              "method": "GET",
+              "url": "page:page-home"
+            }
+          }
         ]
       }
     }
