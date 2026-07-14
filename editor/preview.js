@@ -67,10 +67,10 @@ export function showPreview(store, projectId, pageId, onExit) {
         pagesBar.appendChild(b);
     }
 
-    function mount(id) {
+    async function mount(id) {
         pagesBar.querySelectorAll(".preview-page-btn").forEach(b =>
             b.classList.toggle("active", b.dataset.pageId === id));
-        const { root: tree } = store.loadTree(projectId, id);
+        const { root: tree } = await store.loadTree(projectId, id);
         // A UiPage wrapper has no renderer handler — mount its node child.
         const renderable = (tree && tree.type === "page" && tree.node) ? tree.node : tree;
         if (renderable && renderable.type) {

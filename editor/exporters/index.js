@@ -72,11 +72,14 @@ export function openExportDialog(store, projectId) {
 // ── Project model ──────────────────────────────────────────────────────────────
 
 // Reads a project out of the store into the pure build model (see build.js).
-function project(store, projectId) {
+// Async because page trees may come from a server (RestProjectStore).
+async function project(store, projectId) {
     const proj = store.project(projectId);
-    const raw = proj.pages.map(pg => ({
-        id: pg.id, name: pg.name, root: store.loadTree(projectId, pg.id).root,
-    }));
+    const raw = [];
+    for (const pg of proj.pages) {
+        const { root } = await store.loadTree(projectId, pg.id);
+        raw.push({ id: pg.id, name: pg.name, root });
+    }
     return buildProject(proj.name, raw);
 }
 
@@ -94,7 +97,7 @@ const prefix = (files, dir) => files.map(f => ({ name: `${dir}/${f.name}`, data:
 // ── Targets ────────────────────────────────────────────────────────────────────
 
 async function exportStatic(store, projectId) {
-    const proj = project(store, projectId);
+    const proj = await project(store, projectId);
     const root = slug(proj.projectName) + "-static";
     const files = prefix(await coreAssets(), root);
     files.push({ name: `${root}/index.html`, data: indexHtml(proj.projectName) });
@@ -104,7 +107,7 @@ async function exportStatic(store, projectId) {
 }
 
 async function exportSpring(store, projectId) {
-    const proj = project(store, projectId);
+    const proj = await project(store, projectId);
     const root = slug(proj.projectName) + "-springboot";
     const staticDir = `${root}/src/main/resources/static`;
     const pagesDir = `${root}/src/main/resources/pages`;
@@ -122,7 +125,7 @@ async function exportSpring(store, projectId) {
 }
 
 async function exportNode(store, projectId) {
-    const proj = project(store, projectId);
+    const proj = await project(store, projectId);
     const root = slug(proj.projectName) + "-node";
     const files = prefix(await coreAssets(), `${root}/public`);
     files.push({ name: `${root}/public/index.html`, data: indexHtml(proj.projectName) });

@@ -17,13 +17,15 @@
 import { createDefaultRenderer } from "./sui/renderer.js";
 import { SuiEventBus } from "./sui/eventbus.js";
 import { bootEditor } from "./sui-editor/editor.js";
-import { ProjectStore } from "./store.js";
+import { createProjectStore } from "./store.js";
 import { createLocalStorageBackend } from "./local-storage-backend.js";
+import { createServerBackend } from "./server-backend.js";
 import { showPreview } from "./preview.js";
 import { openExportDialog } from "./exporters/index.js";
 import { pinPlainMorpher } from "./offline.js";
 
-const store = new ProjectStore();
+// The store is chosen at boot: REST when a backend is present, else localStorage.
+let store;
 let schema = [];
 let defaults = {};
 
@@ -32,26 +34,33 @@ const app = () => document.getElementById("app");
 // ── Boot ─────────────────────────────────────────────────────────────────────
 
 async function boot() {
-    try {
-        [schema, defaults] = await Promise.all([
-            fetch("./data/schema.json").then(r => r.json()),
-            fetch("./data/defaults.json").then(r => r.json()),
-        ]);
-    } catch (err) {
-        app().innerHTML = `<p class="fatal">Failed to load the node catalogue (data/schema.json). ` +
-            `Serve this app from a static server so fetch() can read it.</p>`;
-        console.error("shell: catalogue load failed", err);
-        return;
-    }
+    // Pick the store: REST (server present) or localStorage (static build).
+    store = await createProjectStore();
 
-    // First run (nothing in localStorage yet): seed the bundled starter project
-    // so there's something to open. Later runs keep the user's own projects and
-    // never re-seed (deleting the sample sticks).
-    if (!store.projects().length) {
+    // The node catalogue drives the local editor backend and is only needed in
+    // localStorage mode — in server mode the editor fetches it from the REST
+    // endpoints instead, so a missing ./data/ (static-only asset) is fine.
+    if (store.mode === "local") {
         try {
-            const res = await fetch("./seed/seed.json");
-            if (res.ok) store.importAll(await res.json());
-        } catch (_) { /* no seed shipped — start empty */ }
+            [schema, defaults] = await Promise.all([
+                fetch("./data/schema.json").then(r => r.json()),
+                fetch("./data/defaults.json").then(r => r.json()),
+            ]);
+        } catch (err) {
+            app().innerHTML = `<p class="fatal">Failed to load the node catalogue (data/schema.json). ` +
+                `Serve this app from a static server so fetch() can read it.</p>`;
+            console.error("shell: catalogue load failed", err);
+            return;
+        }
+
+        // First run (empty localStorage): seed the bundled starter project so
+        // there's something to open. Deleting the sample sticks (no re-seed).
+        if (!store.projects().length) {
+            try {
+                const res = await fetch("./seed/seed.json");
+                if (res.ok) store.importAll(await res.json());
+            } catch (_) { /* no seed shipped — start empty */ }
+        }
     }
 
     showProjects();
@@ -117,22 +126,22 @@ function projectRow(proj) {
 }
 
 function registerProjectsHandlers(bus) {
-    bus.registerClientHandler("project.new", () => {
+    bus.registerClientHandler("project.new", async () => {
         const name = prompt("Project name:", "My project");
         if (name == null) return;
-        store.createProject(name.trim() || "Untitled project");
+        await store.createProject(name.trim() || "Untitled project");
         return replace("home", projectsPage());
     });
-    bus.registerClientHandler("project.rename", (ctx) => {
+    bus.registerClientHandler("project.rename", async (ctx) => {
         const proj = store.project(ctx.trigger.projectId);
         if (!proj) return;
         const name = prompt("Rename project:", proj.name);
         if (name == null) return;
-        store.renameProject(proj.id, name.trim() || proj.name);
+        await store.renameProject(proj.id, name.trim() || proj.name);
         return replace("home", projectsPage());
     });
-    bus.registerClientHandler("project.delete", (ctx) => {
-        store.deleteProject(ctx.trigger.projectId);
+    bus.registerClientHandler("project.delete", async (ctx) => {
+        await store.deleteProject(ctx.trigger.projectId);
         return replace("home", projectsPage());
     });
     bus.registerClientHandler("project.open", (ctx) => {
@@ -195,22 +204,22 @@ function pageRow(projectId, pg) {
 function registerProjectHandlers(bus, projectId) {
     bus.registerClientHandler("nav.projects", () => { showProjects(); });
 
-    bus.registerClientHandler("page.new", () => {
+    bus.registerClientHandler("page.new", async () => {
         const name = prompt("Page name:", "Home");
         if (name == null) return;
-        store.createPage(projectId, name.trim() || "Untitled page");
+        await store.createPage(projectId, name.trim() || "Untitled page");
         return replace("proj", projectPage(projectId));
     });
-    bus.registerClientHandler("page.rename", (ctx) => {
+    bus.registerClientHandler("page.rename", async (ctx) => {
         const pg = store.page(projectId, ctx.trigger.pageId);
         if (!pg) return;
         const name = prompt("Rename page:", pg.name);
         if (name == null) return;
-        store.renamePage(projectId, ctx.trigger.pageId, name.trim() || pg.name);
+        await store.renamePage(projectId, ctx.trigger.pageId, name.trim() || pg.name);
         return replace("proj", projectPage(projectId));
     });
-    bus.registerClientHandler("page.delete", (ctx) => {
-        store.deletePage(projectId, ctx.trigger.pageId);
+    bus.registerClientHandler("page.delete", async (ctx) => {
+        await store.deletePage(projectId, ctx.trigger.pageId);
         return replace("proj", projectPage(projectId));
     });
     bus.registerClientHandler("page.open", (ctx) => {
@@ -237,7 +246,9 @@ async function showEditor(projectId, pageId) {
     const pg = store.page(projectId, pageId);
     if (!proj || !pg) { showProject(projectId); return; }
     app().innerHTML = `<div id="sui-editor-root"></div>`;
-    const backend = createLocalStorageBackend({ schema, defaults, store, projectId, pageId });
+    const backend = store.mode === "server"
+        ? createServerBackend({ store, projectId, pageId })
+        : createLocalStorageBackend({ schema, defaults, store, projectId, pageId });
     await bootEditor({
         rootId: "sui-editor-root",
         backend,

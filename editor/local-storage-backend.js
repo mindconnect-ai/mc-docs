@@ -36,7 +36,7 @@ export function createLocalStorageBackend({ schema, defaults, store, projectId, 
         },
 
         async saveContent(content) {
-            store.saveTree(projectId, pageId, content?.root ?? null);
+            await store.saveTree(projectId, pageId, content?.root ?? null);
         },
 
         async loadDefault(type) {

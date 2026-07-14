@@ -1,3 +1,9 @@
+// The core renderer is a sibling bundle served at /sui/renderer.js. Its real
+// .d.ts is staged into src/main/sui/ at build time (see the pom), so this
+// resolves to genuine types; the emitted import path is unchanged and the
+// browser loads it from the sibling /sui/ at runtime (Spring host, standalone,
+// or a sub-path deploy — /sui-editor/… and /sui/… stay siblings everywhere).
+import { SuiRenderer, installDefaultHandlers } from "../sui/renderer.js";
 const SELECTED_CLASS = "sui-editor-selected";
 export class Preview {
     host;
@@ -73,31 +79,19 @@ export class Preview {
         return [];
     }
     async attachRenderer() {
-        // Dynamic import keeps the URL out of TypeScript's static module graph.
-        // We use a path RELATIVE to this module ("../sui/…") rather than an
-        // absolute "/sui/…" so the editor works when the whole site is served
-        // from a sub-path (e.g. GitHub Pages at /mc-docs/editor/): the editor
-        // bundle lives at …/sui-editor/preview.js and the core bundle at the
-        // sibling …/sui/renderer.js in every host (Spring `/sui-editor` + `/sui`,
-        // the standalone app, and any sub-path deploy). tsc can't resolve the
-        // cross-bundle path, so we suppress the check and cast through the shim.
-        // @ts-expect-error — sibling-bundle URL resolved by the browser.
-        const mod = (await import("../sui/renderer.js"));
-        const renderer = new mod.SuiRenderer(this.host);
+        const renderer = new SuiRenderer(this.host);
         // Force the innerHTML morpher: the editor's preview wants every
         // mutation to land as a clean re-render, not a diff. Idiomorph's
         // attribute-aware diff is great for SPA navigation but can be too
         // conservative when the same form re-appears with only one field
         // changed — exactly the case we exercise here.
-        if (typeof renderer.setMorpher === "function") {
-            renderer.setMorpher((target, html, mode) => {
-                if (mode === "outerHTML")
-                    target.outerHTML = html;
-                else
-                    target.innerHTML = html;
-            });
-        }
-        this.renderer = mod.installDefaultHandlers(renderer);
+        renderer.setMorpher((target, html, mode) => {
+            if (mode === "outerHTML")
+                target.outerHTML = html;
+            else
+                target.innerHTML = html;
+        });
+        this.renderer = installDefaultHandlers(renderer);
         // Force one render now that the renderer is online.
         this.render();
     }
