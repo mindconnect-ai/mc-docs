@@ -1,16 +1,16 @@
 {
   "page" : {
     "type" : "page",
-    "id" : "page-27gjgl"
+    "id" : "page-2vvupg"
   },
   "stack" : {
     "type" : "stack",
-    "id" : "stack-27gr3i",
+    "id" : "stack-2vw1al",
     "children" : [ ]
   },
   "form" : {
     "type" : "form",
-    "id" : "form-27gu4g",
+    "id" : "form-2vw37y",
     "fields" : [ ],
     "actions" : [ ],
     "links" : [ ],
@@ -18,32 +18,32 @@
   },
   "section" : {
     "type" : "section",
-    "id" : "section-27gxau",
+    "id" : "section-2vw6q8",
     "title" : "New section",
     "sections" : [ ],
     "collapseOpen" : false
   },
   "section-entry" : {
     "type" : "section-entry",
-    "id" : "tab-27gzu0",
+    "id" : "tab-2vw901",
     "title" : "New tab"
   },
   "detail" : {
     "type" : "detail",
-    "id" : "detail-27h0zf",
+    "id" : "detail-2vw9k2",
     "fields" : [ ],
     "actions" : [ ],
     "links" : [ ]
   },
   "list" : {
     "type" : "list",
-    "id" : "list-27h1vz",
+    "id" : "list-2vwbrr",
     "items" : [ ],
     "actions" : [ ]
   },
   "table" : {
     "type" : "table",
-    "id" : "table-27h5ky",
+    "id" : "table-2vwfo8",
     "columns" : [ ],
     "rows" : [ ],
     "actions" : [ ],
@@ -53,35 +53,35 @@
   },
   "column" : {
     "type" : "column",
-    "id" : "col-col-27h9r8-27h9",
+    "id" : "col-col-2vwion-2vwi",
     "label" : "Column",
-    "dataKey" : "col-27h9r8",
+    "dataKey" : "col-2vwion",
     "sortable" : false,
     "filterable" : false
   },
   "row" : {
     "type" : "row",
-    "id" : "row-27hd1t",
+    "id" : "row-2vwnmz",
     "data" : { }
   },
   "text" : {
     "type" : "text",
-    "id" : "text-27hf8s",
+    "id" : "text-2vwriw",
     "text" : "Text"
   },
   "header" : {
     "type" : "header",
-    "id" : "header-27hfsb",
+    "id" : "header-2vws5j",
     "brand" : "Brand"
   },
   "chart" : {
     "type" : "chart",
-    "id" : "chart-27hgnq",
+    "id" : "chart-2vwsvh",
     "chartType" : "BAR"
   },
   "field" : {
     "type" : "field",
-    "id" : "field-27hhi2",
+    "id" : "field-2vwv3u",
     "label" : "Label",
     "fieldType" : "TEXT",
     "editable" : true,
@@ -92,7 +92,7 @@
   },
   "action" : {
     "type" : "action",
-    "id" : "action-27hj9u",
+    "id" : "action-2vwyky",
     "label" : "Action",
     "style" : "SECONDARY",
     "appearance" : "BUTTON",
@@ -100,10 +100,15 @@
   },
   "link" : {
     "type" : "link",
-    "id" : "link-27hkk1",
-    "rel" : "link-27hkk1",
+    "id" : "link-2vx13r",
+    "rel" : "link-2vx13r",
     "href" : "#",
     "label" : "Link",
     "external" : false
+  },
+  "dialog" : {
+    "type" : "dialog",
+    "id" : "dialog-2vx35q",
+    "title" : "Dialog"
   }
 }

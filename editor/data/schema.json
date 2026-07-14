@@ -15,6 +15,10 @@
     "property" : "node",
     "cardinality" : "SINGLE",
     "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "link", "action", "field" ]
+  }, {
+    "property" : "dialog",
+    "cardinality" : "SINGLE",
+    "allowedTypes" : [ "dialog" ]
   } ]
 }, {
   "type" : "stack",
@@ -472,4 +476,30 @@
     "required" : false
   } ],
   "children" : [ ]
+}, {
+  "type" : "dialog",
+  "label" : "Dialog",
+  "category" : "overlay",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "closeHref",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "node",
+    "cardinality" : "SINGLE",
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "link", "action", "field" ]
+  } ]
 } ]

@@ -383,6 +383,9 @@ export interface UiPage {
     activeStreams?: UiPageActiveStream[];
 }
 export interface UiPageDialog {
+    /** Present since the dialog became a UiNode subtype ({@code UiDialog}). */
+    type?: "dialog";
+    id?: string;
     title?: string;
     /** URL the close button navigates to (SSR closes by navigation). */
     closeHref?: string;

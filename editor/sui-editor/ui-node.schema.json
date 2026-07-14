@@ -1,58 +1,6 @@
 {
   "$schema" : "http://json-schema.org/draft-07/schema#",
   "definitions" : {
-    "Dialog" : {
-      "type" : "object",
-      "properties" : {
-        "closeHref" : {
-          "type" : "string"
-        },
-        "node" : {
-          "anyOf" : [ {
-            "$ref" : "#/definitions/UiSection-2"
-          }, {
-            "$ref" : "#/definitions/UiSectionEntry-2"
-          }, {
-            "$ref" : "#/definitions/UiStack-2"
-          }, {
-            "$ref" : "#/definitions/UiForm-2"
-          }, {
-            "$ref" : "#/definitions/UiTable-2"
-          }, {
-            "$ref" : "#/definitions/UiColumn-2"
-          }, {
-            "$ref" : "#/definitions/UiRow"
-          }, {
-            "$ref" : "#/definitions/UiText"
-          }, {
-            "$ref" : "#/definitions/UiList-2"
-          }, {
-            "$ref" : "#/definitions/UiTree-2"
-          }, {
-            "$ref" : "#/definitions/UiDetail"
-          }, {
-            "$ref" : "#/definitions/UiChart"
-          }, {
-            "$ref" : "#/definitions/UiHeader-2"
-          }, {
-            "$ref" : "#/definitions/UiAction-2"
-          }, {
-            "$ref" : "#/definitions/UiField"
-          }, {
-            "$ref" : "#/definitions/UiFieldGroup-2"
-          }, {
-            "$ref" : "#/definitions/UiUpload"
-          }, {
-            "$ref" : "#/definitions/UiLink"
-          }, {
-            "$ref" : "#/definitions/UiPage-2"
-          } ]
-        },
-        "title" : {
-          "type" : "string"
-        }
-      }
-    },
     "Node" : {
       "type" : "object",
       "properties" : {
@@ -99,6 +47,8 @@
             "$ref" : "#/definitions/UiUpload"
           }, {
             "$ref" : "#/definitions/UiLink"
+          }, {
+            "$ref" : "#/definitions/UiDialog-2"
           }, {
             "$ref" : "#/definitions/UiPage-2"
           } ]
@@ -149,6 +99,8 @@
             "$ref" : "#/definitions/UiUpload"
           }, {
             "$ref" : "#/definitions/UiLink"
+          }, {
+            "$ref" : "#/definitions/UiDialog-2"
           }, {
             "$ref" : "#/definitions/UiPage-2"
           } ]
@@ -305,6 +257,8 @@
           }, {
             "$ref" : "#/definitions/UiLink"
           }, {
+            "$ref" : "#/definitions/UiDialog-2"
+          }, {
             "$ref" : "#/definitions/UiPage-2"
           } ]
         },
@@ -379,6 +333,79 @@
         }
       },
       "required" : [ "type" ]
+    },
+    "UiDialog-1" : {
+      "type" : "object",
+      "properties" : {
+        "closeHref" : {
+          "type" : "string"
+        },
+        "cssClass" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "node" : {
+          "anyOf" : [ {
+            "$ref" : "#/definitions/UiSection-2"
+          }, {
+            "$ref" : "#/definitions/UiSectionEntry-2"
+          }, {
+            "$ref" : "#/definitions/UiStack-2"
+          }, {
+            "$ref" : "#/definitions/UiForm-2"
+          }, {
+            "$ref" : "#/definitions/UiTable-2"
+          }, {
+            "$ref" : "#/definitions/UiColumn-2"
+          }, {
+            "$ref" : "#/definitions/UiRow"
+          }, {
+            "$ref" : "#/definitions/UiText"
+          }, {
+            "$ref" : "#/definitions/UiList-2"
+          }, {
+            "$ref" : "#/definitions/UiTree-2"
+          }, {
+            "$ref" : "#/definitions/UiDetail"
+          }, {
+            "$ref" : "#/definitions/UiChart"
+          }, {
+            "$ref" : "#/definitions/UiHeader-2"
+          }, {
+            "$ref" : "#/definitions/UiAction-2"
+          }, {
+            "$ref" : "#/definitions/UiField"
+          }, {
+            "$ref" : "#/definitions/UiFieldGroup-2"
+          }, {
+            "$ref" : "#/definitions/UiUpload"
+          }, {
+            "$ref" : "#/definitions/UiLink"
+          }, {
+            "$ref" : "#/definitions/UiDialog-2"
+          }, {
+            "$ref" : "#/definitions/UiPage-2"
+          } ]
+        },
+        "title" : {
+          "type" : "string"
+        }
+      }
+    },
+    "UiDialog-2" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/UiDialog-1"
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "dialog"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
     },
     "UiField" : {
       "type" : "object",
@@ -502,6 +529,8 @@
             }, {
               "$ref" : "#/definitions/UiLink"
             }, {
+              "$ref" : "#/definitions/UiDialog-2"
+            }, {
               "$ref" : "#/definitions/UiPage-2"
             } ]
           }
@@ -581,6 +610,8 @@
               "$ref" : "#/definitions/UiUpload"
             }, {
               "$ref" : "#/definitions/UiLink"
+            }, {
+              "$ref" : "#/definitions/UiDialog-2"
             }, {
               "$ref" : "#/definitions/UiPage-2"
             } ]
@@ -682,6 +713,8 @@
               "$ref" : "#/definitions/UiUpload"
             }, {
               "$ref" : "#/definitions/UiLink"
+            }, {
+              "$ref" : "#/definitions/UiDialog-2"
             }, {
               "$ref" : "#/definitions/UiPage-2"
             } ]
@@ -828,6 +861,8 @@
                 }, {
                   "$ref" : "#/definitions/UiLink"
                 }, {
+                  "$ref" : "#/definitions/UiDialog-2"
+                }, {
                   "$ref" : "#/definitions/UiPage-2"
                 } ]
               },
@@ -877,6 +912,8 @@
                   "$ref" : "#/definitions/UiUpload"
                 }, {
                   "$ref" : "#/definitions/UiLink"
+                }, {
+                  "$ref" : "#/definitions/UiDialog-2"
                 }, {
                   "$ref" : "#/definitions/UiPage-2"
                 } ]
@@ -949,7 +986,7 @@
           "type" : "string"
         },
         "dialog" : {
-          "$ref" : "#/definitions/Dialog"
+          "$ref" : "#/definitions/UiDialog-2"
         },
         "id" : {
           "type" : "string"
@@ -994,6 +1031,8 @@
             "$ref" : "#/definitions/UiUpload"
           }, {
             "$ref" : "#/definitions/UiLink"
+          }, {
+            "$ref" : "#/definitions/UiDialog-2"
           }, {
             "$ref" : "#/definitions/UiPage-2"
           } ]
@@ -1126,6 +1165,8 @@
           }, {
             "$ref" : "#/definitions/UiLink"
           }, {
+            "$ref" : "#/definitions/UiDialog-2"
+          }, {
             "$ref" : "#/definitions/UiPage-2"
           } ]
         },
@@ -1198,6 +1239,8 @@
               "$ref" : "#/definitions/UiUpload"
             }, {
               "$ref" : "#/definitions/UiLink"
+            }, {
+              "$ref" : "#/definitions/UiDialog-2"
             }, {
               "$ref" : "#/definitions/UiPage-2"
             } ]
@@ -1407,7 +1450,7 @@
               "type" : "boolean"
             },
             "dialog" : {
-              "$ref" : "#/definitions/Dialog"
+              "$ref" : "#/definitions/UiDialog-2"
             },
             "patches" : {
               "type" : "array",
@@ -1451,6 +1494,8 @@
                       "$ref" : "#/definitions/UiUpload"
                     }, {
                       "$ref" : "#/definitions/UiLink"
+                    }, {
+                      "$ref" : "#/definitions/UiDialog-2"
                     }, {
                       "$ref" : "#/definitions/UiPage-2"
                     } ]
@@ -1560,6 +1605,8 @@
     "$ref" : "#/definitions/UiUpload"
   }, {
     "$ref" : "#/definitions/UiLink"
+  }, {
+    "$ref" : "#/definitions/UiDialog-2"
   }, {
     "$ref" : "#/definitions/UiPage-2"
   } ]
