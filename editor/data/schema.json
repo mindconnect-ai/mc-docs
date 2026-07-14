@@ -16,8 +16,8 @@
     "cardinality" : "SINGLE",
     "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "link", "action", "field" ]
   }, {
-    "property" : "dialog",
-    "cardinality" : "SINGLE",
+    "property" : "dialogs",
+    "cardinality" : "LIST",
     "allowedTypes" : [ "dialog" ]
   } ]
 }, {

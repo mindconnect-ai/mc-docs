@@ -47,9 +47,16 @@ export function csrfHeader() {
 export async function bffFetch(input, init = {}) {
     const method = (init.method ?? "GET").toUpperCase();
     const isMutating = method !== "GET" && method !== "HEAD" && method !== "OPTIONS";
-    const headers = { ...(init.headers ?? {}) };
-    if (isMutating)
-        Object.assign(headers, csrfHeader());
+    // Use the Headers constructor, not object-spread: callers (e.g. the
+    // EventBus's withJsonAccept) hand us a Headers *instance*, and
+    // `{ ...new Headers(...) }` yields {} — silently dropping Content-Type
+    // and Accept, so a JSON POST would go out as text/plain and 415.
+    const headers = new Headers(init.headers);
+    if (isMutating) {
+        const token = csrfToken();
+        if (token)
+            headers.set("X-XSRF-TOKEN", token);
+    }
     return fetch(input, { ...init, headers, credentials: "same-origin" });
 }
 /**

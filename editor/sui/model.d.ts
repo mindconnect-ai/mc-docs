@@ -362,18 +362,19 @@ export interface UiFieldGroup extends UiNodeBase {
     hint?: string;
     content?: UiNode[];
 }
-export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiSection | UiStack | UiChart | UiHeader | UiText | UiLink | UiAction | UiField | UiUpload;
+export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiSection | UiStack | UiChart | UiHeader | UiText | UiLink | UiAction | UiField | UiDialog | UiUpload;
 export interface UiPage {
     navigate?: string;
     node?: UiNode;
     /** Transient toasts to surface alongside the page content. */
     toasts?: UiToast[];
     /**
-     * When present, render this page as a modal dialog instead of replacing
-     * the main content. SPA path mounts into a popped-up {@code <dialog>},
-     * SSR path renders it as a standalone page with backdrop styling.
+     * Dialogs open on this page. Each is a {@link UiDialog} node identified by
+     * its id; the bus paints them into the body-level `#sui-dialogs` host on
+     * every applyPage. Opening one later is an APPEND into that host, closing
+     * it a REMOVE by id.
      */
-    dialog?: UiPageDialog;
+    dialogs?: UiDialog[];
     /**
      * Server-known SSE streams the SPA may want to re-attach to. On every
      * applyPage the bus walks this list and opens a GET reconnect for any
@@ -382,11 +383,16 @@ export interface UiPage {
      */
     activeStreams?: UiPageActiveStream[];
 }
-export interface UiPageDialog {
-    /** Present since the dialog became a UiNode subtype ({@code UiDialog}). */
-    type?: "dialog";
-    id?: string;
-    title?: string;
+/**
+ * A modal dialog overlay — a first-class UiNode (mirrors UiDialog.java).
+ * Rendered as a fixed-position overlay wherever it sits in the tree, so it is
+ * opened by APPENDing it into the `#sui-dialogs` host and closed by REMOVE-ing
+ * it by id. Pages declare their initially-open dialogs in `UiPage.dialogs`;
+ * there is no singular `dialog` field or `closeDialog` flag any more, and
+ * several dialogs can be stacked, each addressed by its own id.
+ */
+export interface UiDialog extends UiNodeBase {
+    type: "dialog";
     /** URL the close button navigates to (SSR closes by navigation). */
     closeHref?: string;
     /** The dialog body. Same UiNode types as a regular page node. */
@@ -413,10 +419,6 @@ export interface UiPatch {
     patches: UiPatchOperation[];
     /** Toasts to display alongside the patch operations. */
     toasts?: UiToast[];
-    /** Open (or replace) a modal dialog alongside the patch, without a page render. */
-    dialog?: UiPageDialog;
-    /** Dismiss any open dialog when the patch is applied. */
-    closeDialog?: boolean;
 }
 export type UiToastLevel = "INFO" | "SUCCESS" | "WARN" | "ERROR";
 export interface UiToast {

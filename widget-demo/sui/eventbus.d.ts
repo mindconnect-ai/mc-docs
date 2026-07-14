@@ -338,19 +338,24 @@ export declare class SuiEventBus {
      */
     private updateStatusToast;
     /**
-     * Mounts {@code dialog.node} into the body-level dialog host so the
-     * overlay sits above {@code #sui-root}. Matches the SSR rendering exactly
-     * (same DOM shape, same class names) — the user can't tell where the
-     * dialog came from.
+     * Ensures the persistent body-level dialog host ({@code #sui-dialogs})
+     * exists, with the bus's listeners bound to it. Dialogs are appended here
+     * as {@code UiDialog} nodes (each a fixed-position {@code .sui-dialog-host}
+     * overlay carrying its own id), so several can stack and each is removed
+     * individually by a {@code REMOVE} patch on its id or by its close button.
+     * The host sits at body level so it overlays {@code #sui-root}; its own
+     * listeners are needed because that subtree is outside the root.
      */
-    private mountDialog;
+    private ensureDialogHost;
     /**
-     * Tears down a previously-mounted dialog overlay: detaches the listeners
-     * we bound in {@link #mountDialog} and removes the DOM host. Called by
-     * the close-button intercept, by navigation away from a dialog-bearing
-     * page, and re-entrantly by mountDialog() before stacking a new dialog.
+     * Replaces the dialog host's contents with the page's open dialogs. Called
+     * on every full page render: the previous page's dialogs are cleared, then
+     * each {@code UiDialog} in {@code dialogs} is rendered into the host. Empty
+     * / undefined just clears the host.
      */
-    private dismissDialog;
+    private renderDialogs;
+    /** Closes the dialog that {@code el} sits inside (its × / backdrop). */
+    private closeDialogAround;
     /** Applies a {@link UiPatch} via the renderer. Convenience wrapper. */
     applyPatch(patch: UiPatch): void;
     /**

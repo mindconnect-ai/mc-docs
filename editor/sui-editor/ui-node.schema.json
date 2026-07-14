@@ -985,8 +985,11 @@
         "cssClass" : {
           "type" : "string"
         },
-        "dialog" : {
-          "$ref" : "#/definitions/UiDialog-2"
+        "dialogs" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/UiDialog-2"
+          }
         },
         "id" : {
           "type" : "string"
@@ -1446,12 +1449,6 @@
         "patch" : {
           "type" : "object",
           "properties" : {
-            "closeDialog" : {
-              "type" : "boolean"
-            },
-            "dialog" : {
-              "$ref" : "#/definitions/UiDialog-2"
-            },
             "patches" : {
               "type" : "array",
               "items" : {

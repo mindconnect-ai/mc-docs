@@ -117,8 +117,11 @@
                 "onClick": {
                   "behavior": "PATCH",
                   "patch": {
-                    "patches": [],
-                    "dialog": {
+                    "patches": [
+                      {
+                        "op": "APPEND",
+                        "targetId": "sui-dialogs",
+                        "node": {
                       "type": "dialog",
                       "id": "about-dialog",
                       "title": "About this prototype",
@@ -130,7 +133,7 @@
                           {
                             "type": "text",
                             "id": "about-t",
-                            "text": "This modal was opened by a UiPatch (behavior: PATCH with a `dialog`). Closing it is a UiPatch too (closeDialog) — all in the browser, no backend."
+                            "text": "This modal was opened by a UiPatch that APPENDs a `dialog` node into the #sui-dialogs host. Closing it is a UiPatch too — a REMOVE by the dialog's id — all in the browser, no backend."
                           },
                           {
                             "type": "stack",
@@ -165,8 +168,9 @@
                                 "onClick": {
                                   "behavior": "PATCH",
                                   "patch": {
-                                    "patches": [],
-                                    "closeDialog": true
+                                    "patches": [
+                                      { "op": "REMOVE", "targetId": "about-dialog" }
+                                    ]
                                   }
                                 }
                               }
@@ -175,6 +179,8 @@
                         ]
                       }
                     }
+                        }
+                      ]
                   }
                 }
               }

@@ -70,6 +70,7 @@ export class SuiEventBus {
         this.root = root;
         this.navigate = this.doNavigate.bind(this);
         this.installRootListeners();
+        this.ensureDialogHost();
         this.registerDefaultBehaviors();
         // A patch SSE event is so universal that we wire it as a built-in
         // stream handler; apps can override by registering another handler
@@ -208,10 +209,11 @@ export class SuiEventBus {
     applyPage(page, fallbackHref) {
         if (page && page.node)
             this.renderer.mount(page.node);
-        if (page?.dialog?.node)
-            this.mountDialog(page.dialog);
-        else
-            this.dismissDialog(); // any new page without a dialog dismisses an open one
+        // A full page render is a fresh screen: drop the previous page's open
+        // dialogs and paint this page's own (page.dialogs) into the host. Each
+        // dialog is a UiDialog node (a fixed-position .sui-dialog-host overlay
+        // carrying its own id); later opens/closes are APPEND/REMOVE patches.
+        this.renderDialogs(page?.dialogs);
         if (page?.toasts)
             showToasts(page.toasts);
         // The DOM just swapped. Some live streams' target containers may
@@ -418,80 +420,50 @@ export class SuiEventBus {
         }
     }
     /**
-     * Mounts {@code dialog.node} into the body-level dialog host so the
-     * overlay sits above {@code #sui-root}. Matches the SSR rendering exactly
-     * (same DOM shape, same class names) — the user can't tell where the
-     * dialog came from.
+     * Ensures the persistent body-level dialog host ({@code #sui-dialogs})
+     * exists, with the bus's listeners bound to it. Dialogs are appended here
+     * as {@code UiDialog} nodes (each a fixed-position {@code .sui-dialog-host}
+     * overlay carrying its own id), so several can stack and each is removed
+     * individually by a {@code REMOVE} patch on its id or by its close button.
+     * The host sits at body level so it overlays {@code #sui-root}; its own
+     * listeners are needed because that subtree is outside the root.
      */
-    mountDialog(dialog) {
-        // Wipe any previously mounted dialog first so opening a second one
-        // doesn't stack overlays — also detaches its listeners.
-        this.dismissDialog();
-        const host = document.createElement("div");
-        host.id = "sui-dialog-host";
-        host.className = "sui-dialog-host";
-        host.dataset.closeHref = dialog.closeHref ?? "";
-        const backdrop = document.createElement("div");
-        backdrop.className = "sui-dialog-backdrop";
-        host.appendChild(backdrop);
-        const box = document.createElement("div");
-        box.className = "sui-dialog";
-        box.setAttribute("role", "dialog");
-        box.setAttribute("aria-modal", "true");
-        if (dialog.title)
-            box.setAttribute("aria-label", dialog.title);
-        const header = document.createElement("div");
-        header.className = "sui-dialog-header";
-        const title = document.createElement("h2");
-        title.className = "sui-dialog-title";
-        title.textContent = dialog.title ?? "";
-        header.appendChild(title);
-        const close = document.createElement("button");
-        close.type = "button";
-        close.className = "sui-dialog-close";
-        close.setAttribute("aria-label", "Close");
-        close.setAttribute("data-sui-dialog-close", "");
-        close.textContent = "×";
-        header.appendChild(close);
-        box.appendChild(header);
-        const body = document.createElement("div");
-        body.className = "sui-dialog-body";
-        body.innerHTML = this.renderer.render(dialog.node);
-        box.appendChild(body);
-        host.appendChild(box);
-        document.body.appendChild(host);
-        // Bind the bus's handlers directly on the dialog host. The main root
-        // listeners don't see this subtree because the dialog sits at body
-        // level — that's the price of a top-level modal overlay.
-        this.installListenersOn(host);
-        this.dialogListenerHost = host;
+    ensureDialogHost() {
+        let host = document.getElementById("sui-dialogs");
+        if (!host) {
+            host = document.createElement("div");
+            host.id = "sui-dialogs";
+            host.className = "sui-dialogs";
+            document.body.appendChild(host);
+            this.installListenersOn(host);
+            // inScope() consults this so events from within dialogs are handled.
+            this.dialogListenerHost = host;
+        }
+        return host;
     }
     /**
-     * Tears down a previously-mounted dialog overlay: detaches the listeners
-     * we bound in {@link #mountDialog} and removes the DOM host. Called by
-     * the close-button intercept, by navigation away from a dialog-bearing
-     * page, and re-entrantly by mountDialog() before stacking a new dialog.
+     * Replaces the dialog host's contents with the page's open dialogs. Called
+     * on every full page render: the previous page's dialogs are cleared, then
+     * each {@code UiDialog} in {@code dialogs} is rendered into the host. Empty
+     * / undefined just clears the host.
      */
-    dismissDialog() {
-        if (this.dialogListenerHost) {
-            this.removeListenersFrom(this.dialogListenerHost);
-            this.dialogListenerHost = null;
-        }
-        const host = document.getElementById("sui-dialog-host");
-        if (host)
-            host.remove();
+    renderDialogs(dialogs) {
+        const host = this.ensureDialogHost();
+        const html = (dialogs ?? []).map(d => this.renderer.render(d)).join("");
+        host.innerHTML = html;
+    }
+    /** Closes the dialog that {@code el} sits inside (its × / backdrop). */
+    closeDialogAround(el) {
+        el.closest(".sui-dialog-host")?.remove();
     }
     /** Applies a {@link UiPatch} via the renderer. Convenience wrapper. */
     applyPatch(patch) {
+        // A patch may APPEND a dialog node into the dialog host (open) or
+        // REMOVE one by id (close) — make sure the host exists first.
+        this.ensureDialogHost();
         this.renderer.applyPatch(patch);
         if (patch?.toasts)
             showToasts(patch.toasts);
-        // A patch can open, replace, or close the modal dialog without a page
-        // render — same envelope as a UiPage's dialog.
-        if (patch?.dialog?.node)
-            this.mountDialog(patch.dialog);
-        else if (patch?.closeDialog)
-            this.dismissDialog();
     }
     /**
      * Convenience boot: wires the {@code popstate} listener (if history is
@@ -875,14 +847,9 @@ export class SuiEventBus {
         // there's nothing to fetch. URL stays where it was (the dialog was
         // a layer on top, not a route).
         const closeEl = target.closest("[data-sui-dialog-close]");
-        if (closeEl && document.getElementById("sui-dialog-host")?.contains(closeEl)) {
+        if (closeEl && closeEl.closest(".sui-dialog-host")) {
             e.preventDefault();
-            this.dismissDialog();
-            return;
-        }
-        if (target.classList?.contains("sui-dialog-backdrop")) {
-            e.preventDefault();
-            this.dismissDialog();
+            this.closeDialogAround(closeEl);
             return;
         }
         const tab = target.closest(".sui-tab");
