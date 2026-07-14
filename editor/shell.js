@@ -16,10 +16,8 @@
  */
 import { createDefaultRenderer } from "./sui/renderer.js";
 import { SuiEventBus } from "./sui/eventbus.js";
-import { bootEditor } from "./sui-editor/editor.js";
+import "./sui-editor/sui-editor-element.js";   // registers the <sui-editor> element
 import { createProjectStore } from "./store.js";
-import { createLocalStorageBackend } from "./local-storage-backend.js";
-import { createServerBackend } from "./server-backend.js";
 import { showPreview } from "./preview.js";
 import { openExportDialog } from "./exporters/index.js";
 import { pinPlainMorpher } from "./offline.js";
@@ -28,6 +26,7 @@ import { pinPlainMorpher } from "./offline.js";
 let store;
 let schema = [];
 let defaults = {};
+let catalogue = null;   // { schema, defaults } for <sui-editor>, built lazily
 
 const app = () => document.getElementById("app");
 
@@ -241,20 +240,63 @@ function registerProjectHandlers(bus, projectId) {
 
 // ── Editor view ────────────────────────────────────────────────────────────────
 
+// The node catalogue for <sui-editor>. Local build: the bundled schema/defaults.
+// Server build: fetched from the library's REST endpoints (one default per type).
+async function getCatalogue() {
+    if (catalogue) return catalogue;
+    if (store.mode === "server") {
+        const list = await fetch("/editor/api/schema", { headers: { Accept: "application/json" } }).then(r => r.json());
+        const defs = {};
+        await Promise.all(list.map(async (m) => {
+            defs[m.type] = await fetch(`/editor/api/default/${encodeURIComponent(m.type)}`,
+                { headers: { Accept: "application/json" } }).then(r => r.json());
+        }));
+        catalogue = { schema: list, defaults: defs };
+    } else {
+        catalogue = { schema, defaults };
+    }
+    return catalogue;
+}
+
 async function showEditor(projectId, pageId) {
     const proj = store.project(projectId);
     const pg = store.page(projectId, pageId);
     if (!proj || !pg) { showProject(projectId); return; }
-    app().innerHTML = `<div id="sui-editor-root"></div>`;
-    const backend = store.mode === "server"
-        ? createServerBackend({ store, projectId, pageId })
-        : createLocalStorageBackend({ schema, defaults, store, projectId, pageId });
-    await bootEditor({
-        rootId: "sui-editor-root",
-        backend,
-        title: `${proj.name} · ${pg.name}`,
-        onExit: () => showProject(projectId),
-        onPreview: () => showPreview(store, projectId, pageId, () => showEditor(projectId, pageId)),
+
+    // The app owns the chrome (back / preview / save status); <sui-editor> owns
+    // the panes. We load the page tree, hand it in as `value`, and persist on
+    // every `change` — the component never touches storage.
+    app().innerHTML =
+        `<div class="editor-view">` +
+        `  <div class="editor-toolbar sui-editor-toolbar">` +
+        `    <button type="button" class="sui-btn" data-act="back">← Projects</button>` +
+        `    <h1>${escapeHtml(proj.name)} · ${escapeHtml(pg.name)}</h1>` +
+        `    <span class="editor-status"></span>` +
+        `    <div class="sui-editor-actions">` +
+        `      <button type="button" class="sui-btn" data-act="preview">▶ Preview</button>` +
+        `    </div>` +
+        `  </div>` +
+        `  <sui-editor class="editor-host"></sui-editor>` +
+        `</div>`;
+
+    const ed = app().querySelector("sui-editor");
+    const status = app().querySelector(".editor-status");
+    app().querySelector('[data-act="back"]').addEventListener("click", () => showProject(projectId));
+    app().querySelector('[data-act="preview"]').addEventListener("click",
+        () => showPreview(store, projectId, pageId, () => showEditor(projectId, pageId)));
+
+    ed.catalogue = await getCatalogue();
+    const { root } = await store.loadTree(projectId, pageId);
+    ed.value = { root };
+    ed.addEventListener("change", async (e) => {
+        status.textContent = "Saving…";
+        try {
+            await store.saveTree(projectId, pageId, e.detail.root);
+            status.textContent = "Saved";
+        } catch (err) {
+            status.textContent = "Save failed";
+            console.error("save failed", err);
+        }
     });
 }
 
@@ -280,6 +322,11 @@ function btn(id, label, handler, extra, confirm) {
     const action = { type: "action", id, label, style: "SECONDARY", appearance: "BUTTON", onClick };
     if (confirm) action.confirm = confirm;
     return action;
+}
+
+function escapeHtml(s) {
+    return String(s).replace(/[&<>"]/g, c =>
+        c === "&" ? "&amp;" : c === "<" ? "&lt;" : c === ">" ? "&gt;" : "&quot;");
 }
 
 // A REPLACE patch that repaints a whole view stack in place, keeping the

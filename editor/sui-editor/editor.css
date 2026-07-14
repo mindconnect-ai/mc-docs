@@ -44,6 +44,18 @@ body {
 }
 
 /* Three-pane main area: tree (left), panel + preview stacked (right). */
+/* The <sui-editor> web component: a block that fills its host box, with the
+   three-pane grid stretched inside it. (bootEditor uses the same grid under a
+   toolbar via #sui-editor-root; the element uses it standalone.) */
+sui-editor {
+    display: block;
+    height: 100%;
+    min-height: 0;
+}
+sui-editor > .sui-editor-main {
+    height: 100%;
+}
+
 .sui-editor-main {
     display: grid;
     /* tree | gutter | right — --tree-w is driven by the column splitter. */
