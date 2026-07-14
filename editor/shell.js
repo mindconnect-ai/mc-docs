@@ -49,7 +49,7 @@ async function boot() {
     // never re-seed (deleting the sample sticks).
     if (!store.projects().length) {
         try {
-            const res = await fetch("./data/seed.json");
+            const res = await fetch("./seed/seed.json");
             if (res.ok) store.importAll(await res.json());
         } catch (_) { /* no seed shipped — start empty */ }
     }

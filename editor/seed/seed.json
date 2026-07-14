@@ -1,0 +1,56 @@
+{
+  "index": {
+    "projects": [
+      {
+        "id": "proj-contacts",
+        "name": "Contacts App",
+        "createdAt": 0,
+        "pages": [
+          { "id": "page-list", "name": "Contact List", "updatedAt": 0 },
+          { "id": "page-new", "name": "New Contact", "updatedAt": 0 }
+        ]
+      }
+    ]
+  },
+  "pages": {
+    "proj-contacts/page-list": {
+      "root": {
+        "type": "stack", "id": "root", "gap": 16,
+        "children": [
+          { "type": "header", "id": "hdr", "brand": "📇 Contacts" },
+          {
+            "type": "table", "id": "contacts", "title": "All contacts",
+            "columns": [
+              { "type": "column", "id": "c-name", "label": "Name", "dataKey": "name" },
+              { "type": "column", "id": "c-email", "label": "Email", "dataKey": "email" },
+              { "type": "column", "id": "c-city", "label": "City", "dataKey": "city" }
+            ],
+            "rows": [
+              { "type": "row", "id": "r1", "data": { "name": "Ada Lovelace", "email": "ada@example.com", "city": "London" } },
+              { "type": "row", "id": "r2", "data": { "name": "Alan Turing", "email": "alan@example.com", "city": "Manchester" } }
+            ],
+            "actions": [
+              { "type": "action", "id": "add", "label": "＋ New contact", "style": "PRIMARY",
+                "onClick": { "behavior": "APPLY_RESPONSE", "method": "GET", "url": "page:page-new" } }
+            ]
+          }
+        ]
+      }
+    },
+    "proj-contacts/page-new": {
+      "root": {
+        "type": "form", "id": "newform", "title": "New contact",
+        "fields": [
+          { "type": "field", "id": "f-name", "label": "Name", "fieldType": "TEXT", "editable": true },
+          { "type": "field", "id": "f-email", "label": "Email", "fieldType": "TEXT", "editable": true },
+          { "type": "field", "id": "f-city", "label": "City", "fieldType": "TEXT", "editable": true }
+        ],
+        "actions": [
+          { "type": "action", "id": "back", "label": "← Back to list", "style": "SECONDARY",
+            "onClick": { "behavior": "APPLY_RESPONSE", "method": "GET", "url": "page:page-list" } },
+          { "type": "action", "id": "save", "label": "Save", "style": "PRIMARY" }
+        ]
+      }
+    }
+  }
+}
