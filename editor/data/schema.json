@@ -1,0 +1,475 @@
+[ {
+  "type" : "page",
+  "label" : "Page",
+  "category" : "document",
+  "properties" : [ {
+    "name" : "navigate",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "node",
+    "cardinality" : "SINGLE",
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "link", "action", "field" ]
+  } ]
+}, {
+  "type" : "stack",
+  "label" : "Stack",
+  "category" : "container",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "direction",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "VERTICAL", "HORIZONTAL" ]
+  }, {
+    "name" : "gap",
+    "kind" : "NUMBER",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "children",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "link", "action", "field" ]
+  } ]
+}, {
+  "type" : "form",
+  "label" : "Form",
+  "category" : "container",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "reloadOnSubmit",
+    "kind" : "BOOLEAN",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "fields",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "field" ]
+  }, {
+    "property" : "actions",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "action" ]
+  }, {
+    "property" : "links",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "link" ]
+  } ]
+}, {
+  "type" : "section",
+  "label" : "Section",
+  "category" : "container",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "initialSection",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "collapseSummary",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "collapseOpen",
+    "kind" : "BOOLEAN",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "sections",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "section-entry" ]
+  } ]
+}, {
+  "type" : "section-entry",
+  "label" : "Tab",
+  "category" : "container",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "href",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "content",
+    "cardinality" : "SINGLE",
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "link", "action", "field" ]
+  } ]
+}, {
+  "type" : "detail",
+  "label" : "Detail",
+  "category" : "container",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "fields",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "field" ]
+  }, {
+    "property" : "actions",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "action" ]
+  }, {
+    "property" : "links",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "link" ]
+  } ]
+}, {
+  "type" : "list",
+  "label" : "List",
+  "category" : "container",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "actions",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "action" ]
+  } ]
+}, {
+  "type" : "table",
+  "label" : "Table",
+  "category" : "container",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "selectedRowId",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "selectMode",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "NONE", "SINGLE", "MULTI" ]
+  } ],
+  "children" : [ {
+    "property" : "columns",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "column" ]
+  }, {
+    "property" : "rows",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "row" ]
+  }, {
+    "property" : "actions",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "action" ]
+  }, {
+    "property" : "rowActions",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "action" ]
+  } ]
+}, {
+  "type" : "column",
+  "label" : "Column",
+  "category" : "table",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "label",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "dataKey",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "sortable",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "filterable",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "cellTemplate",
+    "cardinality" : "SINGLE",
+    "allowedTypes" : [ "text", "link", "field", "action", "stack" ]
+  } ]
+}, {
+  "type" : "row",
+  "label" : "Row",
+  "category" : "table",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ ]
+}, {
+  "type" : "text",
+  "label" : "Text",
+  "category" : "display",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "text",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ ]
+}, {
+  "type" : "header",
+  "label" : "Header",
+  "category" : "chrome",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "brand",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "brandHref",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "extras",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "stack", "form", "section", "detail", "list", "table", "chart", "text", "field", "action", "link" ]
+  } ]
+}, {
+  "type" : "chart",
+  "label" : "Chart",
+  "category" : "display",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "chartType",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "LINE", "BAR", "PIE", "DONUT", "AREA" ]
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ ]
+}, {
+  "type" : "field",
+  "label" : "Field",
+  "category" : "input",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "label",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "fieldType",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "TEXT", "TEXTAREA", "NUMBER", "CURRENCY", "PERCENT", "DATE", "DATETIME", "BOOLEAN", "SELECT", "MULTISELECT", "FILE", "REFERENCE" ]
+  }, {
+    "name" : "value",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "placeholder",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "hint",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "editable",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "required",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "submitOnEnter",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "submitOnChange",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "min",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "max",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "step",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ ]
+}, {
+  "type" : "action",
+  "label" : "Action",
+  "category" : "input",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "label",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "style",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "PRIMARY", "SECONDARY", "DANGER" ]
+  }, {
+    "name" : "appearance",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "BUTTON", "LINK", "ICON" ]
+  }, {
+    "name" : "enabled",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "disabledReason",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "confirm",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ ]
+}, {
+  "type" : "link",
+  "label" : "Link",
+  "category" : "input",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "href",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "label",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ ]
+} ]

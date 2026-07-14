@@ -1,0 +1,109 @@
+{
+  "page" : {
+    "type" : "page",
+    "id" : "page-3gkjmo"
+  },
+  "stack" : {
+    "type" : "stack",
+    "id" : "stack-3gkr43",
+    "children" : [ ]
+  },
+  "form" : {
+    "type" : "form",
+    "id" : "form-3gktgq",
+    "fields" : [ ],
+    "actions" : [ ],
+    "links" : [ ],
+    "reloadOnSubmit" : false
+  },
+  "section" : {
+    "type" : "section",
+    "id" : "section-3gkxsz",
+    "title" : "New section",
+    "sections" : [ ],
+    "collapseOpen" : false
+  },
+  "section-entry" : {
+    "type" : "section-entry",
+    "id" : "tab-3gkzc9",
+    "title" : "New tab"
+  },
+  "detail" : {
+    "type" : "detail",
+    "id" : "detail-3gkzxy",
+    "fields" : [ ],
+    "actions" : [ ],
+    "links" : [ ]
+  },
+  "list" : {
+    "type" : "list",
+    "id" : "list-3gl3d8",
+    "items" : [ ],
+    "actions" : [ ]
+  },
+  "table" : {
+    "type" : "table",
+    "id" : "table-3gl5ow",
+    "columns" : [ ],
+    "rows" : [ ],
+    "actions" : [ ],
+    "rowActions" : [ ],
+    "selectMode" : "NONE",
+    "selectedRowIds" : [ ]
+  },
+  "column" : {
+    "type" : "column",
+    "id" : "col-col-3gl8xd-3gl8",
+    "label" : "Column",
+    "dataKey" : "col-3gl8xd",
+    "sortable" : false,
+    "filterable" : false
+  },
+  "row" : {
+    "type" : "row",
+    "id" : "row-3glc30",
+    "data" : { }
+  },
+  "text" : {
+    "type" : "text",
+    "id" : "text-3gleg0",
+    "text" : "Text"
+  },
+  "header" : {
+    "type" : "header",
+    "id" : "header-3glf01",
+    "brand" : "Brand"
+  },
+  "chart" : {
+    "type" : "chart",
+    "id" : "chart-3glfx3",
+    "chartType" : "BAR"
+  },
+  "field" : {
+    "type" : "field",
+    "id" : "field-3glgr6",
+    "label" : "Label",
+    "fieldType" : "TEXT",
+    "editable" : true,
+    "required" : false,
+    "submitOnEnter" : false,
+    "submitOnChange" : false,
+    "multiple" : false
+  },
+  "action" : {
+    "type" : "action",
+    "id" : "action-3glinc",
+    "label" : "Action",
+    "style" : "SECONDARY",
+    "appearance" : "BUTTON",
+    "enabled" : true
+  },
+  "link" : {
+    "type" : "link",
+    "id" : "link-3glk18",
+    "rel" : "link-3glk18",
+    "href" : "#",
+    "label" : "Link",
+    "external" : false
+  }
+}
