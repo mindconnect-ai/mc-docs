@@ -18,9 +18,31 @@ export interface BehaviorContext {
     fetch: typeof fetch;
     /** The owning bus, so handlers can {@link SuiEventBus#dispatch} follow-on triggers. */
     bus: SuiEventBus;
+    /**
+     * Files selected/dropped for an upload dispatch (a {@code UiUpload} drop
+     * zone or a {@code FILE} field). Present for the {@code UPLOAD} behaviour
+     * and for {@code INVOKE} handlers wired to an upload — a client handler can
+     * read the raw {@code File} objects (e.g. to preview an image) with no
+     * backend. {@code undefined} for ordinary triggers.
+     */
+    files?: File[];
 }
 /** Behaviour handlers implement what happens after the bus dispatches a trigger. */
 export type BehaviorHandler = (ctx: BehaviorContext) => Promise<void> | void;
+/**
+ * A client-side handler invoked by the built-in {@code INVOKE} behaviour —
+ * the browser-only counterpart to a server endpoint. It receives the same
+ * {@link BehaviorContext} a server call would (trigger, collected payload,
+ * source element, owning bus) and may return a {@link UiPage} or
+ * {@link UiPatch}; the bus applies the result through its
+ * {@link ResponseHandler}, exactly as if it had come back over the wire.
+ *
+ * <p>Returning {@code void}/{@code null}/{@code undefined} means "I already
+ * applied whatever I needed to" (e.g. the handler called
+ * {@code ctx.bus.applyPatch(...)} itself) — the bus does nothing further.
+ * Handlers registered by name via {@link SuiEventBus#registerClientHandler}.
+ */
+export type ClientHandler = (ctx: BehaviorContext) => UiPage | UiPatch | void | Promise<UiPage | UiPatch | void>;
 /** Hook for app-specific URL rewriting (UI path → API path). */
 export type UrlRewriter = (uiUrl: string) => string;
 /**
@@ -173,6 +195,8 @@ export declare class SuiEventBus {
     private readonly renderer;
     private readonly root;
     private readonly behaviors;
+    /** Named client-side handlers dispatched by the built-in {@code INVOKE} behaviour. */
+    private readonly clientHandlers;
     private readonly streamEventHandlers;
     /**
      * Live SSE streams that survive navigation. Keyed by channel id (taken
@@ -196,6 +220,14 @@ export declare class SuiEventBus {
     constructor(renderer: SuiRenderer, root: HTMLElement);
     /** Registers (or replaces) a behaviour handler. */
     registerBehavior(name: string, handler: BehaviorHandler): this;
+    /**
+     * Registers (or replaces) a client-side handler for the built-in
+     * {@code INVOKE} behaviour. A trigger with
+     * {@code behavior: "INVOKE", handler: "<name>"} calls the function
+     * registered here under {@code name} instead of fetching a URL — the
+     * handler is a browser-local "endpoint". See {@link ClientHandler}.
+     */
+    registerClientHandler(name: string, handler: ClientHandler): this;
     /** Registers (or replaces) a stream-event handler used by the {@code STREAM} behaviour. */
     onStreamEvent(name: string, handler: StreamEventHandler): this;
     /** Replaces the fetcher used by every built-in behaviour and by {@link #navigate}. */
@@ -381,7 +413,7 @@ export declare class SuiEventBus {
      * carrying it. The loading indicator is shown around the dispatch
      * according to {@link #setLoadingPolicy}.
      */
-    dispatch(trigger: UiTrigger, sourceElement?: HTMLElement): Promise<void>;
+    dispatch(trigger: UiTrigger, sourceElement?: HTMLElement, files?: File[]): Promise<void>;
     private shouldShowLoading;
     private installRootListeners;
     /** Pre-bound handler set; keeps {@code add/removeEventListener} symmetric. */
@@ -420,6 +452,21 @@ export declare class SuiEventBus {
      * script), so no double-submit guard is needed.
      */
     private handleChange;
+    /**
+     * Dispatches the upload trigger for a file {@code <input>} that just
+     * changed. The trigger comes from the surrounding {@code [data-sui-upload]}
+     * zone ({@code data-upload-trigger}) or, for a standalone FILE field, the
+     * input's own {@code data-change-trigger}. The zone is passed as the source
+     * element so the {@code UPLOAD} behaviour can read {@code data-sui-upload-name}.
+     */
+    private handleFileSelection;
+    /** The {@code [data-sui-upload]} zone an event landed in, or null. */
+    private uploadZoneOf;
+    private handleDragOver;
+    private handleDragLeave;
+    private handleDrop;
+    /** Parses a trigger from a raw JSON string, logging (not throwing) on error. */
+    private parseTriggerJson;
     private handleKeydown;
     private handleClick;
     private handleSubmit;
@@ -449,6 +496,34 @@ export declare class SuiEventBus {
      */
     private collectPayload;
     private registerDefaultBehaviors;
+    /**
+     * Built-in {@code UPLOAD} behaviour: POSTs {@code ctx.files} to
+     * {@code ctx.url} as {@code multipart/form-data} and applies the response
+     * through the configured {@link ResponseHandler} — same as a normal
+     * fetch, but with a file body. The multipart field name comes from the
+     * source element's {@code data-sui-upload-name} (or its {@code name}),
+     * falling back to {@code "files"}. Fired by a {@code UiUpload} drop zone
+     * or a {@code FILE} field's change.
+     */
+    private uploadBehavior;
+    /**
+     * Built-in {@code PATCH} behaviour: applies the {@link UiPatch} carried
+     * inline on the trigger ({@code trigger.patch}) — no server call, no JS
+     * handler. The patch is baked into the trigger at render time, so this is
+     * the leanest way to express static, known-ahead UI logic: a list row
+     * that fills a detail panel, a button that opens a fixed dialog, a toggle
+     * that reveals another field — all with zero round-trip.
+     */
+    private inlinePatchBehavior;
+    /**
+     * Built-in {@code INVOKE} behaviour: looks up the client handler named by
+     * {@code trigger.handler} and runs it — no network. A returned
+     * {@link UiPage} / {@link UiPatch} is applied through the configured
+     * {@link ResponseHandler} (same path a fetched response takes), so a
+     * handler can swap the page, open a dialog, or emit a partial patch. A
+     * {@code void} return means the handler already applied its own changes.
+     */
+    private invokeBehavior;
     private applyResponseBehavior;
     private downloadBehavior;
     private openInTabBehavior;

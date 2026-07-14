@@ -2,8 +2,12 @@ import { escapeHtml } from "../renderer.js";
 import { cls } from "./util.js";
 import { renderField } from "./field.js";
 import { renderActions, renderLinks } from "./shared.js";
-export function renderForm(node) {
+export function renderForm(node, r) {
     const fields = (node.fields || []).map(renderField).join("");
+    // Rich body: any layout nodes (stacks/sections/groups) rendered through the
+    // dispatcher, after the flat fields. Named inputs anywhere inside still get
+    // collected on submit, so the whole form travels as one payload.
+    const content = (node.content || []).map(c => r.render(c)).join("");
     // The form needs its own serialised JSON so submit handlers can resolve
     // field metadata without walking the DOM back to the model.
     const nodeJson = escapeHtml(JSON.stringify(node));
@@ -28,7 +32,9 @@ export function renderForm(node) {
     return `<form class="${cls("sui-form", node)}" id="${escapeHtml(node.id)}" data-sui="form"${reload}${methodAttr} data-node='${nodeJson}'>
         ${methodOverride}
         ${node.title ? `<h2>${escapeHtml(node.title)}</h2>` : ""}
+        ${node.formError ? `<div class="sui-form-error" role="alert">${escapeHtml(node.formError)}</div>` : ""}
         ${fields}
+        ${content}
         <div class="sui-form-footer">
             ${renderActions(node.actions || [])}
             ${renderLinks(node.links || [])}

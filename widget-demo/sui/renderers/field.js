@@ -1,4 +1,4 @@
-import { escapeHtml } from "../renderer.js";
+import { escapeHtml, encodeTrigger } from "../renderer.js";
 export function renderField(f) {
     const input = f.editable
         ? renderInput(f)
@@ -28,6 +28,17 @@ function renderInput(f) {
     // EventBus reads the marker in its change handler so apps don't have
     // to add per-element listeners. Mirrors the Handlebars field.hbs path.
     const submitOnChange = f.submitOnChange ? ' data-submit-on-change="true"' : "";
+    // Field-level onChange trigger: the control carries a data-change-trigger
+    // (deliberately NOT data-trigger, which the click handler owns — a form
+    // control must still toggle/commit natively on click). The EventBus's
+    // change handler dispatches it (see SuiEventBus#handleChange). Lets one
+    // field drive UI logic — a checkbox enabling another field, a select
+    // filling a panel — with no form submit.
+    const changeTrigger = f.onChange ? ` data-change-trigger='${encodeTrigger(f.onChange)}'` : "";
+    // Every control gets both markers; they're independent (submitOnChange
+    // submits the form, onChange dispatches a trigger — the bus prefers the
+    // trigger when present).
+    const changeAttrs = submitOnChange + changeTrigger;
     // Numeric/date inputs can carry min / max / step bounds. Plain string
     // attributes — yyyy-MM-dd for DATE, yyyy-MM-ddTHH:mm for DATETIME, a
     // bare number for the rest. No runtime validation: the browser enforces.
@@ -42,13 +53,13 @@ function renderInput(f) {
             // wiring itself lives in the bus so apps don't have to add a
             // per-textarea listener of their own.
             const submitOnEnter = f.submitOnEnter ? ' data-submit-on-enter="true"' : "";
-            return `<textarea id="${id}" name="${name}" rows="4"${submitOnEnter}${submitOnChange}>${valueAttr}</textarea>`;
+            return `<textarea id="${id}" name="${name}" rows="4"${submitOnEnter}${changeAttrs}>${valueAttr}</textarea>`;
         }
         case "BOOLEAN":
-            return `<input type="checkbox" id="${id}" name="${name}"${submitOnChange} ${f.value ? "checked" : ""}>`;
+            return `<input type="checkbox" id="${id}" name="${name}"${changeAttrs} ${f.value ? "checked" : ""}>`;
         case "SELECT": {
             const opts = (f.options || []).map(o => `<option value="${escapeHtml(o.value)}" ${f.value === o.value ? "selected" : ""}>${escapeHtml(o.label)}</option>`).join("");
-            return `<select id="${id}" name="${name}"${submitOnChange}>${opts}</select>`;
+            return `<select id="${id}" name="${name}"${changeAttrs}>${opts}</select>`;
         }
         case "MULTISELECT": {
             const selected = Array.isArray(f.value)
@@ -56,17 +67,23 @@ function renderInput(f) {
                 : (f.value ? String(f.value).split(",").map(s => s.trim()) : []);
             const opts = (f.options || []).map(o => `<option value="${escapeHtml(o.value)}" ${selected.includes(o.value) ? "selected" : ""}>${escapeHtml(o.label)}</option>`).join("");
             const size = Math.min((f.options || []).length + 1, 6);
-            return `<select id="${id}" name="${name}"${submitOnChange} multiple size="${size}">${opts}</select>`;
+            return `<select id="${id}" name="${name}"${changeAttrs} multiple size="${size}">${opts}</select>`;
         }
         case "NUMBER":
         case "CURRENCY":
         case "PERCENT":
-            return `<input type="number" id="${id}" name="${name}" value="${valueAttr}"${rangeAttrs}${submitOnChange}>`;
+            return `<input type="number" id="${id}" name="${name}" value="${valueAttr}"${rangeAttrs}${changeAttrs}>`;
         case "DATE":
-            return `<input type="date" id="${id}" name="${name}" value="${valueAttr}"${rangeAttrs}${submitOnChange}>`;
+            return `<input type="date" id="${id}" name="${name}" value="${valueAttr}"${rangeAttrs}${changeAttrs}>`;
         case "DATETIME":
-            return `<input type="datetime-local" id="${id}" name="${name}" value="${valueAttr}"${rangeAttrs}${submitOnChange}>`;
+            return `<input type="datetime-local" id="${id}" name="${name}" value="${valueAttr}"${rangeAttrs}${changeAttrs}>`;
+        case "FILE": {
+            const accept = f.accept ? ` accept="${escapeHtml(f.accept)}"` : "";
+            const multiple = f.multiple ? " multiple" : "";
+            // No value attribute — file inputs are set by the user only.
+            return `<input type="file" id="${id}" name="${name}"${accept}${multiple}${changeAttrs}>`;
+        }
         default:
-            return `<input type="text" id="${id}" name="${name}" value="${valueAttr}" placeholder="${escapeHtml(f.placeholder ?? "")}"${submitOnChange}>`;
+            return `<input type="text" id="${id}" name="${name}" value="${valueAttr}" placeholder="${escapeHtml(f.placeholder ?? "")}"${changeAttrs}>`;
     }
 }

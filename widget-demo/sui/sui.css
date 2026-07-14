@@ -240,9 +240,53 @@ a.sui-tree-label:hover { text-decoration: underline; }
 .sui-field textarea { resize: vertical; min-height: 100px; }
 .sui-hint { font-size: 11px; color: var(--sui-color-empty); }
 .sui-required { color: var(--sui-color-required); }
+/* Validation errors — per-field (sui-field--error + sui-error message) and
+   form-level (sui-form-error banner). */
+.sui-field--error input,
+.sui-field--error textarea,
+.sui-field--error select { border-color: var(--sui-color-danger); }
+.sui-field--error input:focus,
+.sui-field--error textarea:focus,
+.sui-field--error select:focus {
+    border-color: var(--sui-color-danger);
+    box-shadow: 0 0 0 3px var(--sui-color-danger-bg);
+}
+.sui-field--error label { color: var(--sui-color-danger); }
+.sui-error { font-size: 11px; color: var(--sui-color-danger); }
+.sui-form-error {
+    padding: 10px 14px; margin-bottom: 16px;
+    border: 1px solid var(--sui-color-danger); border-left-width: 3px;
+    border-radius: var(--sui-radius-md);
+    background: var(--sui-color-danger-bg); color: var(--sui-color-danger);
+    font-size: 13px;
+}
 .sui-value { color: var(--sui-color-text-body); }
 .sui-empty { color: var(--sui-color-empty); font-style: italic; }
 .sui-form-footer { display: flex; align-items: center; gap: 12px; margin-top: 20px; padding-top: 16px; border-top: 1px solid var(--sui-color-border-soft); }
+
+/* ── Upload (UiUpload drop zone) ────────────────────────────────────────── */
+.sui-upload { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
+.sui-upload-label { font-size: 12px; font-weight: 500; color: var(--sui-color-text-body); }
+.sui-upload-zone {
+    display: flex; flex-direction: column; align-items: center; justify-content: center;
+    gap: 10px; padding: 28px 20px; text-align: center;
+    border: 2px dashed var(--sui-color-border-strong);
+    border-radius: var(--sui-radius-lg);
+    background: var(--sui-color-surface-alt);
+    color: var(--sui-color-text-muted);
+    transition: border-color .15s, background .15s;
+}
+/* Highlighted while a file is being dragged over the zone. */
+.sui-upload--dragover .sui-upload-zone {
+    border-color: var(--sui-color-primary);
+    background: var(--sui-color-primary-soft);
+    color: var(--sui-color-primary);
+}
+.sui-upload-icon { font-size: 24px; line-height: 1; opacity: .7; }
+.sui-upload-prompt { font-size: 13px; }
+/* The browse control is a <label> styled as a button. */
+.sui-upload-browse { cursor: pointer; }
+.sui-upload-hint { text-align: center; }
 
 .sui-detail-grid { display: grid; grid-template-columns: 180px 1fr; gap: 0; }
 .sui-detail-row { display: contents; }
@@ -355,6 +399,26 @@ a.sui-tree-label:hover { text-decoration: underline; }
 .sui-stack            { display: flex; gap: 16px; }
 .sui-stack--vertical  { flex-direction: column; }
 .sui-stack--horizontal{ flex-direction: row; align-items: center; }
+/* Form-layout helpers (apply via cssClass on a stack). `sui-cols` turns a
+   horizontal stack into equal-width, top-aligned columns; `sui-fieldgroup`
+   boxes a set of related fields with a title. */
+.sui-cols { align-items: flex-start; }
+.sui-cols > * { flex: 1 1 0; min-width: 0; }
+/* Works both as the UiFieldGroup <fieldset> and as an opt-in class on a stack.
+   The fieldset resets (margin/min-width) keep it flush and flex-shrinkable. */
+.sui-fieldgroup {
+    border: 1px solid var(--sui-color-border); border-radius: var(--sui-radius-md);
+    padding: 14px 16px; margin: 0; min-width: 0;
+}
+.sui-fieldgroup-title {
+    display: block; padding: 0; width: auto; font-size: 12px; font-weight: 700;
+    letter-spacing: .04em; text-transform: uppercase;
+    color: var(--sui-color-text-subtle); margin-bottom: 8px;
+}
+/* A <legend> renders inside the border by default; keep it as a plain block. */
+legend.sui-fieldgroup-title { float: none; }
+/* Tabbed forms: tighten the panel padding so fields align with the rest. */
+.sui-form .sui-section-entry { padding: 12px 0 0; }
 
 /* ── Sections (tabs + collapsible) ──────────────────────────────────────── */
 

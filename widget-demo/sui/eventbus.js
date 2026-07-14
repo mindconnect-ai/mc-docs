@@ -43,6 +43,8 @@ export class SuiEventBus {
     renderer;
     root;
     behaviors = new Map();
+    /** Named client-side handlers dispatched by the built-in {@code INVOKE} behaviour. */
+    clientHandlers = new Map();
     streamEventHandlers = new Map();
     /**
      * Live SSE streams that survive navigation. Keyed by channel id (taken
@@ -85,6 +87,17 @@ export class SuiEventBus {
     /** Registers (or replaces) a behaviour handler. */
     registerBehavior(name, handler) {
         this.behaviors.set(name, handler);
+        return this;
+    }
+    /**
+     * Registers (or replaces) a client-side handler for the built-in
+     * {@code INVOKE} behaviour. A trigger with
+     * {@code behavior: "INVOKE", handler: "<name>"} calls the function
+     * registered here under {@code name} instead of fetching a URL — the
+     * handler is a browser-local "endpoint". See {@link ClientHandler}.
+     */
+    registerClientHandler(name, handler) {
+        this.clientHandlers.set(name, handler);
         return this;
     }
     /** Registers (or replaces) a stream-event handler used by the {@code STREAM} behaviour. */
@@ -607,7 +620,7 @@ export class SuiEventBus {
      * carrying it. The loading indicator is shown around the dispatch
      * according to {@link #setLoadingPolicy}.
      */
-    async dispatch(trigger, sourceElement) {
+    async dispatch(trigger, sourceElement, files) {
         const ctx = {
             trigger,
             payload: trigger.payload ? this.collectPayload(trigger.payload) : null,
@@ -616,6 +629,7 @@ export class SuiEventBus {
             method: (trigger.method ?? "GET").toUpperCase(),
             fetch: this.fetcher,
             bus: this,
+            files,
         };
         const name = trigger.behavior ?? "APPLY_RESPONSE";
         const handler = this.behaviors.get(name);
@@ -665,6 +679,9 @@ export class SuiEventBus {
                 submit: (e) => this.handleSubmit(e),
                 keydown: (e) => this.handleKeydown(e),
                 change: (e) => this.handleChange(e),
+                dragover: (e) => this.handleDragOver(e),
+                dragleave: (e) => this.handleDragLeave(e),
+                drop: (e) => this.handleDrop(e),
             };
         }
         const h = this.boundHandlers;
@@ -672,6 +689,9 @@ export class SuiEventBus {
         target.addEventListener("submit", h.submit);
         target.addEventListener("keydown", h.keydown);
         target.addEventListener("change", h.change);
+        target.addEventListener("dragover", h.dragover);
+        target.addEventListener("dragleave", h.dragleave);
+        target.addEventListener("drop", h.drop);
     }
     removeListenersFrom(target) {
         if (!this.boundHandlers)
@@ -681,6 +701,9 @@ export class SuiEventBus {
         target.removeEventListener("submit", h.submit);
         target.removeEventListener("keydown", h.keydown);
         target.removeEventListener("change", h.change);
+        target.removeEventListener("dragover", h.dragover);
+        target.removeEventListener("dragleave", h.dragleave);
+        target.removeEventListener("drop", h.drop);
     }
     /**
      * Returns true when {@code el} is part of the SPA-controlled subtree —
@@ -722,11 +745,108 @@ export class SuiEventBus {
         const target = e.target;
         if (!target)
             return;
+        // File inputs (a FILE field or a UiUpload's hidden input) upload their
+        // selected files instead of following the ordinary change path.
+        if (target instanceof HTMLInputElement && target.type === "file") {
+            this.handleFileSelection(target);
+            return;
+        }
+        // Field-level onChange trigger takes precedence over submitOnChange:
+        // the control carries a data-change-trigger (a separate attribute from
+        // the click-owned data-trigger, so the control still toggles/commits
+        // natively on click). We dispatch it directly — folding in the
+        // surrounding form's values as payload — instead of submitting the
+        // whole form. Lets one field drive UI logic on its own.
+        const changeRaw = target.dataset?.changeTrigger;
+        if (changeRaw) {
+            let trigger = null;
+            try {
+                trigger = JSON.parse(changeRaw);
+            }
+            catch (err) {
+                console.error("SuiEventBus: bad data-change-trigger JSON", err, changeRaw);
+            }
+            if (trigger) {
+                this.inferImplicitPayload(trigger, target);
+                void this.dispatch(trigger, target);
+                return;
+            }
+        }
         if (target.dataset?.submitOnChange !== "true")
             return;
         const form = target.closest("form");
         if (form)
             form.requestSubmit();
+    }
+    // ── File upload (UiUpload drop zone + FILE field) ─────────────────────
+    /**
+     * Dispatches the upload trigger for a file {@code <input>} that just
+     * changed. The trigger comes from the surrounding {@code [data-sui-upload]}
+     * zone ({@code data-upload-trigger}) or, for a standalone FILE field, the
+     * input's own {@code data-change-trigger}. The zone is passed as the source
+     * element so the {@code UPLOAD} behaviour can read {@code data-sui-upload-name}.
+     */
+    handleFileSelection(input) {
+        const files = Array.from(input.files ?? []);
+        if (files.length === 0)
+            return;
+        const zone = input.closest("[data-sui-upload]");
+        const raw = zone?.dataset.uploadTrigger ?? input.dataset.changeTrigger;
+        const trigger = this.parseTriggerJson(raw);
+        if (!trigger)
+            return;
+        void this.dispatch(trigger, zone ?? input, files);
+        // Let the same file be re-selected later (change won't fire otherwise).
+        input.value = "";
+    }
+    /** The {@code [data-sui-upload]} zone an event landed in, or null. */
+    uploadZoneOf(e) {
+        const t = e.target;
+        return t && typeof t.closest === "function"
+            ? t.closest("[data-sui-upload]")
+            : null;
+    }
+    handleDragOver(e) {
+        const zone = this.uploadZoneOf(e);
+        if (!zone || !this.inScope(zone))
+            return;
+        e.preventDefault(); // required so the following "drop" fires
+        if (e.dataTransfer)
+            e.dataTransfer.dropEffect = "copy";
+        zone.classList.add("sui-upload--dragover");
+    }
+    handleDragLeave(e) {
+        const zone = this.uploadZoneOf(e);
+        // Only clear when the pointer actually left the zone (not a child).
+        if (zone && !zone.contains(e.relatedTarget)) {
+            zone.classList.remove("sui-upload--dragover");
+        }
+    }
+    handleDrop(e) {
+        const zone = this.uploadZoneOf(e);
+        if (!zone || !this.inScope(zone))
+            return;
+        e.preventDefault();
+        zone.classList.remove("sui-upload--dragover");
+        const files = Array.from(e.dataTransfer?.files ?? []);
+        if (files.length === 0)
+            return;
+        const trigger = this.parseTriggerJson(zone.dataset.uploadTrigger);
+        if (!trigger)
+            return;
+        void this.dispatch(trigger, zone, files);
+    }
+    /** Parses a trigger from a raw JSON string, logging (not throwing) on error. */
+    parseTriggerJson(raw) {
+        if (!raw)
+            return null;
+        try {
+            return JSON.parse(raw);
+        }
+        catch (err) {
+            console.error("SuiEventBus: bad upload-trigger JSON", err, raw);
+            return null;
+        }
     }
     handleKeydown(e) {
         if (e.key !== "Enter" || e.shiftKey || e.isComposing)
@@ -913,6 +1033,82 @@ export class SuiEventBus {
         this.registerBehavior("STREAM", (ctx) => this.streamBehavior(ctx));
         this.registerBehavior("DOWNLOAD", (ctx) => this.downloadBehavior(ctx));
         this.registerBehavior("OPEN_IN_TAB", (ctx) => this.openInTabBehavior(ctx));
+        this.registerBehavior("INVOKE", (ctx) => this.invokeBehavior(ctx));
+        this.registerBehavior("PATCH", (ctx) => this.inlinePatchBehavior(ctx));
+        this.registerBehavior("UPLOAD", (ctx) => this.uploadBehavior(ctx));
+    }
+    /**
+     * Built-in {@code UPLOAD} behaviour: POSTs {@code ctx.files} to
+     * {@code ctx.url} as {@code multipart/form-data} and applies the response
+     * through the configured {@link ResponseHandler} — same as a normal
+     * fetch, but with a file body. The multipart field name comes from the
+     * source element's {@code data-sui-upload-name} (or its {@code name}),
+     * falling back to {@code "files"}. Fired by a {@code UiUpload} drop zone
+     * or a {@code FILE} field's change.
+     */
+    async uploadBehavior(ctx) {
+        const files = ctx.files ?? [];
+        if (files.length === 0)
+            return;
+        const src = ctx.sourceElement;
+        const name = src?.dataset?.suiUploadName
+            || (src instanceof HTMLInputElement ? src.name : "")
+            || "files";
+        const form = new FormData();
+        for (const file of files)
+            form.append(name, file, file.name);
+        // Don't set Content-Type — the browser adds the multipart boundary.
+        const method = ctx.method === "GET" ? "POST" : ctx.method;
+        const res = await this.safeFetch(ctx.url, { method, body: form }, ctx);
+        if (!res)
+            return; // network failure already reported
+        if (await this.handleUnauthenticated(res, ctx))
+            return;
+        if (await this.reportHttpError(res, ctx.url, ctx))
+            return;
+        const ct = res.headers.get("content-type") ?? "";
+        const body = ct.includes("application/json") ? await res.json() : null;
+        await this.responseHandler(body, ctx.url, this);
+    }
+    /**
+     * Built-in {@code PATCH} behaviour: applies the {@link UiPatch} carried
+     * inline on the trigger ({@code trigger.patch}) — no server call, no JS
+     * handler. The patch is baked into the trigger at render time, so this is
+     * the leanest way to express static, known-ahead UI logic: a list row
+     * that fills a detail panel, a button that opens a fixed dialog, a toggle
+     * that reveals another field — all with zero round-trip.
+     */
+    inlinePatchBehavior(ctx) {
+        const patch = ctx.trigger.patch;
+        if (!patch) {
+            console.warn("SuiEventBus: PATCH trigger has no inline patch", ctx.trigger);
+            return;
+        }
+        this.applyPatch(patch);
+    }
+    /**
+     * Built-in {@code INVOKE} behaviour: looks up the client handler named by
+     * {@code trigger.handler} and runs it — no network. A returned
+     * {@link UiPage} / {@link UiPatch} is applied through the configured
+     * {@link ResponseHandler} (same path a fetched response takes), so a
+     * handler can swap the page, open a dialog, or emit a partial patch. A
+     * {@code void} return means the handler already applied its own changes.
+     */
+    async invokeBehavior(ctx) {
+        const name = ctx.trigger.handler;
+        if (!name) {
+            console.warn("SuiEventBus: INVOKE trigger has no handler name", ctx.trigger);
+            return;
+        }
+        const handler = this.clientHandlers.get(name);
+        if (!handler) {
+            console.warn(`SuiEventBus: no client handler registered for "${name}"`);
+            return;
+        }
+        const result = await handler(ctx);
+        if (result == null)
+            return; // handler applied its own changes
+        await this.responseHandler(result, undefined, this);
     }
     async applyResponseBehavior(ctx) {
         const init = { method: ctx.method };
@@ -1116,11 +1312,33 @@ export class SuiEventBus {
     }
 }
 /**
- * Default response handler. Treats {@code body.patches} as a {@link UiPatch}
- * and everything else with a {@code node} or {@code navigate} as a
- * {@link UiPage}. Unknown shapes log and no-op.
+ * Default response handler. Applies one of three shapes:
+ * <ul>
+ *   <li>a {@link UiPage} — an object with {@code node} / {@code navigate}
+ *       (full swap + pushState);</li>
+ *   <li>a {@link UiPatch} — an object with a {@code patches} array
+ *       (in-place);</li>
+ *   <li>an <b>array</b> of {@code UiPatch} / {@code UiPage} — applied in
+ *       order. This is how a server returns <em>multiple patches</em> from a
+ *       single {@code APPLY_RESPONSE}: several envelopes, each free to carry
+ *       its own toasts / dialog. (A single {@code UiPatch} is an object whose
+ *       {@code patches} property is the array; the multi-patch case is a
+ *       top-level array of such objects — so the two never collide.)</li>
+ * </ul>
+ * Unknown shapes log and no-op.
  */
 const defaultResponseHandler = (body, fallbackHref, bus) => {
+    if (body == null)
+        return;
+    if (Array.isArray(body)) {
+        for (const item of body)
+            applyResponseItem(item, fallbackHref, bus);
+        return;
+    }
+    applyResponseItem(body, fallbackHref, bus);
+};
+/** Applies a single UiPage / UiPatch, branching on its shape. */
+function applyResponseItem(body, fallbackHref, bus) {
     if (body == null)
         return;
     const b = body;
@@ -1133,7 +1351,7 @@ const defaultResponseHandler = (body, fallbackHref, bus) => {
     else {
         console.warn("SuiEventBus: response body matches neither UiPage nor UiPatch", body);
     }
-};
+}
 // ── Helpers ─────────────────────────────────────────────────────────────────
 function readInputValue(input, type) {
     if (input instanceof HTMLInputElement && input.type === "checkbox") {

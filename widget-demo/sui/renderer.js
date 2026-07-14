@@ -17,6 +17,8 @@ import { renderText } from "./renderers/text.js";
 import { renderLink } from "./renderers/link.js";
 import { renderAction } from "./renderers/action.js";
 import { renderField } from "./renderers/field.js";
+import { renderFieldGroup } from "./renderers/fieldgroup.js";
+import { renderUpload } from "./renderers/upload.js";
 // Default item-handler for the UiList rendering — set on the SuiRenderer
 // at construction time. List items have no type discriminator so they
 // can't go through the dispatcher; they get their own handler slot.
@@ -422,7 +424,9 @@ export function installDefaultHandlers(renderer) {
         // {@code renderers/shared.ts} which preserves the original markup.
         .register("link", renderLink)
         .register("action", renderAction)
-        .register("field", renderField);
+        .register("field", renderField)
+        .register("fieldgroup", renderFieldGroup)
+        .register("upload", renderUpload);
 }
 /** Convenience: a fresh renderer pre-loaded with the default handlers. */
 export function createDefaultRenderer() {

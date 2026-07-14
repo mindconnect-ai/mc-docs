@@ -2,7 +2,7 @@ export type FieldType = "TEXT" | "TEXTAREA" | "NUMBER" | "CURRENCY" | "PERCENT" 
 export type ActionStyle = "PRIMARY" | "SECONDARY" | "DANGER";
 export type ActionAppearance = "BUTTON" | "LINK" | "ICON";
 export type ChartType = "LINE" | "BAR" | "PIE" | "DONUT" | "AREA";
-export type TriggerBehavior = "APPLY_RESPONSE" | "STREAM" | "DOWNLOAD" | "OPEN_IN_TAB";
+export type TriggerBehavior = "APPLY_RESPONSE" | "STREAM" | "DOWNLOAD" | "OPEN_IN_TAB" | "INVOKE" | "PATCH" | "UPLOAD";
 export interface UiTrigger {
     /**
      * What the client does with the response. Apps may add custom values
@@ -14,6 +14,23 @@ export interface UiTrigger {
     url?: string;
     /** ID of a UiForm-like node whose field values are collected as the JSON body. */
     payload?: string;
+    /**
+     * Name of a client-side handler registered via
+     * {@code SuiEventBus.registerClientHandler}. Only meaningful with
+     * {@code behavior: "INVOKE"} — the bus calls the named function instead
+     * of fetching a URL, and applies whatever {@code UiPage} / {@code UiPatch}
+     * it returns. Lets a screen run entirely in the browser, no backend.
+     */
+    handler?: string;
+    /**
+     * An inline {@link UiPatch} applied directly when the trigger fires.
+     * Only meaningful with {@code behavior: "PATCH"} — no server call, no JS
+     * handler: the patch is baked into the trigger at render time and the bus
+     * just applies it. Ideal for static, known-ahead UI logic — e.g. a list
+     * row whose click fills a detail panel, or a button that opens a fixed
+     * dialog — with zero round-trip.
+     */
+    patch?: UiPatch;
 }
 export interface UiNodeBase {
     id: string;
@@ -50,6 +67,20 @@ export interface UiField {
      * user's selection IS the action — no separate Save button needed.
      */
     submitOnChange?: boolean;
+    /**
+     * Trigger fired when this control's value changes (typing settles, a
+     * select option is picked, a checkbox toggles). Lets a single field
+     * drive UI logic on its own — e.g. a checkbox that enables/disables
+     * another field, or a select that fills a dependent panel — without
+     * submitting the whole form. Dispatched by the {@code SuiEventBus}; the
+     * collected form payload rides along, so an {@code INVOKE} handler can
+     * read the new value. Takes precedence over {@code submitOnChange}.
+     */
+    onChange?: UiTrigger;
+    /** Only for {@code FILE}: HTML `accept` filter (e.g. `"image/*"`). */
+    accept?: string;
+    /** Only for {@code FILE}: allow selecting more than one file. */
+    multiple?: boolean;
     /** Lower bound for DATE/DATETIME/NUMBER/CURRENCY/PERCENT. */
     min?: string;
     /** Upper bound for the same numeric/date types. */
@@ -154,6 +185,21 @@ export interface UiForm extends UiNodeBase {
     fields: UiField[];
     actions?: UiAction[];
     links?: UiLink[];
+    /**
+     * Optional rich body rendered inside the `<form>` after {@link fields}.
+     * Any node — a {@link UiStack} for columns, a {@link UiSection} for tabs,
+     * nested groups. The payload is collected by walking every named control
+     * in the `<form>` element, so the whole form still submits as one object
+     * regardless of layout (and across inactive, merely-hidden tabs). Put the
+     * inputs as standalone {@link UiField} nodes inside the content.
+     */
+    content?: UiNode[];
+    /**
+     * Form-level error banner, shown above the fields. For cross-field or
+     * general errors ("Please fix the errors below", "Save failed") that don't
+     * belong to a single field — per-field errors go on {@link UiField#validationError}.
+     */
+    formError?: string;
     /**
      * When true, the EventBus skips its submit-interception so the browser
      * does a native full-page navigation. Used for state changes whose
@@ -282,7 +328,41 @@ export interface UiHeaderUser {
     initials: string;
     profileHref?: string;
 }
-export type UiNode = UiForm | UiDetail | UiTable | UiList | UiTree | UiSection | UiStack | UiChart | UiHeader | UiText | UiLink | UiAction | UiField;
+/**
+ * Drag-and-drop file-upload area. Renders a drop zone with a browse button and
+ * a hidden `<input type="file">`. When files are dropped or picked, the bus
+ * fires {@link UiUpload#onUpload}: an `UPLOAD` trigger POSTs them as
+ * multipart/form-data; an `INVOKE` trigger hands the `File[]` to a client
+ * handler (via {@code ctx.files}) for a backend-free preview. Mirrors
+ * {@code UiUpload.java}.
+ */
+export interface UiUpload extends UiNodeBase {
+    type: "upload";
+    label?: string;
+    hint?: string;
+    /** Multipart field name; defaults to the node id. */
+    name?: string;
+    /** HTML `accept` filter (e.g. `"image/*"` or `".pdf,.docx"`). */
+    accept?: string;
+    multiple?: boolean;
+    /** Browse-button label; defaults to "Browse…". */
+    buttonLabel?: string;
+    /** Drop-zone prompt; defaults to "Drag files here or". */
+    dropText?: string;
+    onUpload?: UiTrigger;
+}
+/**
+ * A titled group of related fields, rendered as a `<fieldset><legend>`. The
+ * body holds any node (usually {@link UiField}s). Transparent to submission —
+ * the fields inside still ride along in the single form payload. Mirrors
+ * {@code UiFieldGroup.java}.
+ */
+export interface UiFieldGroup extends UiNodeBase {
+    type: "fieldgroup";
+    hint?: string;
+    content?: UiNode[];
+}
+export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiSection | UiStack | UiChart | UiHeader | UiText | UiLink | UiAction | UiField | UiUpload;
 export interface UiPage {
     navigate?: string;
     node?: UiNode;
