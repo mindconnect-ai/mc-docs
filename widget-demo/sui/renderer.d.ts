@@ -186,6 +186,40 @@ export declare class SuiRenderer {
      * extension is still resolving its CDN import on first use).
      */
     private withTailChase;
+    /**
+     * Handles patch ops that address a table's rows or columns. Tables
+     * render with their full model embedded as {@code data-node} (see
+     * renderTable); a matching patch edits that model and re-renders the
+     * whole table through the morpher, which keeps thead/tbody/selection
+     * consistent and preserves focus/scroll.
+     *
+     * <p>Handled cases — returns {@code true} when consumed:
+     * <ul>
+     *   <li>{@code REPLACE} a {@code row}/{@code column} node whose target
+     *       id matches a model row/column;</li>
+     *   <li>{@code REMOVE} where the target id matches a model row/column;</li>
+     *   <li>{@code APPEND} a {@code row} node targeting the table itself
+     *       (appends to {@code rows}; an existing id is replaced instead so
+     *       repeated appends stay idempotent).</li>
+     * </ul>
+     * Anything else (e.g. patching a cell-template subtree, whose suffixed
+     * ids never match model entries) falls back to the generic DOM path.
+     */
+    private applyTablePatch;
+    /**
+     * Resolves where an APPENDed {@code tree-node} <li> should land within
+     * {@code target}:
+     * <ul>
+     *   <li>target is the tree container → its root {@code .sui-tree-list};</li>
+     *   <li>target is an expandable tree row → its {@code .sui-tree-children}
+     *       list (created on the fly when the row has a body but no children
+     *       yet, e.g. content-only nodes);</li>
+     *   <li>anything else → {@code null}, caller falls back to the target
+     *       itself. A collapsed leaf can't grow children this way — REPLACE
+     *       the row instead.</li>
+     * </ul>
+     */
+    private treeAppendHost;
     private appendListItems;
     /**
      * Replaces the loading indicator implementation. The default draws a

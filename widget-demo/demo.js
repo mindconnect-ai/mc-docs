@@ -67,52 +67,52 @@ function treeTab() {
     const explorer = {
         type: "tree", id: "tree-explorer", title: "File explorer",
         nodes: [
-            { id: "t-src", label: "src", icon: "📁", open: true, children: [
-                { id: "t-main", label: "main", icon: "📁", open: true, children: [
-                    { id: "t-app",  label: "app.ts",  icon: "📄", onClick: go("/files/app.ts") },
-                    { id: "t-boot", label: "boot.ts", icon: "📄", onClick: go("/files/boot.ts") },
-                    { id: "t-cmp", label: "components", icon: "📁", children: [
-                        { id: "t-btn",  label: "Button.ts", icon: "📄", onClick: go("/files/Button.ts") },
-                        { id: "t-tree", label: "Tree.ts",   icon: "📄", selected: true, onClick: go("/files/Tree.ts") },
+            { type: "tree-node", id: "t-src", label: "src", icon: "📁", open: true, children: [
+                { type: "tree-node", id: "t-main", label: "main", icon: "📁", open: true, children: [
+                    { type: "tree-node", id: "t-app",  label: "app.ts",  icon: "📄", onClick: go("/files/app.ts") },
+                    { type: "tree-node", id: "t-boot", label: "boot.ts", icon: "📄", onClick: go("/files/boot.ts") },
+                    { type: "tree-node", id: "t-cmp", label: "components", icon: "📁", children: [
+                        { type: "tree-node", id: "t-btn",  label: "Button.ts", icon: "📄", onClick: go("/files/Button.ts") },
+                        { type: "tree-node", id: "t-tree", label: "Tree.ts",   icon: "📄", selected: true, onClick: go("/files/Tree.ts") },
                     ] },
                 ] },
-                { id: "t-test", label: "test", icon: "📁", children: [
-                    { id: "t-spec", label: "app.spec.ts", icon: "📄", onClick: go("/files/app.spec.ts") },
+                { type: "tree-node", id: "t-test", label: "test", icon: "📁", children: [
+                    { type: "tree-node", id: "t-spec", label: "app.spec.ts", icon: "📄", onClick: go("/files/app.spec.ts") },
                 ] },
             ] },
-            { id: "t-readme", label: "README.md", icon: "📄", onClick: go("/files/README.md") },
-            { id: "t-pom",    label: "pom.xml",   icon: "📄", onClick: go("/files/pom.xml") },
+            { type: "tree-node", id: "t-readme", label: "README.md", icon: "📄", onClick: go("/files/README.md") },
+            { type: "tree-node", id: "t-pom",    label: "pom.xml",   icon: "📄", onClick: go("/files/pom.xml") },
         ],
     };
     const explorerJava =
 `UiTree.of("tree-explorer", "File explorer")
-    .node(UiTree.Node.of("t-src", "src").icon("📁").open(true)
-        .child(UiTree.Node.of("t-main", "main").icon("📁").open(true)
-            .child(UiTree.Node.of("t-app",  "app.ts").icon("📄").onClick(UiTrigger.go("/files/app.ts")))
-            .child(UiTree.Node.of("t-boot", "boot.ts").icon("📄").onClick(UiTrigger.go("/files/boot.ts")))
-            .child(UiTree.Node.of("t-cmp", "components").icon("📁")
-                .child(UiTree.Node.of("t-btn",  "Button.ts").icon("📄").onClick(UiTrigger.go("/files/Button.ts")))
-                .child(UiTree.Node.of("t-tree", "Tree.ts").icon("📄").selected(true).onClick(UiTrigger.go("/files/Tree.ts")))))
-        .child(UiTree.Node.of("t-test", "test").icon("📁")
-            .child(UiTree.Node.of("t-spec", "app.spec.ts").icon("📄").onClick(UiTrigger.go("/files/app.spec.ts")))))
-    .node(UiTree.Node.of("t-readme", "README.md").icon("📄").onClick(UiTrigger.go("/files/README.md")))
-    .node(UiTree.Node.of("t-pom", "pom.xml").icon("📄").onClick(UiTrigger.go("/files/pom.xml")));`;
+    .node(UiTreeNode.of("t-src", "src").icon("📁").open(true)
+        .child(UiTreeNode.of("t-main", "main").icon("📁").open(true)
+            .child(UiTreeNode.of("t-app",  "app.ts").icon("📄").onClick(UiTrigger.go("/files/app.ts")))
+            .child(UiTreeNode.of("t-boot", "boot.ts").icon("📄").onClick(UiTrigger.go("/files/boot.ts")))
+            .child(UiTreeNode.of("t-cmp", "components").icon("📁")
+                .child(UiTreeNode.of("t-btn",  "Button.ts").icon("📄").onClick(UiTrigger.go("/files/Button.ts")))
+                .child(UiTreeNode.of("t-tree", "Tree.ts").icon("📄").selected(true).onClick(UiTrigger.go("/files/Tree.ts")))))
+        .child(UiTreeNode.of("t-test", "test").icon("📁")
+            .child(UiTreeNode.of("t-spec", "app.spec.ts").icon("📄").onClick(UiTrigger.go("/files/app.spec.ts")))))
+    .node(UiTreeNode.of("t-readme", "README.md").icon("📄").onClick(UiTrigger.go("/files/README.md")))
+    .node(UiTreeNode.of("t-pom", "pom.xml").icon("📄").onClick(UiTrigger.go("/files/pom.xml")));`;
 
     const rich = {
         type: "tree", id: "tree-rich", title: "Nodes with rich content",
         nodes: [
-            { id: "r-order", label: "Order #1024", icon: "🧾", open: true, content: {
+            { type: "tree-node", id: "r-order", label: "Order #1024", icon: "🧾", open: true, content: {
                 type: "detail", id: "r-order-detail", fields: [
                     { type: "field", id: "r-cust",   label: "Customer", fieldType: "TEXT",   value: "Grace Hopper" },
                     { type: "field", id: "r-total",  label: "Total",    fieldType: "NUMBER", value: 249.0 },
                     { type: "field", id: "r-status", label: "Status",   fieldType: "TEXT",   value: "Shipped" },
                 ],
             } },
-            { id: "r-metrics", label: "Metrics", icon: "📊", content: {
+            { type: "tree-node", id: "r-metrics", label: "Metrics", icon: "📊", content: {
                 type: "chart", id: "r-chart", chartType: "BAR",
                 data: { labels: ["Mon", "Tue", "Wed", "Thu", "Fri"], series: [{ name: "Visits", values: [12, 19, 9, 22, 17] }] },
             }, children: [
-                { id: "r-child", label: "Drill down…", icon: "→", onClick: go("/metrics") },
+                { type: "tree-node", id: "r-child", label: "Drill down…", icon: "→", onClick: go("/metrics") },
             ] },
         ],
     };
@@ -125,14 +125,14 @@ series.setValues(List.of(12, 19, 9, 22, 17));
 visits.setSeries(List.of(series));
 
 UiTree.of("tree-rich", "Nodes with rich content")
-    .node(UiTree.Node.of("r-order", "Order #1024").icon("🧾").open(true)
+    .node(UiTreeNode.of("r-order", "Order #1024").icon("🧾").open(true)
         .content(UiDetail.of("r-order-detail", null)
             .field(UiField.text("r-cust",   "Customer", "Grace Hopper"))
             .field(UiField.number("r-total", "Total",    249.0))
             .field(UiField.text("r-status", "Status",   "Shipped"))))
-    .node(UiTree.Node.of("r-metrics", "Metrics").icon("📊")
+    .node(UiTreeNode.of("r-metrics", "Metrics").icon("📊")
         .content(UiChart.of("r-chart", null, UiChart.ChartType.BAR, visits))
-        .child(UiTree.Node.of("r-child", "Drill down…").icon("→").onClick(UiTrigger.go("/metrics"))));`;
+        .child(UiTreeNode.of("r-child", "Drill down…").icon("→").onClick(UiTrigger.go("/metrics"))));`;
 
     return stack("tab-tree", [
         text("tree-intro", "Nodes with children (or content) render as a native <details> disclosure with client-controlled state: expand/collapse survives re-renders. Click a twisty to toggle; click a label to fire its action."),

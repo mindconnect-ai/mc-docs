@@ -64,7 +64,13 @@ export function renderTable(node, r) {
     const emptyRow = rows.length === 0
         ? `<tr><td colspan="${colCount}" class="sui-table-empty">No rows.</td></tr>`
         : "";
-    return `<div class="${cls("sui-table", node)}" id="${escapeHtml(node.id)}">
+    // The table carries its own serialised model so the patch pipeline can
+    // treat row/column patches as model updates: REPLACE/REMOVE a <tr>/<th>
+    // (or APPEND a row) edits this JSON and re-renders the whole table —
+    // the only way a single column swap can update every cell consistently.
+    // Same data-node convention as renderForm.
+    const nodeJson = escapeHtml(JSON.stringify(node));
+    return `<div class="${cls("sui-table", node)}" id="${escapeHtml(node.id)}" data-sui="table" data-node='${nodeJson}'>
         ${node.title ? `<div class="sui-table-header"><h2>${escapeHtml(node.title)}</h2>${renderActions(node.actions || [])}</div>` : ""}
         <table>
             <thead><tr>${thead}</tr></thead>

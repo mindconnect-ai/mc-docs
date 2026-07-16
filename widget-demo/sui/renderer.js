@@ -4,7 +4,7 @@
 import { renderForm } from "./renderers/form.js";
 import { renderDetail } from "./renderers/detail.js";
 import { renderList } from "./renderers/list.js";
-import { renderTree } from "./renderers/tree.js";
+import { renderTree, renderTreeNode } from "./renderers/tree.js";
 import { renderSection } from "./renderers/section.js";
 import { renderSectionEntry } from "./renderers/section-entry.js";
 import { renderStack } from "./renderers/stack.js";
@@ -206,6 +206,12 @@ export class SuiRenderer {
         const target = document.getElementById(op.targetId);
         if (!target)
             return;
+        // Row/column patches inside a table are model updates, not DOM
+        // morphs: the table re-renders from its embedded model so header,
+        // cells and selection state stay consistent (a lone <tr>/<th> swap
+        // couldn't re-render a column's cells or apply cellTemplates).
+        if (this.applyTablePatch(op, target))
+            return;
         switch (op.op) {
             case "REPLACE": {
                 if (!op.node)
@@ -226,14 +232,21 @@ export class SuiRenderer {
                 // For appends we deliberately don't morph: we want to add
                 // new content, not reconcile against existing siblings.
                 this.withTailChase(target, () => {
-                    if (op.node.type === "list") {
+                    const type = op.node.type;
+                    if (type === "list") {
                         this.appendListItems(target, op.node);
                     }
                     else {
+                        // Tree rows are <li>s that belong inside the tree's
+                        // <ul> (root list or a node's children list), not at
+                        // the end of the targeted container itself.
+                        const host = type === "tree-node"
+                            ? this.treeAppendHost(target) ?? target
+                            : target;
                         const tmp = document.createElement("div");
                         tmp.innerHTML = this.render(op.node);
                         while (tmp.firstChild)
-                            target.appendChild(tmp.firstChild);
+                            host.appendChild(tmp.firstChild);
                     }
                 });
                 break;
@@ -280,6 +293,103 @@ export class SuiRenderer {
                 });
             });
         }
+    }
+    /**
+     * Handles patch ops that address a table's rows or columns. Tables
+     * render with their full model embedded as {@code data-node} (see
+     * renderTable); a matching patch edits that model and re-renders the
+     * whole table through the morpher, which keeps thead/tbody/selection
+     * consistent and preserves focus/scroll.
+     *
+     * <p>Handled cases — returns {@code true} when consumed:
+     * <ul>
+     *   <li>{@code REPLACE} a {@code row}/{@code column} node whose target
+     *       id matches a model row/column;</li>
+     *   <li>{@code REMOVE} where the target id matches a model row/column;</li>
+     *   <li>{@code APPEND} a {@code row} node targeting the table itself
+     *       (appends to {@code rows}; an existing id is replaced instead so
+     *       repeated appends stay idempotent).</li>
+     * </ul>
+     * Anything else (e.g. patching a cell-template subtree, whose suffixed
+     * ids never match model entries) falls back to the generic DOM path.
+     */
+    applyTablePatch(op, target) {
+        const wrapper = target.closest('[data-sui="table"][data-node]');
+        if (!wrapper)
+            return false;
+        let model;
+        try {
+            model = JSON.parse(wrapper.getAttribute("data-node"));
+        }
+        catch {
+            return false;
+        }
+        const rows = model.rows ?? (model.rows = []);
+        const cols = model.columns ?? (model.columns = []);
+        const type = op.node?.type;
+        let changed = false;
+        if (op.op === "APPEND" && target === wrapper && type === "row") {
+            const idx = rows.findIndex(x => x.id != null && x.id === op.node.id);
+            if (idx >= 0)
+                rows[idx] = op.node;
+            else
+                rows.push(op.node);
+            changed = true;
+        }
+        else if (target !== wrapper && op.op === "REPLACE" && (type === "row" || type === "column")) {
+            const list = type === "row" ? rows : cols;
+            const idx = list.findIndex(x => x.id === op.targetId);
+            if (idx < 0)
+                return false;
+            list[idx] = op.node;
+            changed = true;
+        }
+        else if (target !== wrapper && op.op === "REMOVE") {
+            const ri = rows.findIndex(x => x.id === op.targetId);
+            const ci = ri < 0 ? cols.findIndex(x => x.id === op.targetId) : -1;
+            if (ri < 0 && ci < 0)
+                return false;
+            if (ri >= 0)
+                rows.splice(ri, 1);
+            else
+                cols.splice(ci, 1);
+            changed = true;
+        }
+        if (!changed)
+            return false;
+        this.withTailChase(wrapper, () => {
+            this.morpher(wrapper, this.render(model), "outerHTML");
+        });
+        return true;
+    }
+    /**
+     * Resolves where an APPENDed {@code tree-node} <li> should land within
+     * {@code target}:
+     * <ul>
+     *   <li>target is the tree container → its root {@code .sui-tree-list};</li>
+     *   <li>target is an expandable tree row → its {@code .sui-tree-children}
+     *       list (created on the fly when the row has a body but no children
+     *       yet, e.g. content-only nodes);</li>
+     *   <li>anything else → {@code null}, caller falls back to the target
+     *       itself. A collapsed leaf can't grow children this way — REPLACE
+     *       the row instead.</li>
+     * </ul>
+     */
+    treeAppendHost(target) {
+        const rootList = target.querySelector(":scope > ul.sui-tree-list");
+        if (rootList)
+            return rootList;
+        const body = target.querySelector(":scope > details > .sui-tree-body");
+        if (!body)
+            return null;
+        let children = body.querySelector(":scope > ul.sui-tree-children");
+        if (!children) {
+            children = document.createElement("ul");
+            children.className = "sui-tree-children";
+            children.setAttribute("role", "group");
+            body.appendChild(children);
+        }
+        return children;
     }
     appendListItems(target, node) {
         const ul = target.querySelector("ul");
@@ -406,6 +516,7 @@ export function installDefaultHandlers(renderer) {
     return renderer
         .register("list", renderList)
         .register("tree", renderTree)
+        .register("tree-node", renderTreeNode)
         .register("form", renderForm)
         .register("detail", renderDetail)
         .register("section", renderSection)

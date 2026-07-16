@@ -1,16 +1,16 @@
 {
   "page" : {
     "type" : "page",
-    "id" : "page-28bokq"
+    "id" : "page-3uwpij"
   },
   "stack" : {
     "type" : "stack",
-    "id" : "stack-28bwli",
+    "id" : "stack-3ux4si",
     "children" : [ ]
   },
   "form" : {
     "type" : "form",
-    "id" : "form-28bya9",
+    "id" : "form-3ux90t",
     "fields" : [ ],
     "actions" : [ ],
     "links" : [ ],
@@ -18,32 +18,32 @@
   },
   "section" : {
     "type" : "section",
-    "id" : "section-28c05e",
+    "id" : "section-3uxewd",
     "title" : "New section",
     "sections" : [ ],
     "collapseOpen" : false
   },
   "section-entry" : {
     "type" : "section-entry",
-    "id" : "tab-28c16z",
+    "id" : "tab-3uxi7p",
     "title" : "New tab"
   },
   "detail" : {
     "type" : "detail",
-    "id" : "detail-28c1si",
+    "id" : "detail-3uxir1",
     "fields" : [ ],
     "actions" : [ ],
     "links" : [ ]
   },
   "list" : {
     "type" : "list",
-    "id" : "list-28c2sx",
+    "id" : "list-3uxm46",
     "items" : [ ],
     "actions" : [ ]
   },
   "table" : {
     "type" : "table",
-    "id" : "table-28c4gm",
+    "id" : "table-3uxrun",
     "columns" : [ ],
     "rows" : [ ],
     "actions" : [ ],
@@ -53,35 +53,35 @@
   },
   "column" : {
     "type" : "column",
-    "id" : "col-col-28c6mh-28c6",
+    "id" : "col-col-3uxvkm-3uxv",
     "label" : "Column",
-    "dataKey" : "col-28c6mh",
+    "dataKey" : "col-3uxvkm",
     "sortable" : false,
     "filterable" : false
   },
   "row" : {
     "type" : "row",
-    "id" : "row-28c9s6",
+    "id" : "row-3uy0we",
     "data" : { }
   },
   "text" : {
     "type" : "text",
-    "id" : "text-28cbzj",
+    "id" : "text-3uy455",
     "text" : "Text"
   },
   "header" : {
     "type" : "header",
-    "id" : "header-28cck9",
+    "id" : "header-3uy5p5",
     "brand" : "Brand"
   },
   "chart" : {
     "type" : "chart",
-    "id" : "chart-28cdic",
+    "id" : "chart-3uya9o",
     "chartType" : "BAR"
   },
   "field" : {
     "type" : "field",
-    "id" : "field-28ceh1",
+    "id" : "field-3uybtu",
     "label" : "Label",
     "fieldType" : "TEXT",
     "editable" : true,
@@ -92,7 +92,7 @@
   },
   "action" : {
     "type" : "action",
-    "id" : "action-28cgse",
+    "id" : "action-3uyfh1",
     "label" : "Action",
     "style" : "SECONDARY",
     "appearance" : "BUTTON",
@@ -100,15 +100,15 @@
   },
   "link" : {
     "type" : "link",
-    "id" : "link-28cjfz",
-    "rel" : "link-28cjfz",
+    "id" : "link-3uyhos",
+    "rel" : "link-3uyhos",
     "href" : "#",
     "label" : "Link",
     "external" : false
   },
   "dialog" : {
     "type" : "dialog",
-    "id" : "dialog-28ck6q",
+    "id" : "dialog-3uyiv2",
     "title" : "Dialog"
   }
 }

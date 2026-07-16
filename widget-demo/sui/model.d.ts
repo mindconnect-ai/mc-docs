@@ -243,13 +243,15 @@ export interface UiList extends UiNodeBase {
 /**
  * One node of a {@link UiTree}. Recursive: a node with {@code children} (or
  * {@code content}) is expandable and renders as a native {@code <details>};
- * a node with neither is a leaf. Mirrors {@code UiTree.Node} in Java. Not a
- * top-level {@code UiNode} — it has no {@code type} discriminator, like
- * {@link UiListItem}.
+ * a node with neither is a leaf. Mirrors {@code UiTreeNode.java}.
+ *
+ * <p>A full {@code UiNode} (type {@code "tree-node"}), so each tree row is
+ * individually patch-addressable: {@code REPLACE} its id to re-render one
+ * row, {@code REMOVE} its id to drop it from the tree.
  */
-export interface UiTreeNode {
-    id: string;
-    label: string;
+export interface UiTreeNode extends UiNodeBase {
+    type: "tree-node";
+    label?: string;
     /** Optional rich label rendered instead of the plain `label` text. */
     labelNode?: UiNode;
     /** Optional leading icon/emoji shown before the label. */
@@ -362,7 +364,7 @@ export interface UiFieldGroup extends UiNodeBase {
     hint?: string;
     content?: UiNode[];
 }
-export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiSection | UiStack | UiChart | UiHeader | UiText | UiLink | UiAction | UiField | UiDialog | UiUpload;
+export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiTreeNode | UiSection | UiStack | UiChart | UiHeader | UiText | UiLink | UiAction | UiField | UiDialog | UiUpload;
 export interface UiPage {
     navigate?: string;
     node?: UiNode;

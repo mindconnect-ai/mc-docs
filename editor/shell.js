@@ -112,6 +112,7 @@ function projectsListOrEmpty() {
 
 function projectRow(proj) {
     return {
+        type: "tree-node",
         id: `p-${proj.id}`,
         labelNode: rowLabel(`prow-${proj.id}`, [
             { type: "action", id: `po-${proj.id}`, label: `📁 ${proj.name}`, appearance: "LINK", style: "SECONDARY",
@@ -189,6 +190,7 @@ function pagesListOrEmpty(projectId) {
 
 function pageRow(projectId, pg) {
     return {
+        type: "tree-node",
         id: `pg-${pg.id}`,
         labelNode: rowLabel(`pgrow-${pg.id}`, [
             { type: "action", id: `po-${pg.id}`, label: `📄 ${pg.name}`, appearance: "LINK", style: "SECONDARY",

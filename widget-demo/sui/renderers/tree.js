@@ -3,6 +3,11 @@ import { cls } from "./util.js";
 /**
  * Renders a {@link UiTree}: a list of recursive {@link UiTreeNode}s.
  *
+ * <p>Every tree node is a full {@code UiNode} (type {@code "tree-node"})
+ * rendered through the renderer registry — so a {@code REPLACE} patch
+ * targeting a node's id re-renders exactly that row (and its subtree), and
+ * a {@code REMOVE} patch drops it.
+ *
  * <p>Each node with children (or {@code content}) renders as a native
  * {@code <details>} disclosure; leaf nodes render as a plain row. Expand /
  * collapse is client-controlled — every disclosure carries
@@ -16,15 +21,23 @@ import { cls } from "./util.js";
  * of the summary does. Leaf nodes and non-clickable labels behave as expected.
  */
 export function renderTree(node, r) {
-    const roots = (node.nodes || []).map(n => renderNode(n, r)).join("");
+    const roots = (node.nodes || []).map(n => renderChild(n, r)).join("");
     return `<div class="${cls("sui-tree", node)}" id="${escapeHtml(node.id)}">
         ${node.title ? `<h2 class="sui-tree-title">${escapeHtml(node.title)}</h2>` : ""}
         <ul class="sui-tree-list" role="tree">${roots}</ul>
     </div>`;
 }
+/**
+ * Dispatches a child through the renderer registry so registered overrides
+ * apply. Lenient fallback: legacy data without a {@code type} discriminator
+ * (pre "tree-node" JSON) still renders directly.
+ */
+function renderChild(node, r) {
+    return node.type ? r.render(node) : renderTreeNode(node, r);
+}
 function renderLabel(node, r) {
     const icon = node.icon ? `<span class="sui-tree-icon">${escapeHtml(node.icon)}</span>` : "";
-    const inner = node.labelNode ? r.render(node.labelNode) : escapeHtml(node.label);
+    const inner = node.labelNode ? r.render(node.labelNode) : escapeHtml(node.label ?? "");
     const labelCls = `sui-tree-label${node.selected ? " is-selected" : ""}`;
     // A clickable label is an anchor carrying the trigger; the event bus
     // intercepts the click (preventDefault) so it fires without toggling the
@@ -34,7 +47,8 @@ function renderLabel(node, r) {
         : `<span class="${labelCls}">${inner}</span>`;
     return `${icon}${label}`;
 }
-function renderNode(node, r) {
+/** Renders one tree row (a {@code <li>}). Registered under {@code "tree-node"}. */
+export function renderTreeNode(node, r) {
     const children = node.children || [];
     const expandable = children.length > 0 || node.content != null;
     const labelHtml = renderLabel(node, r);
@@ -47,7 +61,7 @@ function renderNode(node, r) {
         ? `<div class="sui-tree-content">${r.render(node.content)}</div>`
         : "";
     const childList = children.length > 0
-        ? `<ul class="sui-tree-children" role="group">${children.map(c => renderNode(c, r)).join("")}</ul>`
+        ? `<ul class="sui-tree-children" role="group">${children.map(c => renderChild(c, r)).join("")}</ul>`
         : "";
     return `<li class="sui-tree-node" id="${escapeHtml(node.id)}" data-id="${escapeHtml(node.id)}" role="treeitem" aria-expanded="${node.open ? "true" : "false"}">
         <details class="sui-tree-item" data-sui-client-collapse${node.open ? " open" : ""}>

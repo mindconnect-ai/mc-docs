@@ -1,7 +1,12 @@
-import type { UiTree } from "../model.js";
+import type { UiTree, UiTreeNode } from "../model.js";
 import { type SuiRenderer } from "../renderer.js";
 /**
  * Renders a {@link UiTree}: a list of recursive {@link UiTreeNode}s.
+ *
+ * <p>Every tree node is a full {@code UiNode} (type {@code "tree-node"})
+ * rendered through the renderer registry — so a {@code REPLACE} patch
+ * targeting a node's id re-renders exactly that row (and its subtree), and
+ * a {@code REMOVE} patch drops it.
  *
  * <p>Each node with children (or {@code content}) renders as a native
  * {@code <details>} disclosure; leaf nodes render as a plain row. Expand /
@@ -16,3 +21,5 @@ import { type SuiRenderer } from "../renderer.js";
  * of the summary does. Leaf nodes and non-clickable labels behave as expected.
  */
 export declare function renderTree(node: UiTree, r: SuiRenderer): string;
+/** Renders one tree row (a {@code <li>}). Registered under {@code "tree-node"}. */
+export declare function renderTreeNode(node: UiTreeNode, r: SuiRenderer): string;

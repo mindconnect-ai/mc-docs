@@ -1,121 +1,6 @@
 {
   "$schema" : "http://json-schema.org/draft-07/schema#",
   "definitions" : {
-    "Node" : {
-      "type" : "object",
-      "properties" : {
-        "children" : {
-          "type" : "array",
-          "items" : {
-            "$ref" : "#/definitions/Node"
-          }
-        },
-        "content" : {
-          "anyOf" : [ {
-            "$ref" : "#/definitions/UiSection-2"
-          }, {
-            "$ref" : "#/definitions/UiSectionEntry-2"
-          }, {
-            "$ref" : "#/definitions/UiStack-2"
-          }, {
-            "$ref" : "#/definitions/UiForm-2"
-          }, {
-            "$ref" : "#/definitions/UiTable-2"
-          }, {
-            "$ref" : "#/definitions/UiColumn-2"
-          }, {
-            "$ref" : "#/definitions/UiRow"
-          }, {
-            "$ref" : "#/definitions/UiText"
-          }, {
-            "$ref" : "#/definitions/UiList-2"
-          }, {
-            "$ref" : "#/definitions/UiTree-2"
-          }, {
-            "$ref" : "#/definitions/UiDetail"
-          }, {
-            "$ref" : "#/definitions/UiChart"
-          }, {
-            "$ref" : "#/definitions/UiHeader-2"
-          }, {
-            "$ref" : "#/definitions/UiAction-2"
-          }, {
-            "$ref" : "#/definitions/UiField"
-          }, {
-            "$ref" : "#/definitions/UiFieldGroup-2"
-          }, {
-            "$ref" : "#/definitions/UiUpload"
-          }, {
-            "$ref" : "#/definitions/UiLink"
-          }, {
-            "$ref" : "#/definitions/UiDialog-2"
-          }, {
-            "$ref" : "#/definitions/UiPage-2"
-          } ]
-        },
-        "icon" : {
-          "type" : "string"
-        },
-        "id" : {
-          "type" : "string"
-        },
-        "label" : {
-          "type" : "string"
-        },
-        "labelNode" : {
-          "anyOf" : [ {
-            "$ref" : "#/definitions/UiSection-2"
-          }, {
-            "$ref" : "#/definitions/UiSectionEntry-2"
-          }, {
-            "$ref" : "#/definitions/UiStack-2"
-          }, {
-            "$ref" : "#/definitions/UiForm-2"
-          }, {
-            "$ref" : "#/definitions/UiTable-2"
-          }, {
-            "$ref" : "#/definitions/UiColumn-2"
-          }, {
-            "$ref" : "#/definitions/UiRow"
-          }, {
-            "$ref" : "#/definitions/UiText"
-          }, {
-            "$ref" : "#/definitions/UiList-2"
-          }, {
-            "$ref" : "#/definitions/UiTree-2"
-          }, {
-            "$ref" : "#/definitions/UiDetail"
-          }, {
-            "$ref" : "#/definitions/UiChart"
-          }, {
-            "$ref" : "#/definitions/UiHeader-2"
-          }, {
-            "$ref" : "#/definitions/UiAction-2"
-          }, {
-            "$ref" : "#/definitions/UiField"
-          }, {
-            "$ref" : "#/definitions/UiFieldGroup-2"
-          }, {
-            "$ref" : "#/definitions/UiUpload"
-          }, {
-            "$ref" : "#/definitions/UiLink"
-          }, {
-            "$ref" : "#/definitions/UiDialog-2"
-          }, {
-            "$ref" : "#/definitions/UiPage-2"
-          } ]
-        },
-        "onClick" : {
-          "$ref" : "#/definitions/UiTrigger"
-        },
-        "open" : {
-          "type" : "boolean"
-        },
-        "selected" : {
-          "type" : "boolean"
-        }
-      }
-    },
     "UiAction-1" : {
       "type" : "object",
       "properties" : {
@@ -240,6 +125,8 @@
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
+          }, {
+            "$ref" : "#/definitions/UiTreeNode-2"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -367,6 +254,8 @@
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
+          }, {
+            "$ref" : "#/definitions/UiTreeNode-2"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -513,6 +402,8 @@
             }, {
               "$ref" : "#/definitions/UiTree-2"
             }, {
+              "$ref" : "#/definitions/UiTreeNode-2"
+            }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
               "$ref" : "#/definitions/UiChart"
@@ -594,6 +485,8 @@
               "$ref" : "#/definitions/UiList-2"
             }, {
               "$ref" : "#/definitions/UiTree-2"
+            }, {
+              "$ref" : "#/definitions/UiTreeNode-2"
             }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
@@ -697,6 +590,8 @@
               "$ref" : "#/definitions/UiList-2"
             }, {
               "$ref" : "#/definitions/UiTree-2"
+            }, {
+              "$ref" : "#/definitions/UiTreeNode-2"
             }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
@@ -845,6 +740,8 @@
                 }, {
                   "$ref" : "#/definitions/UiTree-2"
                 }, {
+                  "$ref" : "#/definitions/UiTreeNode-2"
+                }, {
                   "$ref" : "#/definitions/UiDetail"
                 }, {
                   "$ref" : "#/definitions/UiChart"
@@ -896,6 +793,8 @@
                   "$ref" : "#/definitions/UiList-2"
                 }, {
                   "$ref" : "#/definitions/UiTree-2"
+                }, {
+                  "$ref" : "#/definitions/UiTreeNode-2"
                 }, {
                   "$ref" : "#/definitions/UiDetail"
                 }, {
@@ -1018,6 +917,8 @@
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
+          }, {
+            "$ref" : "#/definitions/UiTreeNode-2"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -1152,6 +1053,8 @@
           }, {
             "$ref" : "#/definitions/UiTree-2"
           }, {
+            "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
             "$ref" : "#/definitions/UiChart"
@@ -1226,6 +1129,8 @@
               "$ref" : "#/definitions/UiList-2"
             }, {
               "$ref" : "#/definitions/UiTree-2"
+            }, {
+              "$ref" : "#/definitions/UiTreeNode-2"
             }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
@@ -1412,7 +1317,7 @@
         "nodes" : {
           "type" : "array",
           "items" : {
-            "$ref" : "#/definitions/Node"
+            "$ref" : "#/definitions/UiTreeNode-2"
           }
         },
         "title" : {
@@ -1428,6 +1333,144 @@
         "properties" : {
           "type" : {
             "const" : "tree"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    },
+    "UiTreeNode-1" : {
+      "type" : "object",
+      "properties" : {
+        "children" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/UiTreeNode-2"
+          }
+        },
+        "content" : {
+          "anyOf" : [ {
+            "$ref" : "#/definitions/UiSection-2"
+          }, {
+            "$ref" : "#/definitions/UiSectionEntry-2"
+          }, {
+            "$ref" : "#/definitions/UiStack-2"
+          }, {
+            "$ref" : "#/definitions/UiForm-2"
+          }, {
+            "$ref" : "#/definitions/UiTable-2"
+          }, {
+            "$ref" : "#/definitions/UiColumn-2"
+          }, {
+            "$ref" : "#/definitions/UiRow"
+          }, {
+            "$ref" : "#/definitions/UiText"
+          }, {
+            "$ref" : "#/definitions/UiList-2"
+          }, {
+            "$ref" : "#/definitions/UiTree-2"
+          }, {
+            "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
+            "$ref" : "#/definitions/UiDetail"
+          }, {
+            "$ref" : "#/definitions/UiChart"
+          }, {
+            "$ref" : "#/definitions/UiHeader-2"
+          }, {
+            "$ref" : "#/definitions/UiAction-2"
+          }, {
+            "$ref" : "#/definitions/UiField"
+          }, {
+            "$ref" : "#/definitions/UiFieldGroup-2"
+          }, {
+            "$ref" : "#/definitions/UiUpload"
+          }, {
+            "$ref" : "#/definitions/UiLink"
+          }, {
+            "$ref" : "#/definitions/UiDialog-2"
+          }, {
+            "$ref" : "#/definitions/UiPage-2"
+          } ]
+        },
+        "cssClass" : {
+          "type" : "string"
+        },
+        "icon" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "label" : {
+          "type" : "string"
+        },
+        "labelNode" : {
+          "anyOf" : [ {
+            "$ref" : "#/definitions/UiSection-2"
+          }, {
+            "$ref" : "#/definitions/UiSectionEntry-2"
+          }, {
+            "$ref" : "#/definitions/UiStack-2"
+          }, {
+            "$ref" : "#/definitions/UiForm-2"
+          }, {
+            "$ref" : "#/definitions/UiTable-2"
+          }, {
+            "$ref" : "#/definitions/UiColumn-2"
+          }, {
+            "$ref" : "#/definitions/UiRow"
+          }, {
+            "$ref" : "#/definitions/UiText"
+          }, {
+            "$ref" : "#/definitions/UiList-2"
+          }, {
+            "$ref" : "#/definitions/UiTree-2"
+          }, {
+            "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
+            "$ref" : "#/definitions/UiDetail"
+          }, {
+            "$ref" : "#/definitions/UiChart"
+          }, {
+            "$ref" : "#/definitions/UiHeader-2"
+          }, {
+            "$ref" : "#/definitions/UiAction-2"
+          }, {
+            "$ref" : "#/definitions/UiField"
+          }, {
+            "$ref" : "#/definitions/UiFieldGroup-2"
+          }, {
+            "$ref" : "#/definitions/UiUpload"
+          }, {
+            "$ref" : "#/definitions/UiLink"
+          }, {
+            "$ref" : "#/definitions/UiDialog-2"
+          }, {
+            "$ref" : "#/definitions/UiPage-2"
+          } ]
+        },
+        "onClick" : {
+          "$ref" : "#/definitions/UiTrigger"
+        },
+        "open" : {
+          "type" : "boolean"
+        },
+        "selected" : {
+          "type" : "boolean"
+        },
+        "title" : {
+          "type" : "string"
+        }
+      }
+    },
+    "UiTreeNode-2" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/UiTreeNode-1"
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "tree-node"
           }
         },
         "required" : [ "type" ]
@@ -1475,6 +1518,8 @@
                       "$ref" : "#/definitions/UiList-2"
                     }, {
                       "$ref" : "#/definitions/UiTree-2"
+                    }, {
+                      "$ref" : "#/definitions/UiTreeNode-2"
                     }, {
                       "$ref" : "#/definitions/UiDetail"
                     }, {
@@ -1586,6 +1631,8 @@
     "$ref" : "#/definitions/UiList-2"
   }, {
     "$ref" : "#/definitions/UiTree-2"
+  }, {
+    "$ref" : "#/definitions/UiTreeNode-2"
   }, {
     "$ref" : "#/definitions/UiDetail"
   }, {
