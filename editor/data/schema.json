@@ -14,7 +14,7 @@
   "children" : [ {
     "property" : "node",
     "cardinality" : "SINGLE",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "menu-button", "link", "action", "field" ]
   }, {
     "property" : "dialogs",
     "cardinality" : "LIST",
@@ -45,7 +45,7 @@
   "children" : [ {
     "property" : "children",
     "cardinality" : "LIST",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "menu-button", "link", "action", "field" ]
   } ]
 }, {
   "type" : "form",
@@ -148,7 +148,7 @@
   "children" : [ {
     "property" : "content",
     "cardinality" : "SINGLE",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "menu-button", "link", "action", "field" ]
   } ]
 }, {
   "type" : "detail",
@@ -478,12 +478,60 @@
     "kind" : "BOOLEAN",
     "required" : false
   }, {
+    "name" : "danger",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "divider",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
     "name" : "cssClass",
     "kind" : "STRING",
     "required" : false
   } ],
   "children" : [ {
     "property" : "children",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "menu-item" ]
+  } ]
+}, {
+  "type" : "menu-button",
+  "label" : "Menu button",
+  "category" : "chrome",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "icon",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "label",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "variant",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "ICON", "BUTTON" ]
+  }, {
+    "name" : "align",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "START", "END" ]
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "items",
     "cardinality" : "LIST",
     "allowedTypes" : [ "menu-item" ]
   } ]
@@ -705,6 +753,6 @@
   "children" : [ {
     "property" : "node",
     "cardinality" : "SINGLE",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "menu-button", "link", "action", "field" ]
   } ]
 } ]

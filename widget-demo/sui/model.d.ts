@@ -387,8 +387,30 @@ export interface UiMenuItem extends UiNodeBase {
     badge?: string;
     /** When true (and the item has children), the group renders initially open. */
     open?: boolean;
+    /** Destructive action — rendered in the danger colour (mainly in a menu-button). */
+    danger?: boolean;
+    /** Non-interactive separator line; other fields ignored (mainly in a menu-button). */
+    divider?: boolean;
     /** Nested entries; when present this item is a collapsible / fly-out group. */
     children?: UiMenuItem[];
+}
+/**
+ * A button that opens a floating dropdown / context menu of {@link UiMenuItem}s
+ * anchored to itself. Transient (opens on click, closes on outside-click /
+ * Escape / item pick), placeable anywhere — including as a {@link UiTreeNode}'s
+ * `labelNode` to give a row its own context menu. Mirrors UiMenuButton.java.
+ */
+export interface UiMenuButton extends UiNodeBase {
+    type: "menu-button";
+    items: UiMenuItem[];
+    /** Trigger glyph token. Defaults to `"more"` (a vertical "⋮"). */
+    icon?: string;
+    /** Optional trigger text; when set the trigger renders as a labelled button. */
+    label?: string;
+    /** Trigger look. When unset: `"BUTTON"` if `label` is set, else `"ICON"`. */
+    variant?: "ICON" | "BUTTON";
+    /** Which edge the popover aligns to. Defaults to `"END"` (right-aligned). */
+    align?: "START" | "END";
 }
 /**
  * A vertical navigation menu (the collapsible admin sidebar). Toggles between
@@ -445,6 +467,8 @@ export interface UiSectionEntry extends UiNodeBase {
     href?: string;
     /** Leading icon token shown before the tab label. See {@link UiIcon}. */
     icon?: string;
+    /** Trigger fired on tab click, in addition to activating the panel (e.g. lazy-load). */
+    onClick?: UiTrigger;
 }
 export interface UiSection extends UiNodeBase {
     type: "section";
@@ -530,7 +554,7 @@ export interface UiFieldGroup extends UiNodeBase {
     hint?: string;
     content?: UiNode[];
 }
-export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiTreeNode | UiMenu | UiMenuItem | UiSection | UiStack | UiChart | UiHeader | UiText | UiIcon | UiSpinner | UiProgress | UiLink | UiAction | UiField | UiDialog | UiUpload;
+export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiTreeNode | UiMenu | UiMenuItem | UiMenuButton | UiSection | UiStack | UiChart | UiHeader | UiText | UiIcon | UiSpinner | UiProgress | UiLink | UiAction | UiField | UiDialog | UiUpload;
 export interface UiPage {
     navigate?: string;
     node?: UiNode;

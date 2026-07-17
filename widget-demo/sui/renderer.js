@@ -6,6 +6,7 @@ import { renderDetail } from "./renderers/detail.js";
 import { renderList } from "./renderers/list.js";
 import { renderTree, renderTreeNode } from "./renderers/tree.js";
 import { renderMenu, renderMenuItem } from "./renderers/menu.js";
+import { renderMenuButton } from "./renderers/menu-button.js";
 import { renderSection } from "./renderers/section.js";
 import { renderSectionEntry } from "./renderers/section-entry.js";
 import { renderStack } from "./renderers/stack.js";
@@ -33,6 +34,9 @@ export { restoreMenuState, applyMenuState, cycleMenuState, menuStateOf, MENU_STA
 // Tab-bar overflow enhancement — apps call it once after mount to activate the
 // "⋯ More" dropdown on sections with tabOverflow: "MENU".
 export { wireTabOverflow } from "./renderers/tabs.js";
+// Menu-button popovers — apps call it once after mount to activate the
+// click-positioned dropdown / context menus (UiMenuButton).
+export { wireMenuButtons } from "./renderers/menu-button.js";
 // Default item-handler for the UiList rendering — set on the SuiRenderer
 // at construction time. List items have no type discriminator so they
 // can't go through the dispatcher; they get their own handler slot.
@@ -532,6 +536,7 @@ export function installDefaultHandlers(renderer) {
         .register("tree-node", renderTreeNode)
         .register("menu", renderMenu)
         .register("menu-item", renderMenuItem)
+        .register("menu-button", renderMenuButton)
         .register("form", renderForm)
         .register("detail", renderDetail)
         .register("section", renderSection)

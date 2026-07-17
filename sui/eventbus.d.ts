@@ -356,6 +356,13 @@ export declare class SuiEventBus {
     private renderDialogs;
     /** Closes the dialog that {@code el} sits inside (its × / backdrop). */
     private closeDialogAround;
+    private autoObserver;
+    private enhanceScheduled;
+    private installAutoEnhance;
+    private observeForEnhance;
+    private scheduleEnhance;
+    /** Runs the idempotent post-render enhancers over the bus's root. */
+    private enhance;
     /** Applies a {@link UiPatch} via the renderer. Convenience wrapper. */
     applyPatch(patch: UiPatch): void;
     /**

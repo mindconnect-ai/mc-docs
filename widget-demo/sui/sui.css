@@ -235,6 +235,10 @@ details.sui-tree-item[open] > summary.sui-tree-summary::before { transform: rota
 a.sui-tree-label { color: var(--sui-color-primary); cursor: pointer; }
 a.sui-tree-label:hover { text-decoration: underline; }
 .sui-tree-label.is-selected { font-weight: 600; color: var(--sui-color-primary); }
+/* A row whose label hosts a menu-button (a per-row context menu): let the label
+   fill the row so the trigger sits at the trailing edge. */
+.sui-tree-label:has(.sui-menu-button) { flex: 1; min-width: 0; }
+.sui-tree-label:has(.sui-menu-button) > .sui-stack { width: 100%; justify-content: space-between; align-items: center; }
 
 /* Body wraps rich content + child list, indented under the twisty. */
 .sui-tree-content { padding: 4px 0 4px 28px; }
@@ -642,6 +646,99 @@ details.sui-section--collapsible > summary.sui-section-summary:hover { backgroun
 }
 .sui-tab-more-menu .sui-tab:hover { background: var(--sui-color-border-soft); }
 .sui-tab-more-menu .sui-tab.active { background: var(--sui-color-primary-soft); }
+
+/* ── Menu button (dropdown / context / "kebab" menu) ────────────────────── */
+
+/* Wrapper is a native <details> so it opens with no JS; the SPA repositions the
+   popover with position:fixed at open time. Reset the summary marker + focus. */
+.sui-menu-button { position: relative; display: inline-block; }
+.sui-menu-button-trigger {
+    list-style: none; cursor: pointer; user-select: none;
+    display: inline-flex; align-items: center; gap: 6px; box-sizing: border-box;
+    font: inherit; color: var(--sui-color-text-muted);
+    border: 1px solid transparent; border-radius: var(--sui-radius-md);
+    transition: background .15s, color .15s, box-shadow .15s; touch-action: manipulation;
+}
+.sui-menu-button-trigger::-webkit-details-marker { display: none; }
+.sui-menu-button-trigger::marker { content: ""; }
+.sui-menu-button-trigger:hover,
+.sui-menu-button[open] > .sui-menu-button-trigger {
+    background: var(--sui-color-surface-alt); color: var(--sui-color-text-strong);
+}
+.sui-menu-button-glyph { display: inline-flex; }
+.sui-menu-button-glyph .sui-icon { width: 18px; height: 18px; }
+.sui-menu-button-caret { display: inline-flex; color: var(--sui-color-text-subtle); margin-left: 2px; }
+.sui-menu-button-caret .sui-icon { width: 14px; height: 14px; }
+
+/* Icon-only trigger → a square, touch-friendly kebab button. */
+.sui-menu-button--icon .sui-menu-button-trigger { width: 36px; height: 36px; justify-content: center; }
+/* Labelled trigger → a normal outline button. */
+.sui-menu-button--button .sui-menu-button-trigger {
+    padding: 8px 12px; font-size: 14px; font-weight: 500;
+    color: var(--sui-color-text-body); box-shadow: inset 0 0 0 1px var(--sui-color-border-strong);
+}
+
+/* Popover: a floating card of items. Default (no-JS / keyboard) positioning is
+   absolute under the trigger; the SPA overrides it to position:fixed on open. */
+.sui-menu-button-popover {
+    position: absolute; top: calc(100% + 6px); z-index: 70;
+    min-width: 184px; max-width: 300px; padding: 6px;
+    display: flex; flex-direction: column; gap: 1px;
+    background: var(--sui-color-surface); border: 1px solid var(--sui-color-border);
+    border-radius: var(--sui-radius-lg); box-shadow: var(--sui-shadow-pop);
+    animation: sui-menu-pop-in .12s ease-out;
+}
+.sui-menu-button--align-end   .sui-menu-button-popover { right: 0; }
+.sui-menu-button--align-start .sui-menu-button-popover { left: 0; }
+@keyframes sui-menu-pop-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.sui-menu-button-item {
+    display: flex; align-items: center; gap: 10px; width: 100%; box-sizing: border-box;
+    text-align: left; cursor: pointer; text-decoration: none;
+    font: inherit; font-size: 14px; color: var(--sui-color-text-body);
+    background: none; border: none; border-radius: var(--sui-radius-sm); padding: 8px 10px;
+    transition: background .1s, color .1s; touch-action: manipulation;
+}
+.sui-menu-button-item:hover { background: var(--sui-color-surface-alt); color: var(--sui-color-text-strong); }
+.sui-menu-button-item.is-danger { color: var(--sui-color-danger); }
+.sui-menu-button-item.is-danger:hover { background: var(--sui-color-danger-bg); }
+.sui-menu-button-item-icon { display: inline-flex; flex: none; color: var(--sui-color-text-subtle); }
+.sui-menu-button-item-icon .sui-icon { width: 16px; height: 16px; }
+.sui-menu-button-item.is-danger .sui-menu-button-item-icon { color: var(--sui-color-danger); }
+.sui-menu-button-item-label { flex: 1; white-space: nowrap; }
+.sui-menu-button-item-badge {
+    flex: none; font-size: 11px; color: var(--sui-color-text-muted);
+    background: var(--sui-color-surface-alt); border-radius: 999px; padding: 1px 7px;
+}
+.sui-menu-button-sep { height: 1px; margin: 5px 6px; background: var(--sui-color-border); }
+
+/* Nested submenu: a group header (with a trailing ›) + a side-flyout that opens
+   on hover / focus (desktop) or an `.is-open` class the SPA toggles on click
+   (touch). Same UiMenuItem.children the sidebar uses. */
+.sui-menu-button-group { position: relative; }
+.sui-menu-button-item--group { width: 100%; }
+.sui-menu-button-submenu-caret { display: inline-flex; margin-left: auto; color: var(--sui-color-text-subtle); }
+.sui-menu-button-submenu-caret .sui-icon { width: 15px; height: 15px; }
+.sui-menu-button-group:hover    > .sui-menu-button-item--group,
+.sui-menu-button-group.is-open  > .sui-menu-button-item--group { background: var(--sui-color-surface-alt); color: var(--sui-color-text-strong); }
+
+.sui-menu-button-submenu {
+    display: none;
+    position: absolute; top: -7px; left: 100%; z-index: 71;
+    min-width: 180px; max-width: 300px; padding: 6px;
+    flex-direction: column; gap: 1px;
+    background: var(--sui-color-surface); border: 1px solid var(--sui-color-border);
+    border-radius: var(--sui-radius-lg); box-shadow: var(--sui-shadow-pop);
+}
+.sui-menu-button-group:hover        > .sui-menu-button-submenu,
+.sui-menu-button-group:focus-within > .sui-menu-button-submenu,
+.sui-menu-button-group.is-open      > .sui-menu-button-submenu { display: flex; }
+/* Submenus fly out to the right by default; the SPA flips them left (via this
+   class) when the popover is too close to the viewport's right edge. */
+.sui-menu-button--submenu-left .sui-menu-button-submenu { left: auto; right: 100%; }
 
 /* ── Activity (collapsible detail) ──────────────────────────────────────── */
 

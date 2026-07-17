@@ -2,6 +2,7 @@ import type { UiNode, UiListItem, UiTrigger, UiPatch } from "./model.js";
 export { renderIcon, setIconResolver, setIconSpriteUrl, spriteIconResolver, type IconResolver, type IconOpts, } from "./renderers/icon.js";
 export { restoreMenuState, applyMenuState, cycleMenuState, menuStateOf, MENU_STATES, type MenuState, } from "./renderers/menu.js";
 export { wireTabOverflow } from "./renderers/tabs.js";
+export { wireMenuButtons } from "./renderers/menu-button.js";
 /**
  * A handler renders one node of a specific {@link UiNode#type} to an HTML
  * string. It receives the owning {@link SuiRenderer} so it can recurse via

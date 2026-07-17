@@ -144,6 +144,8 @@
           }, {
             "$ref" : "#/definitions/UiMenuItem-2"
           }, {
+            "$ref" : "#/definitions/UiMenuButton"
+          }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
             "$ref" : "#/definitions/UiChart"
@@ -282,6 +284,8 @@
             "$ref" : "#/definitions/UiMenu"
           }, {
             "$ref" : "#/definitions/UiMenuItem-2"
+          }, {
+            "$ref" : "#/definitions/UiMenuButton"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -443,6 +447,8 @@
             }, {
               "$ref" : "#/definitions/UiMenuItem-2"
             }, {
+              "$ref" : "#/definitions/UiMenuButton"
+            }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
               "$ref" : "#/definitions/UiChart"
@@ -536,6 +542,8 @@
               "$ref" : "#/definitions/UiMenu"
             }, {
               "$ref" : "#/definitions/UiMenuItem-2"
+            }, {
+              "$ref" : "#/definitions/UiMenuButton"
             }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
@@ -651,6 +659,8 @@
               "$ref" : "#/definitions/UiMenu"
             }, {
               "$ref" : "#/definitions/UiMenuItem-2"
+            }, {
+              "$ref" : "#/definitions/UiMenuButton"
             }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
@@ -841,6 +851,8 @@
                 }, {
                   "$ref" : "#/definitions/UiMenuItem-2"
                 }, {
+                  "$ref" : "#/definitions/UiMenuButton"
+                }, {
                   "$ref" : "#/definitions/UiDetail"
                 }, {
                   "$ref" : "#/definitions/UiChart"
@@ -907,6 +919,8 @@
                   "$ref" : "#/definitions/UiMenu"
                 }, {
                   "$ref" : "#/definitions/UiMenuItem-2"
+                }, {
+                  "$ref" : "#/definitions/UiMenuButton"
                 }, {
                   "$ref" : "#/definitions/UiDetail"
                 }, {
@@ -1009,6 +1023,44 @@
       },
       "required" : [ "type" ]
     },
+    "UiMenuButton" : {
+      "type" : "object",
+      "properties" : {
+        "align" : {
+          "type" : "string",
+          "enum" : [ "START", "END" ]
+        },
+        "cssClass" : {
+          "type" : "string"
+        },
+        "icon" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "items" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/UiMenuItem-2"
+          }
+        },
+        "label" : {
+          "type" : "string"
+        },
+        "title" : {
+          "type" : "string"
+        },
+        "variant" : {
+          "type" : "string",
+          "enum" : [ "ICON", "BUTTON" ]
+        },
+        "type" : {
+          "const" : "menu-button"
+        }
+      },
+      "required" : [ "type" ]
+    },
     "UiMenuItem-1" : {
       "type" : "object",
       "properties" : {
@@ -1023,6 +1075,12 @@
         },
         "cssClass" : {
           "type" : "string"
+        },
+        "danger" : {
+          "type" : "boolean"
+        },
+        "divider" : {
+          "type" : "boolean"
         },
         "href" : {
           "type" : "string"
@@ -1134,6 +1192,8 @@
             "$ref" : "#/definitions/UiMenu"
           }, {
             "$ref" : "#/definitions/UiMenuItem-2"
+          }, {
+            "$ref" : "#/definitions/UiMenuButton"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -1319,6 +1379,8 @@
           }, {
             "$ref" : "#/definitions/UiMenuItem-2"
           }, {
+            "$ref" : "#/definitions/UiMenuButton"
+          }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
             "$ref" : "#/definitions/UiChart"
@@ -1351,6 +1413,9 @@
         },
         "id" : {
           "type" : "string"
+        },
+        "onClick" : {
+          "$ref" : "#/definitions/UiTrigger"
         },
         "title" : {
           "type" : "string"
@@ -1433,6 +1498,8 @@
               "$ref" : "#/definitions/UiMenu"
             }, {
               "$ref" : "#/definitions/UiMenuItem-2"
+            }, {
+              "$ref" : "#/definitions/UiMenuButton"
             }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
@@ -1686,6 +1753,8 @@
           }, {
             "$ref" : "#/definitions/UiMenuItem-2"
           }, {
+            "$ref" : "#/definitions/UiMenuButton"
+          }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
             "$ref" : "#/definitions/UiChart"
@@ -1752,6 +1821,8 @@
             "$ref" : "#/definitions/UiMenu"
           }, {
             "$ref" : "#/definitions/UiMenuItem-2"
+          }, {
+            "$ref" : "#/definitions/UiMenuButton"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -1855,6 +1926,8 @@
                       "$ref" : "#/definitions/UiMenu"
                     }, {
                       "$ref" : "#/definitions/UiMenuItem-2"
+                    }, {
+                      "$ref" : "#/definitions/UiMenuButton"
                     }, {
                       "$ref" : "#/definitions/UiDetail"
                     }, {
@@ -1978,6 +2051,8 @@
     "$ref" : "#/definitions/UiMenu"
   }, {
     "$ref" : "#/definitions/UiMenuItem-2"
+  }, {
+    "$ref" : "#/definitions/UiMenuButton"
   }, {
     "$ref" : "#/definitions/UiDetail"
   }, {

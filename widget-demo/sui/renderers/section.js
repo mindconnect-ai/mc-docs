@@ -1,4 +1,4 @@
-import { escapeHtml } from "../renderer.js";
+import { escapeHtml, encodeTrigger } from "../renderer.js";
 import { renderIcon } from "./icon.js";
 import { cls } from "./util.js";
 export function renderSection(node, r) {
@@ -39,12 +39,14 @@ function renderSectionBody(node, r) {
         const activeCls = s.id === activeId ? " active" : "";
         const icon = s.icon ? `${renderIcon(s.icon)} ` : "";
         const tabLabel = `${icon}${escapeHtml(s.title ?? "")}`;
+        // Optional click trigger, fired alongside the panel switch (e.g. lazy-load).
+        const trigAttr = s.onClick ? ` data-trigger='${encodeTrigger(s.onClick)}'` : "";
         if (s.href) {
             // SSR-friendly tab: real anchor. The EventBus intercepts the
             // click via data-href when SPA is active.
-            return `<a class="sui-tab${activeCls}" href="${escapeHtml(s.href)}" data-href="${escapeHtml(s.href)}" data-target="${escapeHtml(s.id)}">${tabLabel}</a>`;
+            return `<a class="sui-tab${activeCls}" href="${escapeHtml(s.href)}" data-href="${escapeHtml(s.href)}" data-target="${escapeHtml(s.id)}"${trigAttr}>${tabLabel}</a>`;
         }
-        return `<button class="sui-tab${activeCls}" data-target="${escapeHtml(s.id)}">${tabLabel}</button>`;
+        return `<button class="sui-tab${activeCls}" data-target="${escapeHtml(s.id)}"${trigAttr}>${tabLabel}</button>`;
     }).join("");
     const panels = node.sections.map(s => `<div class="sui-panel" id="${escapeHtml(s.id)}" ${s.id !== activeId ? "hidden" : ""}>${r.render(s.content)}</div>`).join("");
     // MENU overflow: the bar keeps a single row and wireTabOverflow() moves the

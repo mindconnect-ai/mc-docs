@@ -15,7 +15,7 @@
  *     import { createDefaultRenderer } from "./sui/renderer.js";
  *     createDefaultRenderer().attach(el).mount({ type: "text", id: "t", text: "hi" });
  */
-import { createDefaultRenderer, escapeHtml, renderIcon, restoreMenuState, wireTabOverflow } from "./sui/renderer.js";
+import { createDefaultRenderer, escapeHtml, renderIcon } from "./sui/renderer.js";
 import { SuiEventBus } from "./sui/eventbus.js";
 
 // All icon tokens in the sprite, filled at boot from ./sui/icons.svg so the
@@ -185,10 +185,76 @@ UiTree.of("tree-rich", "Nodes with rich content")
         .content(UiChart.of("r-chart", null, UiChart.ChartType.BAR, visits))
         .child(UiTreeNode.of("r-child", "Drill down…").icon("chevron-right").onClick(UiTrigger.go("/metrics"))));`;
 
+    // Per-row context menu: a node's labelNode is a stack of the filename + a
+    // UiMenuButton, so every row carries its own "⋮" menu. The menu-button
+    // aligns to its END edge and (thanks to a CSS rule) sits at the row's right.
+    const fileRow = (id, name, icon) => ({
+        type: "tree-node", id, icon,
+        labelNode: { type: "stack", id: `${id}-lbl`, direction: "HORIZONTAL", gap: 8, children: [
+            { type: "text", id: `${id}-name`, text: name },
+            { type: "menu-button", id: `${id}-menu`, align: "END", items: [
+                { type: "menu-item", id: `${id}-ren`, label: "Rename",    icon: "edit",     onClick: toastTrigger(`Rename ${name}`) },
+                { type: "menu-item", id: `${id}-dup`, label: "Duplicate", icon: "copy",     onClick: toastTrigger(`Duplicated ${name}`) },
+                { type: "menu-item", id: `${id}-dl`,  label: "Download",  icon: "download", onClick: toastTrigger(`Downloading ${name}`) },
+                { type: "menu-item", id: `${id}-sep`, divider: true },
+                { type: "menu-item", id: `${id}-del`, label: "Delete",    icon: "delete", danger: true, onClick: toastTrigger(`Deleted ${name}`, "ERROR") },
+            ] },
+        ] },
+    });
+    const ctxTree = {
+        type: "tree", id: "tree-ctx", title: "Files — each row has its own ⋮ menu",
+        nodes: [
+            fileRow("cf-report", "report.pdf", "document"),
+            fileRow("cf-budget", "budget.xlsx", "table"),
+            { type: "tree-node", id: "cf-assets", icon: "grid", open: true,
+              labelNode: { type: "stack", id: "cf-assets-lbl", direction: "HORIZONTAL", gap: 8, children: [
+                  { type: "text", id: "cf-assets-name", text: "Assets" },
+                  { type: "menu-button", id: "cf-assets-menu", align: "END", items: [
+                      { type: "menu-item", id: "cf-assets-new", label: "New file",      icon: "edit",   onClick: toastTrigger("New file in Assets") },
+                      { type: "menu-item", id: "cf-assets-sep", divider: true },
+                      { type: "menu-item", id: "cf-assets-del", label: "Delete folder", icon: "delete", danger: true, onClick: toastTrigger("Deleted Assets", "ERROR") },
+                  ] },
+              ] },
+              children: [ fileRow("cf-logo", "logo.svg", "document"), fileRow("cf-hero", "hero.jpg", "document") ],
+            },
+        ],
+    };
+    const ctxTreeJava =
+`// Each row's label is a stack of the name + a UiMenuButton → a per-row context
+// menu. (A small CSS rule stretches the label so the "⋮" sits at the far right.)
+UiTreeNode fileRow(String id, String name, String icon) {
+    return UiTreeNode.of(id, name).icon(icon).labelNode(UiStack.of(
+        UiText.of(name),
+        UiMenuButton.of(id + "-menu",
+            UiMenuItem.of(id + "-ren", "Rename").icon("edit").onClick(UiTrigger.toast("Rename " + name)),
+            UiMenuItem.of(id + "-dup", "Duplicate").icon("copy").onClick(UiTrigger.toast("Duplicated " + name)),
+            UiMenuItem.of(id + "-dl",  "Download").icon("download").onClick(UiTrigger.toast("Downloading " + name)),
+            UiMenuItem.divider(),
+            UiMenuItem.of(id + "-del", "Delete").icon("delete").danger(true)
+                .onClick(UiTrigger.toast(UiToast.error("Deleted " + name)))
+        )).direction(UiStack.Direction.HORIZONTAL).gap(8));
+}
+
+UiTree.of("tree-ctx", "Files — each row has its own ⋮ menu")
+    .node(fileRow("cf-report", "report.pdf", "document"))
+    .node(fileRow("cf-budget", "budget.xlsx", "table"))
+    .node(UiTreeNode.of("cf-assets", "Assets").icon("grid").open(true)
+        .labelNode(UiStack.of(
+            UiText.of("Assets"),
+            UiMenuButton.of("cf-assets-menu",
+                UiMenuItem.of("cf-assets-new", "New file").icon("edit").onClick(UiTrigger.toast("New file in Assets")),
+                UiMenuItem.divider(),
+                UiMenuItem.of("cf-assets-del", "Delete folder").icon("delete").danger(true)
+                    .onClick(UiTrigger.toast(UiToast.error("Deleted Assets")))
+            )).direction(UiStack.Direction.HORIZONTAL).gap(8))
+        .child(fileRow("cf-logo", "logo.svg", "document"))
+        .child(fileRow("cf-hero", "hero.jpg", "document")));`;
+
     return stack("tab-tree", [
         text("tree-intro", "Nodes with children (or content) render as a native <details> disclosure with client-controlled state: expand/collapse survives re-renders. Click a twisty to toggle; click a label to fire its action."),
         specimen("sp-tree", "Generic Tree — expandable / collapsible nodes", explorer, explorerJava),
         specimen("sp-tree-rich", "Trees can carry any component as node content", rich, richJava),
+        specimen("sp-tree-ctx", "Context menu per row — a UiMenuButton in each node's labelNode", ctxTree, ctxTreeJava),
     ], { gap: 16 });
 }
 
@@ -644,9 +710,62 @@ function navTab() {
     UiMenuItem.link("nm-logout", "Log out", "/logout").icon("logout")
 ).state(UiMenu.State.EXPANDED);`;
 
+    // A menu-button: a trigger that opens a floating dropdown / context menu.
+    // Placeable anywhere; here a kebab (icon-only) + a labelled "Actions" button.
+    // Items fire backend-free toasts so it's live with no server (and in a pen).
+    const menuBtns = {
+        type: "stack", id: "mb-row", direction: "HORIZONTAL", gap: 16, children: [
+            { type: "menu-button", id: "mb-kebab", align: "START", items: [
+                { type: "menu-item", id: "mb-k-edit",  label: "Rename",    icon: "edit",   onClick: toastTrigger("Rename") },
+                { type: "menu-item", id: "mb-k-dup",   label: "Duplicate", icon: "copy",   onClick: toastTrigger("Duplicated") },
+                { type: "menu-item", id: "mb-k-share", label: "Share",     icon: "share",  onClick: toastTrigger("Share link copied", "SUCCESS") },
+                { type: "menu-item", id: "mb-k-sep", divider: true },
+                { type: "menu-item", id: "mb-k-del",   label: "Delete",    icon: "delete", danger: true, onClick: toastTrigger("Deleted", "ERROR") },
+            ] },
+            { type: "menu-button", id: "mb-actions", label: "Actions", items: [
+                { type: "menu-item", id: "mb-a-exp", label: "Export CSV", icon: "download", onClick: toastTrigger("Exporting…") },
+                { type: "menu-item", id: "mb-a-ref", label: "Refresh",    icon: "refresh",  onClick: toastTrigger("Refreshed") },
+                // A nested submenu — the same UiMenuItem.children the sidebar uses.
+                { type: "menu-item", id: "mb-a-move", label: "Move to", icon: "share", children: [
+                    { type: "menu-item", id: "mb-a-mv1", label: "Inbox",   onClick: toastTrigger("Moved to Inbox") },
+                    { type: "menu-item", id: "mb-a-mv2", label: "Archive", onClick: toastTrigger("Moved to Archive") },
+                    { type: "menu-item", id: "mb-a-sep", divider: true },
+                    { type: "menu-item", id: "mb-a-mv3", label: "Trash",   danger: true, onClick: toastTrigger("Moved to Trash", "ERROR") },
+                ] },
+                { type: "menu-item", id: "mb-a-set", label: "Settings",   icon: "settings", href: "/settings" },
+            ] },
+        ],
+    };
+    const menuBtnsJava =
+`UiStack.of(
+    // Icon-only "kebab" — a context menu, aligned to its start edge.
+    UiMenuButton.of("mb-kebab",
+        UiMenuItem.of("mb-k-edit",  "Rename").icon("edit").onClick(UiTrigger.toast("Rename")),
+        UiMenuItem.of("mb-k-dup",   "Duplicate").icon("copy").onClick(UiTrigger.toast("Duplicated")),
+        UiMenuItem.of("mb-k-share", "Share").icon("share").onClick(UiTrigger.toast(UiToast.success("Share link copied"))),
+        UiMenuItem.divider(),
+        UiMenuItem.of("mb-k-del",   "Delete").icon("delete").danger(true).onClick(UiTrigger.toast(UiToast.error("Deleted")))
+    ).align(UiMenuButton.Align.START),
+    // Labelled dropdown button — with a nested submenu (UiMenuItem.group).
+    UiMenuButton.of("mb-actions",
+        UiMenuItem.of("mb-a-exp", "Export CSV").icon("download").onClick(UiTrigger.toast("Exporting…")),
+        UiMenuItem.of("mb-a-ref", "Refresh").icon("refresh").onClick(UiTrigger.toast("Refreshed")),
+        UiMenuItem.group("mb-a-move", "Move to",           // same nesting as the sidebar
+            UiMenuItem.of("mb-a-mv1", "Inbox").onClick(UiTrigger.toast("Moved to Inbox")),
+            UiMenuItem.of("mb-a-mv2", "Archive").onClick(UiTrigger.toast("Moved to Archive")),
+            UiMenuItem.divider(),
+            UiMenuItem.of("mb-a-mv3", "Trash").danger(true).onClick(UiTrigger.toast(UiToast.error("Moved to Trash")))
+        ).icon("share"),
+        UiMenuItem.link("mb-a-set", "Settings", "/settings").icon("settings")
+    ).label("Actions")
+).direction(UiStack.Direction.HORIZONTAL).gap(16);`;
+
     return stack("tab-nav", [
         text("nav-intro", "A collapsible sidebar for admin shells. Click the ☰ hamburger to cycle three states: expanded (icon + label) → rail (icons only; hover a group for a fly-out submenu, hover a leaf for its tooltip) → hidden. The choice is remembered in localStorage. Groups nest arbitrarily and expand inline when expanded. Without JS the items are real links, groups are native <details>, and the hamburger still shows/hides via a checkbox."),
         specimen("sp-nav-menu", "Sidebar menu — click ☰ to cycle expanded · rail · hidden", menu, menuJava),
+        heading("Menu button — dropdown & context menus"),
+        text("mb-intro", "A UiMenuButton opens a floating menu anchored to itself: an icon-only \"kebab\" (a context menu) or a labelled dropdown. It's a native <details> so it opens with no JS; the SPA repositions the popover with position:fixed so it's never clipped by a scrolling or overflow-hidden ancestor. Items reuse UiMenuItem (icon, danger, dividers, badges — and children for a nested submenu, the same nesting the sidebar uses; try “Actions → Move to”). Open one, then click outside or press Escape to close. It's placeable anywhere — see the Tree tab for a per-row context menu."),
+        specimen("sp-menu-btn", "Menu button — kebab (context) + labelled dropdown", menuBtns, menuBtnsJava),
         heading("Complete app shell — header + sidebar + content"),
         text("shell-intro", "Three ways the sidebar relates to the content, all the same node tree with a different mode. PUSH: the sidebar occupies layout space, so content reflows wider as it collapses (☰ cycles expanded → rail → gone). OVERLAY: a drawer floating over the content with a backdrop; content stays put (click the backdrop or ☰ to close). RESPONSIVE: push on a wide screen (☰ flips expanded ⇄ rail, never fully gone) and an overlay drawer on a narrow one (closed by default) — resize the preview narrow to see it flip. In all three the hamburger lives in the header (UiHeader.menuToggle)."),
         specimen("sp-shell-push", "App shell — PUSH (content reflows)", appShell("shellA", "PUSH"), appShellJava("PUSH", "LEFT")),
@@ -1073,11 +1192,13 @@ async function boot() {
     });
 
     renderer.mount(buildPage());
+    // Tab overflow, menu-button popovers and the menu's persisted collapse state
+    // are wired automatically by the SuiEventBus (it watches its root and runs
+    // the enhancers on every render) — no wireTabOverflow()/wireMenuButtons() by
+    // hand. Only the demo-specific bits below need explicit wiring.
     wireIconGallery(root);   // search + click-to-copy for the icon library
     wireCodePen(root);       // "Open in CodePen" buttons
     wireLiveProgress(renderer);   // animate the "live" progress bar + ring
-    restoreMenuState(root);  // re-apply each sidebar menu's persisted collapse state
-    wireTabOverflow(root);   // collapse overflowing tabs into a "⋯ More" dropdown
     if (!embedded) wireViewportToggle();   // 📱 phone-frame preview button
 
     // Theme switcher — toggles the class on <html>; the stylesheets are all loaded.

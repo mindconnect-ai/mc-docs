@@ -1,5 +1,7 @@
-import { applyMenuState, nextMenuState } from "./renderers/menu.js";
+import { applyMenuState, nextMenuState, restoreMenuState } from "./renderers/menu.js";
 import { renderIcon } from "./renderers/icon.js";
+import { wireTabOverflow } from "./renderers/tabs.js";
+import { wireMenuButtons } from "./renderers/menu-button.js";
 /**
  * Centralised event handling, behaviour dispatch and SPA navigation for
  * one semantic-ui root element. Owns one {@code click} and one
@@ -74,6 +76,7 @@ export class SuiEventBus {
         this.installRootListeners();
         this.ensureDialogHost();
         this.registerDefaultBehaviors();
+        this.installAutoEnhance();
         // A patch SSE event is so universal that we wire it as a built-in
         // stream handler; apps can override by registering another handler
         // under the same name.
@@ -457,6 +460,66 @@ export class SuiEventBus {
     /** Closes the dialog that {@code el} sits inside (its × / backdrop). */
     closeDialogAround(el) {
         el.closest(".sui-dialog-host")?.remove();
+    }
+    // ── Automatic progressive enhancement ─────────────────────────────────────
+    //
+    // Some node types need a touch of post-render wiring that can't live in the
+    // pure (SSR-shared) renderer: tab bars that collapse overflow into a "⋯"
+    // menu, menu-button popovers, a menu's persisted collapse state. Rather than
+    // make every app remember to call wireTabOverflow()/wireMenuButtons()/… by
+    // hand, the bus watches its root and re-runs these enhancers whenever the DOM
+    // changes — after a mount, a patch, an SSR hydrate, anything. They're all
+    // idempotent, so re-running is cheap and safe. The standalone functions stay
+    // exported for apps that render without a bus.
+    autoObserver = null;
+    enhanceScheduled = false;
+    installAutoEnhance() {
+        if (typeof MutationObserver === "undefined") {
+            this.enhance();
+            return;
+        }
+        this.autoObserver = new MutationObserver(() => this.scheduleEnhance());
+        this.observeForEnhance();
+        this.scheduleEnhance(); // handle SSR-hydrated content already in root
+    }
+    observeForEnhance() {
+        this.autoObserver?.observe(this.root, { childList: true, subtree: true });
+    }
+    scheduleEnhance() {
+        if (this.enhanceScheduled)
+            return;
+        this.enhanceScheduled = true;
+        const run = () => {
+            this.enhanceScheduled = false;
+            // The enhancers mutate the DOM (moving tabs into the overflow menu);
+            // pause observation across the run so we don't self-trigger a loop.
+            this.autoObserver?.disconnect();
+            try {
+                this.enhance();
+            }
+            finally {
+                this.observeForEnhance();
+            }
+        };
+        if (typeof requestAnimationFrame === "function")
+            requestAnimationFrame(run);
+        else
+            setTimeout(run, 0);
+    }
+    /** Runs the idempotent post-render enhancers over the bus's root. */
+    enhance() {
+        try {
+            restoreMenuState(this.root);
+        }
+        catch { /* ignore */ }
+        try {
+            wireTabOverflow(this.root);
+        }
+        catch { /* ignore */ }
+        try {
+            wireMenuButtons(this.root);
+        }
+        catch { /* ignore */ }
     }
     /** Applies a {@link UiPatch} via the renderer. Convenience wrapper. */
     applyPatch(patch) {
@@ -925,6 +988,13 @@ export class SuiEventBus {
                 return;
             }
             this.switchTab(tab);
+            // A section-entry may also carry an onClick trigger: fire it
+            // alongside the panel switch (e.g. lazy-load the panel's content).
+            const tabTrigger = this.parseTrigger(tab);
+            if (tabTrigger) {
+                this.inferImplicitPayload(tabTrigger, tab);
+                await this.dispatch(tabTrigger, tab);
+            }
             return;
         }
         const action = target.closest("[data-action]");
