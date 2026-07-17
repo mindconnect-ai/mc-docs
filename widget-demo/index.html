@@ -39,6 +39,16 @@
         }
         .demo-vp-btn .sui-icon { width: 15px; height: 15px; }
         .demo-vp-btn:hover { background: var(--sui-color-surface-alt); }
+        /* "Open in CodePen" button under each specimen. */
+        .demo-codepen {
+            align-self: flex-start; display: inline-flex; align-items: center; gap: 6px;
+            font: inherit; font-size: 13px; padding: 6px 12px; cursor: pointer;
+            border: 1px solid var(--sui-color-border-strong); border-radius: var(--sui-radius-md);
+            background: var(--sui-color-surface); color: var(--sui-color-text-muted);
+            transition: background .15s, border-color .15s, color .15s;
+        }
+        .demo-codepen:hover { background: var(--sui-color-surface-alt); border-color: var(--sui-color-primary); color: var(--sui-color-primary); }
+        .demo-codepen .sui-icon { width: 14px; height: 14px; }
         .demo-vp-btn.active { border-color: var(--sui-color-primary); color: var(--sui-color-primary); }
         .demo-device {
             width: 390px; max-width: 100%; margin: 0 auto;

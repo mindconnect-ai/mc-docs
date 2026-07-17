@@ -1,4 +1,5 @@
 import { applyMenuState, nextMenuState } from "./renderers/menu.js";
+import { renderIcon } from "./renderers/icon.js";
 /**
  * Centralised event handling, behaviour dispatch and SPA navigation for
  * one semantic-ui root element. Owns one {@code click} and one
@@ -1493,21 +1494,42 @@ function ensureToastContainer() {
     document.body.appendChild(el);
     return el;
 }
+/** One status glyph per level — a coloured icon reads as a status far better
+ *  than a coloured edge, and matches how the rest of the UI signals state. */
+const TOAST_ICON = {
+    info: "info",
+    success: "success",
+    warn: "warning",
+    error: "error",
+};
 function renderToastElement(t) {
     const level = (t.level ?? "INFO").toLowerCase();
     const el = document.createElement("div");
     el.className = `sui-toast sui-toast--${level}`;
     el.setAttribute("role", "status");
+    const iconName = TOAST_ICON[level] ?? "info";
+    const iconHtml = renderIcon(iconName);
+    if (iconHtml) {
+        const icon = document.createElement("span");
+        icon.className = "sui-toast-icon";
+        icon.setAttribute("aria-hidden", "true");
+        icon.innerHTML = iconHtml;
+        el.appendChild(icon);
+    }
+    // Title + message share a column so the icon aligns with the first line.
+    const body = document.createElement("div");
+    body.className = "sui-toast-body";
     if (t.title) {
         const title = document.createElement("div");
         title.className = "sui-toast-title";
         title.textContent = t.title;
-        el.appendChild(title);
+        body.appendChild(title);
     }
     const msg = document.createElement("div");
     msg.className = "sui-toast-message";
     msg.textContent = t.message ?? "";
-    el.appendChild(msg);
+    body.appendChild(msg);
+    el.appendChild(body);
     const close = document.createElement("button");
     close.type = "button";
     close.className = "sui-toast-close";

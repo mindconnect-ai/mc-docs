@@ -52,3 +52,10 @@ html.sui-theme-dark { color-scheme: dark; }
 html.sui-theme-dark .sui-field select:not([multiple]) {
     background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
 }
+
+/* Toast tints for dark: deep status-tinted fills (950-ish), a muted ring, and a
+   bright-enough foreground so icon + text stay legible on the dark surface. */
+html.sui-theme-dark .sui-toast--info    { --sui-toast-bg: #172554; --sui-toast-ring: #1e3a8a; --sui-toast-fg: #93c5fd; }
+html.sui-theme-dark .sui-toast--success { --sui-toast-bg: #052e16; --sui-toast-ring: #166534; --sui-toast-fg: #86efac; }
+html.sui-theme-dark .sui-toast--warn    { --sui-toast-bg: #3a1e04; --sui-toast-ring: #854d0e; --sui-toast-fg: #fcd34d; }
+html.sui-theme-dark .sui-toast--error   { --sui-toast-bg: #450a0a; --sui-toast-ring: #7f1d1d; --sui-toast-fg: #fca5a5; }

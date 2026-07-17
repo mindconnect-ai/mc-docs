@@ -1109,38 +1109,52 @@ a[data-trigger].is-loading::before,
     pointer-events: none;
     max-width: min(420px, calc(100vw - 32px));
 }
+/* Softly tinted per level: a light status-coloured fill, a hairline ring in the
+   same hue, and a matching icon + text — enough to read the status at a glance
+   without shouting. The three colours per level are driven by custom properties
+   so a new level (or the dark theme) only has to re-set the trio. Generous
+   radius + soft drop shadow keep it in the same family as the cards. */
 .sui-toast {
+    --sui-toast-bg:     var(--sui-color-surface);
+    --sui-toast-ring:   var(--sui-color-border);
+    --sui-toast-fg:     var(--sui-color-text);
     pointer-events: auto;
-    display: flex; align-items: flex-start; gap: 10px;
-    padding: 10px 12px;
-    background: var(--sui-color-surface);
-    border: 1px solid var(--sui-color-border);
-    border-left: 4px solid var(--sui-color-text-muted);
-    border-radius: var(--sui-radius-md);
-    box-shadow: var(--sui-shadow-card);
-    font-size: 13px;
-    color: var(--sui-color-text);
-    animation: sui-toast-in .15s ease-out;
+    display: flex; align-items: flex-start; gap: 11px;
+    padding: 14px 14px 14px 15px;
+    background: var(--sui-toast-bg);
+    border-radius: var(--sui-radius-lg);
+    box-shadow: inset 0 0 0 1px var(--sui-toast-ring), var(--sui-shadow-pop);
+    font-size: 14px;
+    color: var(--sui-toast-fg);
+    animation: sui-toast-in .22s cubic-bezier(.22, 1, .36, 1);
 }
 .sui-toast--leaving { animation: sui-toast-out .2s ease-in forwards; }
-.sui-toast-title    { font-weight: 600; margin-bottom: 2px; }
-.sui-toast-message  { flex: 1; line-height: 1.4; }
-.sui-toast-close {
-    background: none; border: none; cursor: pointer;
-    color: var(--sui-color-text-muted);
-    font-size: 18px; line-height: 1; padding: 0 4px;
-    font-family: inherit;
+.sui-toast-icon {
+    flex: none; display: inline-flex; margin-top: 1px;
+    color: var(--sui-toast-fg);
 }
-.sui-toast-close:hover { color: var(--sui-color-text); }
+.sui-toast-icon .sui-icon { width: 18px; height: 18px; }
+.sui-toast-body     { flex: 1; min-width: 0; }
+.sui-toast-title    { font-weight: 600; margin-bottom: 2px; }
+.sui-toast-message  { line-height: 1.45; color: var(--sui-toast-fg); }
+.sui-toast-close {
+    flex: none; background: none; border: none; cursor: pointer;
+    color: var(--sui-toast-fg); opacity: .6;
+    font-size: 18px; line-height: 1; padding: 0 2px; margin: -2px -2px 0 0;
+    font-family: inherit; border-radius: var(--sui-radius-sm);
+    transition: opacity .12s;
+}
+.sui-toast-close:hover { opacity: 1; }
 
-.sui-toast--info    { border-left-color: var(--sui-color-primary); }
-.sui-toast--success { border-left-color: #16a34a; }
-.sui-toast--warn    { border-left-color: #d97706; }
-.sui-toast--error   { border-left-color: var(--sui-color-danger); }
+/* Per-level tint trio: fill · ring · foreground (icon + text). */
+.sui-toast--info    { --sui-toast-bg: #eff6ff; --sui-toast-ring: #bfdbfe; --sui-toast-fg: #1d4ed8; }
+.sui-toast--success { --sui-toast-bg: #f0fdf4; --sui-toast-ring: #bbf7d0; --sui-toast-fg: #15803d; }
+.sui-toast--warn    { --sui-toast-bg: #fffbeb; --sui-toast-ring: #fde68a; --sui-toast-fg: #b45309; }
+.sui-toast--error   { --sui-toast-bg: #fef2f2; --sui-toast-ring: #fecaca; --sui-toast-fg: #b91c1c; }
 
 @keyframes sui-toast-in {
-    from { transform: translateX(20px); opacity: 0; }
-    to   { transform: translateX(0);    opacity: 1; }
+    from { transform: translateY(-8px) scale(.98); opacity: 0; }
+    to   { transform: translateY(0)    scale(1);   opacity: 1; }
 }
 @keyframes sui-toast-out {
     from { transform: translateX(0);    opacity: 1; }

@@ -33,6 +33,10 @@ async function loadIconList() {
 const go   = (url)               => ({ behavior: "APPLY_RESPONSE", method: "GET", url });
 const api  = (method, url)       => ({ behavior: "APPLY_RESPONSE", method, url });
 const api3 = (method, url, pay)  => ({ behavior: "APPLY_RESPONSE", method, url, payload: pay });
+// Backend-free: an inline PATCH trigger that only shows a toast (no fetch), so
+// clicks give visible feedback and work unchanged in an exported CodePen.
+const toastTrigger = (message, level = "INFO") =>
+    ({ behavior: "PATCH", patch: { patches: [], toasts: [{ level, message, durationMs: 2200 }] } });
 
 // ── Small node builders (keep the literals below readable) ──────────────────
 const text    = (id, t)           => ({ type: "text", id, text: t });
@@ -63,6 +67,16 @@ const DEMO_FORM_FIELDS = [
     { type: "field", id: "f-active",label: "Active",      fieldType: "BOOLEAN",  editable: true, value: true },
 ];
 const withError = (f) => ({ ...f, validationError: DEMO_FORM_ERRORS[f.id] });
+// A fully client-side trigger (behavior "PATCH"): the patch is baked into the
+// button and applied by the bus with no fetch — so it needs no backend and
+// travels intact into an exported CodePen. Re-flags / clears every field.
+const formPatch = (mapFn, toast) => ({
+    behavior: "PATCH",
+    patch: {
+        patches: DEMO_FORM_FIELDS.map(f => ({ op: "REPLACE", targetId: f.id, node: mapFn(f) })),
+        toasts: [toast],
+    },
+});
 
 // A collapsible "Show code" panel with JSON | Java tabs. The JSON is generated
 // straight from the node being rendered, so it can never drift from the widget.
@@ -78,10 +92,14 @@ function codePanel(id, node, java) {
     };
 }
 
-// A showcased widget: heading + the widget + its code panel.
+// A showcased widget: heading + the widget + its code panel + an "Open in
+// CodePen" button (opens the exact node in a live sandbox off the CDN bundle).
 function specimen(id, headingText, node, java) {
-    return stack(`${id}-wrap`, [heading(headingText), node, codePanel(id, node, java)], { gap: 8 });
+    return stack(`${id}-wrap`, [heading(headingText), node, codePanel(id, node, java), codepenBtn(id, node)], { gap: 8 });
 }
+
+// A demo-only node carrying a node's JSON; wireCodePen() opens it in CodePen.
+const codepenBtn = (id, node) => ({ type: "codepen", id: `${id}-cp`, json: JSON.stringify(node) });
 
 // ── Page header (chrome) ────────────────────────────────────────────────────
 function pageHeader() {
@@ -239,8 +257,8 @@ function formsTab() {
         type: "form", id: "demo-form", title: "New product",
         fields: DEMO_FORM_FIELDS.map(withError),
         actions: [
-            { type: "action", id: "f-save",   label: "Save",   style: "PRIMARY",   onClick: api3("POST", "/products", "demo-form") },
-            { type: "action", id: "f-cancel", label: "Cancel", style: "SECONDARY", onClick: api("POST", "/form-reset") },
+            { type: "action", id: "f-save",   label: "Save",   style: "PRIMARY",   onClick: formPatch(withError, { level: "ERROR", message: "Please fix the errors below", durationMs: 3000 }) },
+            { type: "action", id: "f-cancel", label: "Cancel", style: "SECONDARY", onClick: formPatch(f => f, { level: "INFO", message: "Changes discarded", durationMs: 2500 }) },
             { type: "action", id: "f-delete", label: "Delete", style: "DANGER", confirm: "Delete this product?", onClick: api("DELETE", "/products/1") },
         ],
         links: [{ type: "link", id: "f-help", rel: "ref", href: "#", label: "Need help?" }],
@@ -257,8 +275,10 @@ function formsTab() {
     .field(UiField.multiselect("f-tags", "Tags", null, List.of(
         UiField.Option.of("new", "New"), UiField.Option.of("sale", "Sale"), UiField.Option.of("eco", "Eco"))).asEditable())
     .field(UiField.bool("f-active", "Active", true).asEditable())
-    .action(UiAction.primary("f-save", "Save").onClick(UiTrigger.api("POST", "/products", "demo-form")))
-    .action(UiAction.secondary("f-cancel", "Cancel").onClick(UiTrigger.api("POST", "/form-reset")))
+    // Fully client-side — the patch is baked into the trigger (behavior PATCH),
+    // applied by the bus with no server call at all.
+    .action(UiAction.primary("f-save", "Save").onClick(UiTrigger.patch(allFieldsError)))
+    .action(UiAction.secondary("f-cancel", "Cancel").onClick(UiTrigger.patch(allFieldsClean)))
     .action(UiAction.danger("f-delete", "Delete").confirm("Delete this product?").onClick(UiTrigger.api("DELETE", "/products/1")))
     .link(UiLink.of("ref", "#", "Need help?"));`;
 
@@ -279,7 +299,7 @@ function formsTab() {
     .link(UiLink.of("ref", "#", "View history"));`;
 
     return stack("tab-forms", [
-        text("forms-intro", "The form loads with every field flagged. Press Save and the “server” pushes an error onto each field via a patch; press Cancel and it patches them all back clean. Both are REPLACE patches targeting the fields — the canonical form-error-via-patch flow."),
+        text("forms-intro", "The form loads with every field flagged. Save re-flags them all, Cancel clears them — no backend involved: each button carries an inline PATCH trigger that the bus applies client-side. That's why it works unchanged in an exported CodePen."),
         specimen("sp-form",   "Form — field types, action styles, links", form, formJava),
         specimen("sp-detail", "Detail — a read-only definition list", detail, detailJava),
     ], { gap: 16 });
@@ -516,6 +536,67 @@ UiStack.of(
     UiAction.primary("fb-state-busy", "Saving…").loading(true)   // forced busy + disabled
 ).direction(UiStack.Direction.HORIZONTAL).gap(8);`;
 
+    // Toasts: one button per level. Each fires an inline PATCH whose only payload
+    // is a toast — no server call. UiTrigger.toast(...) is the sugar for this.
+    const toasts = {
+        type: "stack", id: "fb-toast-btns", direction: "HORIZONTAL", gap: 8, children: [
+            { type: "action", id: "fb-t-info", label: "Info",    style: "SECONDARY", onClick: toastTrigger("Saved to drafts", "INFO") },
+            { type: "action", id: "fb-t-ok",   label: "Success", style: "SECONDARY", onClick: toastTrigger("Changes published", "SUCCESS") },
+            { type: "action", id: "fb-t-warn", label: "Warning", style: "SECONDARY", onClick: toastTrigger("Storage almost full", "WARN") },
+            { type: "action", id: "fb-t-err",  label: "Error",   style: "SECONDARY", onClick: toastTrigger("Upload failed", "ERROR") },
+        ],
+    };
+    const toastsJava =
+`// A toast is a client-side PATCH carrying no DOM ops, just a UiToast.
+UiStack.of(
+    UiAction.secondary("fb-t-info", "Info").onClick(UiTrigger.toast(UiToast.info("Saved to drafts"))),
+    UiAction.secondary("fb-t-ok",   "Success").onClick(UiTrigger.toast(UiToast.success("Changes published"))),
+    UiAction.secondary("fb-t-warn", "Warning").onClick(UiTrigger.toast(UiToast.warn("Storage almost full"))),
+    UiAction.secondary("fb-t-err",  "Error").onClick(UiTrigger.toast(UiToast.error("Upload failed")))
+).direction(UiStack.Direction.HORIZONTAL).gap(8);`;
+
+    // Dialog: a modal overlay. It is "opened" by APPENDing a UiDialog node into
+    // the body-level #sui-dialogs host and "closed" by REMOVE-ing it by id (the
+    // × / backdrop do that automatically). Both are plain inline PATCH triggers —
+    // no backend. Confirm both closes the dialog and fires a success toast.
+    const confirmDialog = {
+        type: "dialog", id: "fb-dialog", title: "Delete customer?",
+        node: {
+            type: "stack", id: "fb-dlg-body", gap: 14, children: [
+                { type: "text", id: "fb-dlg-msg", text: "This permanently removes Ada Lovelace and all associated orders. This can’t be undone." },
+                {
+                    type: "stack", id: "fb-dlg-actions", direction: "HORIZONTAL", gap: 8, children: [
+                        { type: "action", id: "fb-dlg-cancel", label: "Cancel", style: "SECONDARY",
+                          onClick: { behavior: "PATCH", patch: { patches: [{ op: "REMOVE", targetId: "fb-dialog" }], toasts: [] } } },
+                        { type: "action", id: "fb-dlg-confirm", label: "Delete", style: "PRIMARY",
+                          onClick: { behavior: "PATCH", patch: { patches: [{ op: "REMOVE", targetId: "fb-dialog" }], toasts: [{ level: "SUCCESS", message: "Customer deleted", durationMs: 2200 }] } } },
+                    ],
+                },
+            ],
+        },
+    };
+    const dialogOpener = {
+        type: "action", id: "fb-dlg-open", label: "Delete customer…", icon: "delete", style: "PRIMARY",
+        onClick: { behavior: "PATCH", patch: { patches: [{ op: "APPEND", targetId: "sui-dialogs", node: confirmDialog }], toasts: [] } },
+    };
+    const dialogJava =
+`// The dialog body — reused as the node that gets appended into #sui-dialogs.
+UiDialog dialog = UiDialog.of("Delete customer?", null, UiStack.of(
+    UiText.of("This permanently removes Ada Lovelace and all associated orders. This can’t be undone."),
+    UiStack.of(
+        UiAction.secondary("fb-dlg-cancel", "Cancel")
+            .onClick(UiTrigger.patch(UiPatch.Operation.remove("fb-dialog"))),
+        UiAction.primary("fb-dlg-confirm", "Delete")
+            .onClick(UiTrigger.patch(UiPatch.of()
+                .patch(UiPatch.Operation.remove("fb-dialog"))
+                .toast(UiToast.success("Customer deleted"))))
+    ).direction(UiStack.Direction.HORIZONTAL).gap(8)
+).gap(14));
+
+// Open it: APPEND the dialog into the persistent #sui-dialogs host.
+UiAction.primary("fb-dlg-open", "Delete customer…").icon("delete")
+    .onClick(UiTrigger.patch(UiPatch.Operation.append("sui-dialogs", dialog)));`;
+
     return stack("tab-feedback", [
         text("fb-intro", "Two kinds of loading feedback. A UiSpinner / UiProgress node is declarative — you place it in the tree and replace it via a patch when data arrives. Inline loading is automatic — the event bus marks the clicked control busy for the duration of its request. No node needed."),
         specimen("sp-fb-spin", "Spinners — SM · MD · LG · labelled", spinners, spinnersJava),
@@ -523,6 +604,8 @@ UiStack.of(
         specimen("sp-fb-rings", "Circular progress", rings, ringsJava),
         specimen("sp-fb-load", "Inline loading on click — press a button (demo delays ~700ms)", buttons, buttonsJava),
         specimen("sp-fb-state", "Declarative loading — a button set busy by the model (loading:true)", stateful, statefulJava),
+        specimen("sp-fb-toast", "Toasts — inline PATCH, one per level (info · success · warn · error)", toasts, toastsJava),
+        specimen("sp-fb-dialog", "Dialog — modal overlay opened/closed by an inline PATCH", dialogOpener, dialogJava),
     ], { gap: 16 });
 }
 
@@ -578,14 +661,16 @@ function navTab() {
 function appShell(id, mode, side) {
     const menuId = `${id}-menu`;
     const p = id;
+    // Leaf items fire a backend-free toast on click (inline PATCH) so the shell
+    // is interactive without a server — and stays that way in an exported pen.
     const navItems = [
-        { type: "menu-item", id: `${p}-dash`, label: "Dashboard", icon: "dashboard", href: "#", selected: true },
+        { type: "menu-item", id: `${p}-dash`, label: "Dashboard", icon: "dashboard", selected: true, onClick: toastTrigger("Dashboard") },
         { type: "menu-item", id: `${p}-cat`, label: "Catalog", icon: "grid", open: true, children: [
-            { type: "menu-item", id: `${p}-prod`, label: "Products",  icon: "tag",   href: "#" },
-            { type: "menu-item", id: `${p}-cust`, label: "Customers", icon: "users", href: "#" },
+            { type: "menu-item", id: `${p}-prod`, label: "Products",  icon: "tag",   onClick: toastTrigger("Opened Products") },
+            { type: "menu-item", id: `${p}-cust`, label: "Customers", icon: "users", onClick: toastTrigger("Opened Customers") },
         ] },
-        { type: "menu-item", id: `${p}-ord`, label: "Orders", icon: "table", href: "#", badge: "12" },
-        { type: "menu-item", id: `${p}-set`, label: "Settings", icon: "settings", href: "#" },
+        { type: "menu-item", id: `${p}-ord`, label: "Orders", icon: "table", badge: "12", onClick: toastTrigger("Opened Orders (12 new)") },
+        { type: "menu-item", id: `${p}-set`, label: "Settings", icon: "settings", onClick: toastTrigger("Opened Settings") },
     ];
     const right = side === "RIGHT";
     const menu = { type: "menu", id: menuId, title: "Acme", state: "EXPANDED", mode, side: side || "LEFT", toggle: false, items: navItems };
@@ -608,14 +693,16 @@ function appShellJava(mode, side) {
     const sideCall = side === "RIGHT" ? ".side(UiMenu.Side.RIGHT)" : "";
     const order = side === "RIGHT" ? "contentPanel,\n        menu" : "menu,\n        contentPanel";
     return `var menuId = "nav";
+// A leaf can navigate (href) or, like here, fire a trigger. UiTrigger.toast(...)
+// is a client-side PATCH that shows a toast with no server call.
 var menu = UiMenu.of(menuId, "Acme",
-    UiMenuItem.link("dash", "Dashboard", "/dash").icon("dashboard").selected(true),
+    UiMenuItem.of("dash", "Dashboard").icon("dashboard").selected(true).onClick(UiTrigger.toast("Dashboard")),
     UiMenuItem.group("cat", "Catalog",
-        UiMenuItem.link("prod", "Products",  "/products").icon("tag"),
-        UiMenuItem.link("cust", "Customers", "/customers").icon("users")
+        UiMenuItem.of("prod", "Products").icon("tag").onClick(UiTrigger.toast("Opened Products")),
+        UiMenuItem.of("cust", "Customers").icon("users").onClick(UiTrigger.toast("Opened Customers"))
     ).icon("grid").open(true),
-    UiMenuItem.link("ord", "Orders", "/orders").icon("table").badge("12"),
-    UiMenuItem.link("set", "Settings", "/settings").icon("settings")
+    UiMenuItem.of("ord", "Orders").icon("table").badge("12").onClick(UiTrigger.toast("Opened Orders (12 new)")),
+    UiMenuItem.of("set", "Settings").icon("settings").onClick(UiTrigger.toast("Opened Settings"))
 ).mode(UiMenu.Mode.${mode})${sideCall}.toggle(false);      // header owns the burger
 
 UiStack.of(
@@ -649,6 +736,85 @@ function buildPage() {
 // ── Custom node renderer: a syntax-neutral code block ───────────────────────
 function renderCode(node) {
     return `<pre class="demo-code" id="${escapeHtml(node.id)}"><code>${escapeHtml(node.code)}</code></pre>`;
+}
+
+// ── Custom node renderer: "Open in CodePen" button ──────────────────────────
+// The example is plain UiNode JSON + the pre-compiled renderer, so no build is
+// needed — a browser-only sandbox (CodePen) boots it instantly off the CDN
+// bundle. wireCodePen() turns the click into a CodePen prefill POST.
+const SUI_CDN = "https://mindconnect-ai.github.io/mc-docs/sui";
+function renderCodePen(node) {
+    return `<button type="button" class="demo-codepen" data-json='${escapeHtml(node.json)}'>${renderIcon("external")} Open in CodePen</button>`;
+}
+function openInCodePen(json) {
+    // The whole example lives in the HTML panel as a module script — that keeps
+    // ES-module imports working in any browser-only sandbox, no Node needed.
+    const html =
+`<link rel="stylesheet" href="${SUI_CDN}/sui.css">
+<div id="app"></div>
+<script type="module">
+  import { createDefaultRenderer, setIconSpriteUrl } from "${SUI_CDN}/renderer.js";
+  import { SuiEventBus } from "${SUI_CDN}/eventbus.js";
+  const node = ${json};
+  const root = document.getElementById("app");
+  // Icons: a cross-origin SVG <use> is blocked by the browser, so inline the
+  // sprite once and point icons at same-document refs (<use href="#id">).
+  try {
+    const sprite = await fetch("${SUI_CDN}/icons.svg").then(r => r.text());
+    const holder = document.createElement("div");
+    holder.style.display = "none"; holder.innerHTML = sprite;
+    document.body.prepend(holder);
+    setIconSpriteUrl("");
+  } catch (e) { /* icons just won't show */ }
+  const renderer = createDefaultRenderer().attach(root);
+  const bus = new SuiEventBus(renderer, root);
+  // There is no backend in a pen, but some examples carry server-bound triggers
+  // (the Tree's go("/files/…"), the Save/Sync buttons' api("POST","/save")).
+  // Instead of a silent no-op, the stub fetcher answers every such call with a
+  // UiPatch whose only payload is a toast naming the request — so a click in the
+  // pen shows visible feedback ("Demo — would GET /files/app.ts") rather than
+  // appearing to do nothing. A real app would return a real UiPage/UiPatch here.
+  bus.setFetcher((input, init = {}) => {
+    const url = typeof input === "string" ? input : (input && input.url) || "";
+    const method = (init.method || "GET").toUpperCase();
+    const body = JSON.stringify({ patches: [], toasts: [
+      { level: "INFO", message: "Demo — no backend wired. Would " + method + " " + url, durationMs: 2600 }
+    ] });
+    return Promise.resolve(new Response(body, { headers: { "Content-Type": "application/json" } }));
+  });
+  renderer.mount(node);
+<\/script>`;
+    // Base page CSS + the demo's app-shell layout classes, so shell examples
+    // (header + sidebar + content) lay out correctly in the pen too. Harmless
+    // for other examples (the classes simply don't match).
+    const css =
+`body { margin: 20px; font-family: system-ui, sans-serif; background: #f8fafc; }
+.demo-shell { border: 1px solid var(--sui-color-border); border-radius: 12px; overflow: hidden; }
+.demo-shell .sui-header { margin-bottom: 0; border-radius: 0; box-shadow: none; }
+.demo-shell-body { position: relative; overflow: hidden; min-height: 340px; align-items: stretch; }
+.demo-shell-body .sui-menu { border-radius: 0; box-shadow: none; border: none; border-right: 1px solid var(--sui-color-border); }
+.demo-shell-body .sui-menu--right { border-right: none; border-left: 1px solid var(--sui-color-border); }
+.demo-shell-content { flex: 1; padding: 20px; background: var(--sui-color-surface-alt); min-width: 0; }`;
+    const data = { title: "Semantic UI — example", html, css, js: "", editors: "100" };
+    // Open the new tab up-front, inside the click gesture, and give it a name.
+    // Submitting the POST form at that named window is what reliably lands the
+    // pen in a *new* tab: a bare target="_blank" on a scripted submit is often
+    // treated as a popup and either blocked or redirected into the current tab
+    // (and the POST body can be dropped). A pre-opened named window avoids both.
+    const winName = "sui_codepen_" + Date.now();
+    const tab = window.open("about:blank", winName);
+    const form = document.createElement("form");
+    form.method = "POST"; form.action = "https://codepen.io/pen/define";
+    form.target = tab ? winName : "_blank";   // fall back to _blank if popup was blocked
+    const input = document.createElement("input");
+    input.type = "hidden"; input.name = "data"; input.value = JSON.stringify(data);
+    form.appendChild(input); document.body.appendChild(form); form.submit(); form.remove();
+}
+function wireCodePen(root) {
+    root.addEventListener("click", (e) => {
+        const btn = e.target.closest(".demo-codepen");
+        if (btn) openInCodePen(btn.dataset.json);
+    });
 }
 
 // ── Custom node renderer: searchable icon gallery ───────────────────────────
@@ -883,6 +1049,7 @@ async function boot() {
     const renderer = createDefaultRenderer().attach(root);
     renderer.register("chart", renderDemoChart);          // custom inline-SVG charts
     renderer.register("code", renderCode);                // custom code-block node
+    renderer.register("codepen", renderCodePen);          // "Open in CodePen" button
     renderer.register("icon-gallery", renderIconGallery); // searchable icon grid
 
     const bus = new SuiEventBus(renderer, root);
@@ -893,31 +1060,21 @@ async function boot() {
         () => resolve(new Response(JSON.stringify(obj), { headers: { "Content-Type": "application/json" } })),
         700));
 
+    // No backend at all: every server-shaped trigger just resolves to an empty
+    // patch (with a short delay so the inline loading spinner is visible). The
+    // form's Save/Cancel don't come through here — they carry inline PATCH
+    // triggers and are applied client-side, so they work in an exported CodePen
+    // too. Delay is deliberate — lets the "is-loading" feedback show.
     bus.setFetcher((input, init = {}) => {
         const url = typeof input === "string" ? input : (input && input.url) || "";
         const method = (init && init.method) || "GET";
-
-        // Cancel → clear every field's error by patching the clean field back in.
-        if (method === "POST" && url === "/form-reset") {
-            showToast("Changes discarded");
-            return jsonResponse({ patches: DEMO_FORM_FIELDS.map(f => ({ op: "REPLACE", targetId: f.id, node: f })) });
-        }
-
-        // Product form Save → "server-side" validation fails everything: patch
-        // every field back with its error message (the counterpart to Cancel,
-        // which patches them all back clean). Shows form-error-via-patch across
-        // all field types at once.
-        if (method === "POST" && url === "/products") {
-            showToast("Please fix the errors below");
-            return jsonResponse({ patches: DEMO_FORM_FIELDS.map(f => ({ op: "REPLACE", targetId: f.id, node: withError(f) })) });
-        }
-
         showToast(`${method} ${url} — no backend (demo)`);
         return jsonResponse({ patches: [] });
     });
 
     renderer.mount(buildPage());
     wireIconGallery(root);   // search + click-to-copy for the icon library
+    wireCodePen(root);       // "Open in CodePen" buttons
     wireLiveProgress(renderer);   // animate the "live" progress bar + ring
     restoreMenuState(root);  // re-apply each sidebar menu's persisted collapse state
     wireTabOverflow(root);   // collapse overflowing tabs into a "⋯ More" dropdown
