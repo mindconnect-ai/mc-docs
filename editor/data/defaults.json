@@ -1,16 +1,16 @@
 {
   "page" : {
     "type" : "page",
-    "id" : "page-2kfnl0"
+    "id" : "page-2ick03"
   },
   "stack" : {
     "type" : "stack",
-    "id" : "stack-2kfw30",
+    "id" : "stack-2icrkd",
     "children" : [ ]
   },
   "form" : {
     "type" : "form",
-    "id" : "form-2kg0ts",
+    "id" : "form-2ictyv",
     "fields" : [ ],
     "actions" : [ ],
     "links" : [ ],
@@ -18,32 +18,32 @@
   },
   "section" : {
     "type" : "section",
-    "id" : "section-2kg5z4",
+    "id" : "section-2icwla",
     "title" : "New section",
     "sections" : [ ],
     "collapseOpen" : false
   },
   "section-entry" : {
     "type" : "section-entry",
-    "id" : "tab-2kg9yx",
+    "id" : "tab-2icyca",
     "title" : "New tab"
   },
   "detail" : {
     "type" : "detail",
-    "id" : "detail-2kgptl",
+    "id" : "detail-2iczhc",
     "fields" : [ ],
     "actions" : [ ],
     "links" : [ ]
   },
   "list" : {
     "type" : "list",
-    "id" : "list-2kgt4r",
+    "id" : "list-2id21q",
     "items" : [ ],
     "actions" : [ ]
   },
   "table" : {
     "type" : "table",
-    "id" : "table-2kgwkw",
+    "id" : "table-2id4zx",
     "columns" : [ ],
     "rows" : [ ],
     "actions" : [ ],
@@ -54,46 +54,46 @@
   },
   "column" : {
     "type" : "column",
-    "id" : "col-col-2kh14i-2kh1",
+    "id" : "col-col-2idc27-2idc",
     "label" : "Column",
-    "dataKey" : "col-2kh14i",
+    "dataKey" : "col-2idc27",
     "sortable" : false,
     "filterable" : false
   },
   "row" : {
     "type" : "row",
-    "id" : "row-2kh8g3",
+    "id" : "row-2idgrn",
     "data" : { }
   },
   "text" : {
     "type" : "text",
-    "id" : "text-2khd51",
+    "id" : "text-2idkr8",
     "text" : "Text"
   },
   "icon" : {
     "type" : "icon",
-    "id" : "icon-2khejm",
+    "id" : "icon-2idles",
     "name" : "star"
   },
   "spinner" : {
     "type" : "spinner",
-    "id" : "spinner-2khgdx",
+    "id" : "spinner-2idlzg",
     "label" : "Loading…"
   },
   "progress" : {
     "type" : "progress",
-    "id" : "progress-2khhjb",
+    "id" : "progress-2idmvo",
     "value" : 60.0
   },
   "menu" : {
     "type" : "menu",
-    "id" : "menu-2khkyn",
+    "id" : "menu-2idq1k",
     "title" : "Menu",
     "items" : [ ]
   },
   "menu-item" : {
     "type" : "menu-item",
-    "id" : "mi-2khmqt",
+    "id" : "mi-2ids15",
     "label" : "Item",
     "selected" : false,
     "open" : false,
@@ -102,22 +102,22 @@
   },
   "menu-button" : {
     "type" : "menu-button",
-    "id" : "menu-button-2khnz4",
+    "id" : "menu-button-2idtbr",
     "items" : [ ]
   },
   "header" : {
     "type" : "header",
-    "id" : "header-2khppd",
+    "id" : "header-2iduwb",
     "brand" : "Brand"
   },
   "chart" : {
     "type" : "chart",
-    "id" : "chart-2khqtx",
+    "id" : "chart-2idvx8",
     "chartType" : "BAR"
   },
   "field" : {
     "type" : "field",
-    "id" : "field-2khruj",
+    "id" : "field-2idwy0",
     "label" : "Label",
     "fieldType" : "TEXT",
     "editable" : true,
@@ -128,7 +128,7 @@
   },
   "action" : {
     "type" : "action",
-    "id" : "action-2khtqs",
+    "id" : "action-2idz0j",
     "label" : "Action",
     "style" : "SECONDARY",
     "appearance" : "BUTTON",
@@ -137,15 +137,15 @@
   },
   "link" : {
     "type" : "link",
-    "id" : "link-2khv91",
-    "rel" : "link-2khv91",
+    "id" : "link-2ie0hg",
+    "rel" : "link-2ie0hg",
     "href" : "#",
     "label" : "Link",
     "external" : false
   },
   "dialog" : {
     "type" : "dialog",
-    "id" : "dialog-2khw2r",
+    "id" : "dialog-2ie1bu",
     "title" : "Dialog"
   }
 }
