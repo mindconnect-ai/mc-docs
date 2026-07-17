@@ -1,8 +1,15 @@
 import { escapeHtml, encodeTrigger } from "../renderer.js";
+import { renderIcon } from "./icon.js";
 export function renderField(f) {
-    const input = f.editable
+    let input = f.editable
         ? renderInput(f)
         : `<span class="sui-value">${f.value != null ? escapeHtml(f.value) : "—"}</span>`;
+    // Leading in-field icon (decorative): wrap the control so CSS can lay the
+    // icon over the input's left padding. Only meaningful for editable
+    // single-line controls; harmless otherwise.
+    if (f.icon && f.editable) {
+        input = `<div class="sui-input-icon">${renderIcon(f.icon)}${input}</div>`;
+    }
     // The wrapper carries the UiNode id so the editor's id-based selection
     // works symmetrically with every other node type. The inner control
     // takes a derived "<id>__input" so <label for> still hooks up and we

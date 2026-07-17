@@ -1,16 +1,16 @@
 {
   "page" : {
     "type" : "page",
-    "id" : "page-2g10js"
+    "id" : "page-277izp"
   },
   "stack" : {
     "type" : "stack",
-    "id" : "stack-2g17d7",
+    "id" : "stack-277pej",
     "children" : [ ]
   },
   "form" : {
     "type" : "form",
-    "id" : "form-2g1adm",
+    "id" : "form-277qqm",
     "fields" : [ ],
     "actions" : [ ],
     "links" : [ ],
@@ -18,32 +18,32 @@
   },
   "section" : {
     "type" : "section",
-    "id" : "section-2g1dp5",
+    "id" : "section-277u4k",
     "title" : "New section",
     "sections" : [ ],
     "collapseOpen" : false
   },
   "section-entry" : {
     "type" : "section-entry",
-    "id" : "tab-2g1fxs",
+    "id" : "tab-277v92",
     "title" : "New tab"
   },
   "detail" : {
     "type" : "detail",
-    "id" : "detail-2g1hen",
+    "id" : "detail-277vq6",
     "fields" : [ ],
     "actions" : [ ],
     "links" : [ ]
   },
   "list" : {
     "type" : "list",
-    "id" : "list-2g1jcn",
+    "id" : "list-277yaj",
     "items" : [ ],
     "actions" : [ ]
   },
   "table" : {
     "type" : "table",
-    "id" : "table-2g1mw6",
+    "id" : "table-27816t",
     "columns" : [ ],
     "rows" : [ ],
     "actions" : [ ],
@@ -53,35 +53,40 @@
   },
   "column" : {
     "type" : "column",
-    "id" : "col-col-2g1qch-2g1q",
+    "id" : "col-col-2784gf-2784",
     "label" : "Column",
-    "dataKey" : "col-2g1qch",
+    "dataKey" : "col-2784gf",
     "sortable" : false,
     "filterable" : false
   },
   "row" : {
     "type" : "row",
-    "id" : "row-2g1v3m",
+    "id" : "row-27855p",
     "data" : { }
   },
   "text" : {
     "type" : "text",
-    "id" : "text-2g1ydq",
+    "id" : "text-2788fb",
     "text" : "Text"
+  },
+  "icon" : {
+    "type" : "icon",
+    "id" : "icon-27895e",
+    "name" : "star"
   },
   "header" : {
     "type" : "header",
-    "id" : "header-2g205u",
+    "id" : "header-278a14",
     "brand" : "Brand"
   },
   "chart" : {
     "type" : "chart",
-    "id" : "chart-2g21p8",
+    "id" : "chart-278aou",
     "chartType" : "BAR"
   },
   "field" : {
     "type" : "field",
-    "id" : "field-2g230y",
+    "id" : "field-278cjl",
     "label" : "Label",
     "fieldType" : "TEXT",
     "editable" : true,
@@ -92,7 +97,7 @@
   },
   "action" : {
     "type" : "action",
-    "id" : "action-2g26qp",
+    "id" : "action-278ff1",
     "label" : "Action",
     "style" : "SECONDARY",
     "appearance" : "BUTTON",
@@ -100,15 +105,15 @@
   },
   "link" : {
     "type" : "link",
-    "id" : "link-2g28zq",
-    "rel" : "link-2g28zq",
+    "id" : "link-278hpu",
+    "rel" : "link-278hpu",
     "href" : "#",
     "label" : "Link",
     "external" : false
   },
   "dialog" : {
     "type" : "dialog",
-    "id" : "dialog-2g2arf",
+    "id" : "dialog-278jd1",
     "title" : "Dialog"
   }
 }

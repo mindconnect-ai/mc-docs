@@ -1,4 +1,5 @@
 import type { UiNode, UiListItem, UiTrigger, UiPatch } from "./model.js";
+export { renderIcon, setIconResolver, setIconSpriteUrl, spriteIconResolver, type IconResolver, type IconOpts, } from "./renderers/icon.js";
 /**
  * A handler renders one node of a specific {@link UiNode#type} to an HTML
  * string. It receives the owning {@link SuiRenderer} so it can recurse via

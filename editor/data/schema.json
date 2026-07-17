@@ -14,7 +14,7 @@
   "children" : [ {
     "property" : "node",
     "cardinality" : "SINGLE",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "link", "action", "field" ]
   }, {
     "property" : "dialogs",
     "cardinality" : "LIST",
@@ -45,7 +45,7 @@
   "children" : [ {
     "property" : "children",
     "cardinality" : "LIST",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "link", "action", "field" ]
   } ]
 }, {
   "type" : "form",
@@ -132,6 +132,10 @@
     "kind" : "STRING",
     "required" : false
   }, {
+    "name" : "icon",
+    "kind" : "STRING",
+    "required" : false
+  }, {
     "name" : "cssClass",
     "kind" : "STRING",
     "required" : false
@@ -139,7 +143,7 @@
   "children" : [ {
     "property" : "content",
     "cardinality" : "SINGLE",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "link", "action", "field" ]
   } ]
 }, {
   "type" : "detail",
@@ -303,6 +307,28 @@
   } ],
   "children" : [ ]
 }, {
+  "type" : "icon",
+  "label" : "Icon",
+  "category" : "display",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "name",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ ]
+}, {
   "type" : "header",
   "label" : "Header",
   "category" : "chrome",
@@ -374,6 +400,10 @@
     "required" : false
   }, {
     "name" : "placeholder",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "icon",
     "kind" : "STRING",
     "required" : false
   }, {
@@ -449,6 +479,10 @@
     "kind" : "STRING",
     "required" : false
   }, {
+    "name" : "icon",
+    "kind" : "STRING",
+    "required" : false
+  }, {
     "name" : "cssClass",
     "kind" : "STRING",
     "required" : false
@@ -470,6 +504,10 @@
     "name" : "label",
     "kind" : "STRING",
     "required" : true
+  }, {
+    "name" : "icon",
+    "kind" : "STRING",
+    "required" : false
   }, {
     "name" : "cssClass",
     "kind" : "STRING",
@@ -500,6 +538,6 @@
   "children" : [ {
     "property" : "node",
     "cardinality" : "SINGLE",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "link", "action", "field" ]
   } ]
 } ]

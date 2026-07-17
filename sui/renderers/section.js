@@ -1,4 +1,5 @@
 import { escapeHtml } from "../renderer.js";
+import { renderIcon } from "./icon.js";
 import { cls } from "./util.js";
 export function renderSection(node, r) {
     // Collapsible sections wrap the regular section body in a <details>
@@ -36,12 +37,14 @@ function renderSectionBody(node, r) {
     const activeId = node.initialSection || node.sections[0]?.id;
     const tabs = node.sections.map(s => {
         const activeCls = s.id === activeId ? " active" : "";
+        const icon = s.icon ? `${renderIcon(s.icon)} ` : "";
+        const tabLabel = `${icon}${escapeHtml(s.title ?? "")}`;
         if (s.href) {
             // SSR-friendly tab: real anchor. The EventBus intercepts the
             // click via data-href when SPA is active.
-            return `<a class="sui-tab${activeCls}" href="${escapeHtml(s.href)}" data-href="${escapeHtml(s.href)}" data-target="${escapeHtml(s.id)}">${escapeHtml(s.title ?? "")}</a>`;
+            return `<a class="sui-tab${activeCls}" href="${escapeHtml(s.href)}" data-href="${escapeHtml(s.href)}" data-target="${escapeHtml(s.id)}">${tabLabel}</a>`;
         }
-        return `<button class="sui-tab${activeCls}" data-target="${escapeHtml(s.id)}">${escapeHtml(s.title ?? "")}</button>`;
+        return `<button class="sui-tab${activeCls}" data-target="${escapeHtml(s.id)}">${tabLabel}</button>`;
     }).join("");
     const panels = node.sections.map(s => `<div class="sui-panel" id="${escapeHtml(s.id)}" ${s.id !== activeId ? "hidden" : ""}>${r.render(s.content)}</div>`).join("");
     return `<div class="${cls("sui-section", node)}" id="${escapeHtml(node.id)}">

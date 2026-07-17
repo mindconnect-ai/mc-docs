@@ -49,6 +49,12 @@ export interface UiField {
     required?: boolean;
     placeholder?: string;
     hint?: string;
+    /**
+     * Leading icon token shown inside the input, before the value (e.g.
+     * `"search"` on a filter box, `"calendar"` on a date field). Decorative.
+     * See {@link UiIcon}.
+     */
+    icon?: string;
     validationError?: string;
     options?: Array<{
         value: string;
@@ -98,6 +104,12 @@ export interface UiAction {
     disabledReason?: string;
     confirm?: string;
     onClick?: UiTrigger;
+    /**
+     * Leading icon token (e.g. `"save"`, `"delete"`). Rendered before the
+     * label for BUTTON/LINK; for `appearance: "ICON"` it IS the button and
+     * the label becomes the accessible name. See {@link UiIcon}.
+     */
+    icon?: string;
 }
 export interface UiLink {
     type: "link";
@@ -108,12 +120,16 @@ export interface UiLink {
     label: string;
     cssClass?: string;
     external?: boolean;
+    /** Leading icon token rendered before the label. See {@link UiIcon}. */
+    icon?: string;
 }
 export interface UiListItem {
     id: string;
     label: string;
     /** Optional rich label: rendered as the item header instead of the plain `label` text. */
     labelNode?: UiNode;
+    /** Leading icon token rendered before the label. See {@link UiIcon}. */
+    icon?: string;
     description?: string;
     href?: string;
     onClick?: UiTrigger;
@@ -155,6 +171,27 @@ export interface UiText {
     type: "text";
     id?: string;
     text?: string;
+    cssClass?: string;
+}
+/**
+ * Standalone icon node — an icon anywhere a {@code UiNode} is accepted (a
+ * {@code UiStack} child, a tree/list `labelNode`, a table `cellTemplate`).
+ * The convenience `icon` string on {@code UiAction}/{@code UiField}/… covers
+ * the common leading-icon case; this node covers free placement.
+ *
+ * <p>{@code name} is a stable semantic token (`"success"`, `"delete"`) or a
+ * raw library id present in the sprite. Resolution is swappable — see
+ * `renderers/icon.ts` / {@code IconResolver}. Colour follows
+ * {@code currentColor}; size follows the surrounding font (1em). A
+ * {@code title} makes it accessible (otherwise it is decorative).
+ */
+export interface UiIcon {
+    type: "icon";
+    id?: string;
+    /** Icon token: semantic alias (`"delete"`) or raw sprite id (`"trash-2"`). */
+    name: string;
+    /** Accessible label; when absent the icon is decorative (aria-hidden). */
+    title?: string;
     cssClass?: string;
 }
 /**
@@ -292,6 +329,8 @@ export interface UiSectionEntry extends UiNodeBase {
     type: "section-entry";
     content: UiNode;
     href?: string;
+    /** Leading icon token shown before the tab label. See {@link UiIcon}. */
+    icon?: string;
 }
 export interface UiSection extends UiNodeBase {
     type: "section";
@@ -364,7 +403,7 @@ export interface UiFieldGroup extends UiNodeBase {
     hint?: string;
     content?: UiNode[];
 }
-export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiTreeNode | UiSection | UiStack | UiChart | UiHeader | UiText | UiLink | UiAction | UiField | UiDialog | UiUpload;
+export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiTreeNode | UiSection | UiStack | UiChart | UiHeader | UiText | UiIcon | UiLink | UiAction | UiField | UiDialog | UiUpload;
 export interface UiPage {
     navigate?: string;
     node?: UiNode;

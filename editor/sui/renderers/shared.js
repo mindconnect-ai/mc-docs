@@ -1,5 +1,6 @@
 import { escapeHtml, encodeTrigger } from "../renderer.js";
 import { renderAction } from "./action.js";
+import { renderIcon } from "./icon.js";
 import { renderLink } from "./link.js";
 export function renderActions(actions) {
     return actions.map(renderAction).join("");
@@ -37,7 +38,10 @@ function renderPageButton(label, trigger, disabled) {
 export function defaultRenderItem(item, r) {
     // Rich label (labelNode) takes precedence over the plain text label; the
     // text label remains the fallback for accessibility / no-node rows.
-    const labelInner = item.labelNode ? r.render(item.labelNode) : escapeHtml(item.label);
+    // A leading icon prefixes the plain label (not a rich labelNode, which
+    // owns its own layout).
+    const iconHtml = item.icon && !item.labelNode ? `${renderIcon(item.icon)} ` : "";
+    const labelInner = item.labelNode ? r.render(item.labelNode) : `${iconHtml}${escapeHtml(item.label)}`;
     const label = item.onClick
         ? `<a class="sui-list-item-label" href="#" data-trigger='${encodeTrigger(item.onClick)}'>${labelInner}</a>`
         : `<span class="sui-list-item-label">${labelInner}</span>`;

@@ -20,6 +20,10 @@ import { renderField } from "./renderers/field.js";
 import { renderFieldGroup } from "./renderers/fieldgroup.js";
 import { renderDialog } from "./renderers/dialog.js";
 import { renderUpload } from "./renderers/upload.js";
+import { renderIconNode } from "./renderers/icon.js";
+// Icon rendering is behind a swappable resolver — re-exported so apps can
+// point at a different sprite / inline SVG / icon font.
+export { renderIcon, setIconResolver, setIconSpriteUrl, spriteIconResolver, } from "./renderers/icon.js";
 // Default item-handler for the UiList rendering — set on the SuiRenderer
 // at construction time. List items have no type discriminator so they
 // can't go through the dispatcher; they get their own handler slot.
@@ -539,7 +543,8 @@ export function installDefaultHandlers(renderer) {
         .register("field", renderField)
         .register("fieldgroup", renderFieldGroup)
         .register("dialog", renderDialog)
-        .register("upload", renderUpload);
+        .register("upload", renderUpload)
+        .register("icon", renderIconNode);
 }
 /** Convenience: a fresh renderer pre-loaded with the default handlers. */
 export function createDefaultRenderer() {

@@ -337,6 +337,39 @@ a.sui-tree-label:hover { text-decoration: underline; }
 .sui-icon-btn--danger    { background: transparent; color: var(--sui-color-danger); }
 .sui-icon-btn--danger:hover:not(:disabled)    { background: var(--sui-color-danger-bg); }
 
+/* ── Icons ──────────────────────────────────────────────────────────────
+   Rendered by the swappable icon resolver (renderers/icon.ts) as an
+   <svg class="sui-icon"><use href="/sui/icons.svg#token"></svg>. Size is
+   1em and colour is currentColor, so an icon inherits the surrounding
+   text's size and colour. */
+.sui-icon {
+    width: 1em; height: 1em; flex: 0 0 auto;
+    display: inline-block; vertical-align: -0.125em; /* sit on the text baseline */
+    fill: none; stroke: currentColor;
+}
+/* Controls with a leading icon become flex rows with a small gap so glyph
+   and label centre-align. :has keeps text-only controls untouched. */
+.sui-btn:has(.sui-icon),
+.sui-link:has(.sui-icon),
+.sui-tab:has(.sui-icon) { display: inline-flex; align-items: center; gap: 6px; }
+.sui-icon-btn .sui-icon { width: 1.15em; height: 1.15em; vertical-align: 0; }
+
+/* In-field leading icon: overlay it on the input's left padding. */
+.sui-input-icon { position: relative; display: block; }
+.sui-input-icon > .sui-icon {
+    position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+    color: var(--sui-color-text-muted); pointer-events: none;
+}
+.sui-input-icon > input,
+.sui-input-icon > select { padding-left: 32px; }
+
+/* Status-colour helpers for a UiIcon's cssClass. */
+.sui-icon--success { color: var(--sui-color-success, #16a34a); }
+.sui-icon--warning { color: var(--sui-color-warning, #d97706); }
+.sui-icon--danger,
+.sui-icon--error   { color: var(--sui-color-danger); }
+.sui-icon--muted   { color: var(--sui-color-text-muted); }
+
 /* ── Misc ───────────────────────────────────────────────────────────────── */
 
 .sui-pagination { display: flex; align-items: center; gap: 12px; padding: 12px 20px; color: var(--sui-color-text-muted); font-size: 13px; }

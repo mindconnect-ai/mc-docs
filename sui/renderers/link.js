@@ -1,4 +1,5 @@
 import { escapeHtml } from "../renderer.js";
+import { renderIcon } from "./icon.js";
 import { cls } from "./util.js";
 /**
  * Renders a single {@link UiLink} as a standalone {@code <a>}. The wrapper
@@ -15,12 +16,14 @@ export function renderLink(node) {
     const id = node.id;
     const idAttr = id ? ` id="${escapeHtml(id)}"` : "";
     const href = escapeHtml(node.href ?? "#");
+    const icon = node.icon ? `${renderIcon(node.icon)} ` : "";
+    const label = `${icon}${escapeHtml(node.label ?? "")}`;
     // External links open in a new browser tab. We deliberately OMIT
     // data-href so the EventBus click handler doesn't intercept and SPA-route
     // them — target="_blank" only works when the native click is allowed
     // through.
     if (node.external) {
-        return `<a${idAttr} class="${cls("sui-link", node)}" href="${href}" target="_blank" rel="noopener noreferrer">${escapeHtml(node.label ?? "")}</a>`;
+        return `<a${idAttr} class="${cls("sui-link", node)}" href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
     }
-    return `<a${idAttr} class="${cls("sui-link", node)}" href="${href}" data-href="${href}">${escapeHtml(node.label ?? "")}</a>`;
+    return `<a${idAttr} class="${cls("sui-link", node)}" href="${href}" data-href="${href}">${label}</a>`;
 }

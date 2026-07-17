@@ -20,6 +20,9 @@
         "enabled" : {
           "type" : "boolean"
         },
+        "icon" : {
+          "type" : "string"
+        },
         "id" : {
           "type" : "string"
         },
@@ -121,6 +124,8 @@
             "$ref" : "#/definitions/UiRow"
           }, {
             "$ref" : "#/definitions/UiText"
+          }, {
+            "$ref" : "#/definitions/UiIcon"
           }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
@@ -251,6 +256,8 @@
           }, {
             "$ref" : "#/definitions/UiText"
           }, {
+            "$ref" : "#/definitions/UiIcon"
+          }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
@@ -313,6 +320,9 @@
           "enum" : [ "TEXT", "TEXTAREA", "NUMBER", "CURRENCY", "PERCENT", "DATE", "DATETIME", "BOOLEAN", "SELECT", "MULTISELECT", "FILE", "REFERENCE" ]
         },
         "hint" : {
+          "type" : "string"
+        },
+        "icon" : {
           "type" : "string"
         },
         "id" : {
@@ -398,6 +408,8 @@
             }, {
               "$ref" : "#/definitions/UiText"
             }, {
+              "$ref" : "#/definitions/UiIcon"
+            }, {
               "$ref" : "#/definitions/UiList-2"
             }, {
               "$ref" : "#/definitions/UiTree-2"
@@ -481,6 +493,8 @@
               "$ref" : "#/definitions/UiRow"
             }, {
               "$ref" : "#/definitions/UiText"
+            }, {
+              "$ref" : "#/definitions/UiIcon"
             }, {
               "$ref" : "#/definitions/UiList-2"
             }, {
@@ -587,6 +601,8 @@
             }, {
               "$ref" : "#/definitions/UiText"
             }, {
+              "$ref" : "#/definitions/UiIcon"
+            }, {
               "$ref" : "#/definitions/UiList-2"
             }, {
               "$ref" : "#/definitions/UiTree-2"
@@ -650,6 +666,27 @@
         "required" : [ "type" ]
       } ]
     },
+    "UiIcon" : {
+      "type" : "object",
+      "properties" : {
+        "cssClass" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "name" : {
+          "type" : "string"
+        },
+        "title" : {
+          "type" : "string"
+        },
+        "type" : {
+          "const" : "icon"
+        }
+      },
+      "required" : [ "type" ]
+    },
     "UiLink" : {
       "type" : "object",
       "properties" : {
@@ -660,6 +697,9 @@
           "type" : "boolean"
         },
         "href" : {
+          "type" : "string"
+        },
+        "icon" : {
           "type" : "string"
         },
         "id" : {
@@ -736,6 +776,8 @@
                 }, {
                   "$ref" : "#/definitions/UiText"
                 }, {
+                  "$ref" : "#/definitions/UiIcon"
+                }, {
                   "$ref" : "#/definitions/UiList-2"
                 }, {
                   "$ref" : "#/definitions/UiTree-2"
@@ -766,6 +808,9 @@
               "description" : {
                 "type" : "string"
               },
+              "icon" : {
+                "type" : "string"
+              },
               "id" : {
                 "type" : "string"
               },
@@ -789,6 +834,8 @@
                   "$ref" : "#/definitions/UiRow"
                 }, {
                   "$ref" : "#/definitions/UiText"
+                }, {
+                  "$ref" : "#/definitions/UiIcon"
                 }, {
                   "$ref" : "#/definitions/UiList-2"
                 }, {
@@ -913,6 +960,8 @@
             "$ref" : "#/definitions/UiRow"
           }, {
             "$ref" : "#/definitions/UiText"
+          }, {
+            "$ref" : "#/definitions/UiIcon"
           }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
@@ -1049,6 +1098,8 @@
           }, {
             "$ref" : "#/definitions/UiText"
           }, {
+            "$ref" : "#/definitions/UiIcon"
+          }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
@@ -1080,6 +1131,9 @@
           "type" : "string"
         },
         "href" : {
+          "type" : "string"
+        },
+        "icon" : {
           "type" : "string"
         },
         "id" : {
@@ -1125,6 +1179,8 @@
               "$ref" : "#/definitions/UiRow"
             }, {
               "$ref" : "#/definitions/UiText"
+            }, {
+              "$ref" : "#/definitions/UiIcon"
             }, {
               "$ref" : "#/definitions/UiList-2"
             }, {
@@ -1365,6 +1421,8 @@
           }, {
             "$ref" : "#/definitions/UiText"
           }, {
+            "$ref" : "#/definitions/UiIcon"
+          }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
@@ -1421,6 +1479,8 @@
             "$ref" : "#/definitions/UiRow"
           }, {
             "$ref" : "#/definitions/UiText"
+          }, {
+            "$ref" : "#/definitions/UiIcon"
           }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
@@ -1514,6 +1574,8 @@
                       "$ref" : "#/definitions/UiRow"
                     }, {
                       "$ref" : "#/definitions/UiText"
+                    }, {
+                      "$ref" : "#/definitions/UiIcon"
                     }, {
                       "$ref" : "#/definitions/UiList-2"
                     }, {
@@ -1627,6 +1689,8 @@
     "$ref" : "#/definitions/UiRow"
   }, {
     "$ref" : "#/definitions/UiText"
+  }, {
+    "$ref" : "#/definitions/UiIcon"
   }, {
     "$ref" : "#/definitions/UiList-2"
   }, {

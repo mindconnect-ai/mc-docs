@@ -15,8 +15,19 @@
  *     import { createDefaultRenderer } from "./sui/renderer.js";
  *     createDefaultRenderer().attach(el).mount({ type: "text", id: "t", text: "hi" });
  */
-import { createDefaultRenderer, escapeHtml } from "./sui/renderer.js";
+import { createDefaultRenderer, escapeHtml, renderIcon } from "./sui/renderer.js";
 import { SuiEventBus } from "./sui/eventbus.js";
+
+// All icon tokens in the sprite, filled at boot from ./sui/icons.svg so the
+// gallery always reflects whatever the sprite actually ships.
+let ALL_ICONS = [];
+async function loadIconList() {
+    try {
+        const txt = await (await fetch("./sui/icons.svg")).text();
+        const ids = [...txt.matchAll(/<symbol[^>]*\bid="([^"]+)"/g)].map(m => m[1]);
+        ALL_ICONS = [...new Set(ids)].sort();
+    } catch { ALL_ICONS = []; }
+}
 
 // ── Trigger helpers (mirror UiTrigger.* factories) ──────────────────────────
 const go   = (url)               => ({ behavior: "APPLY_RESPONSE", method: "GET", url });
@@ -67,52 +78,52 @@ function treeTab() {
     const explorer = {
         type: "tree", id: "tree-explorer", title: "File explorer",
         nodes: [
-            { type: "tree-node", id: "t-src", label: "src", icon: "📁", open: true, children: [
-                { type: "tree-node", id: "t-main", label: "main", icon: "📁", open: true, children: [
-                    { type: "tree-node", id: "t-app",  label: "app.ts",  icon: "📄", onClick: go("/files/app.ts") },
-                    { type: "tree-node", id: "t-boot", label: "boot.ts", icon: "📄", onClick: go("/files/boot.ts") },
-                    { type: "tree-node", id: "t-cmp", label: "components", icon: "📁", children: [
-                        { type: "tree-node", id: "t-btn",  label: "Button.ts", icon: "📄", onClick: go("/files/Button.ts") },
-                        { type: "tree-node", id: "t-tree", label: "Tree.ts",   icon: "📄", selected: true, onClick: go("/files/Tree.ts") },
+            { type: "tree-node", id: "t-src", label: "src", icon: "folder", open: true, children: [
+                { type: "tree-node", id: "t-main", label: "main", icon: "folder", open: true, children: [
+                    { type: "tree-node", id: "t-app",  label: "app.ts",  icon: "document", onClick: go("/files/app.ts") },
+                    { type: "tree-node", id: "t-boot", label: "boot.ts", icon: "document", onClick: go("/files/boot.ts") },
+                    { type: "tree-node", id: "t-cmp", label: "components", icon: "folder", children: [
+                        { type: "tree-node", id: "t-btn",  label: "Button.ts", icon: "document", onClick: go("/files/Button.ts") },
+                        { type: "tree-node", id: "t-tree", label: "Tree.ts",   icon: "document", selected: true, onClick: go("/files/Tree.ts") },
                     ] },
                 ] },
-                { type: "tree-node", id: "t-test", label: "test", icon: "📁", children: [
-                    { type: "tree-node", id: "t-spec", label: "app.spec.ts", icon: "📄", onClick: go("/files/app.spec.ts") },
+                { type: "tree-node", id: "t-test", label: "test", icon: "folder", children: [
+                    { type: "tree-node", id: "t-spec", label: "app.spec.ts", icon: "document", onClick: go("/files/app.spec.ts") },
                 ] },
             ] },
-            { type: "tree-node", id: "t-readme", label: "README.md", icon: "📄", onClick: go("/files/README.md") },
-            { type: "tree-node", id: "t-pom",    label: "pom.xml",   icon: "📄", onClick: go("/files/pom.xml") },
+            { type: "tree-node", id: "t-readme", label: "README.md", icon: "document", onClick: go("/files/README.md") },
+            { type: "tree-node", id: "t-pom",    label: "pom.xml",   icon: "document", onClick: go("/files/pom.xml") },
         ],
     };
     const explorerJava =
 `UiTree.of("tree-explorer", "File explorer")
-    .node(UiTreeNode.of("t-src", "src").icon("📁").open(true)
-        .child(UiTreeNode.of("t-main", "main").icon("📁").open(true)
-            .child(UiTreeNode.of("t-app",  "app.ts").icon("📄").onClick(UiTrigger.go("/files/app.ts")))
-            .child(UiTreeNode.of("t-boot", "boot.ts").icon("📄").onClick(UiTrigger.go("/files/boot.ts")))
-            .child(UiTreeNode.of("t-cmp", "components").icon("📁")
-                .child(UiTreeNode.of("t-btn",  "Button.ts").icon("📄").onClick(UiTrigger.go("/files/Button.ts")))
-                .child(UiTreeNode.of("t-tree", "Tree.ts").icon("📄").selected(true).onClick(UiTrigger.go("/files/Tree.ts")))))
-        .child(UiTreeNode.of("t-test", "test").icon("📁")
-            .child(UiTreeNode.of("t-spec", "app.spec.ts").icon("📄").onClick(UiTrigger.go("/files/app.spec.ts")))))
-    .node(UiTreeNode.of("t-readme", "README.md").icon("📄").onClick(UiTrigger.go("/files/README.md")))
-    .node(UiTreeNode.of("t-pom", "pom.xml").icon("📄").onClick(UiTrigger.go("/files/pom.xml")));`;
+    .node(UiTreeNode.of("t-src", "src").icon("folder").open(true)
+        .child(UiTreeNode.of("t-main", "main").icon("folder").open(true)
+            .child(UiTreeNode.of("t-app",  "app.ts").icon("document").onClick(UiTrigger.go("/files/app.ts")))
+            .child(UiTreeNode.of("t-boot", "boot.ts").icon("document").onClick(UiTrigger.go("/files/boot.ts")))
+            .child(UiTreeNode.of("t-cmp", "components").icon("folder")
+                .child(UiTreeNode.of("t-btn",  "Button.ts").icon("document").onClick(UiTrigger.go("/files/Button.ts")))
+                .child(UiTreeNode.of("t-tree", "Tree.ts").icon("document").selected(true).onClick(UiTrigger.go("/files/Tree.ts")))))
+        .child(UiTreeNode.of("t-test", "test").icon("folder")
+            .child(UiTreeNode.of("t-spec", "app.spec.ts").icon("document").onClick(UiTrigger.go("/files/app.spec.ts")))))
+    .node(UiTreeNode.of("t-readme", "README.md").icon("document").onClick(UiTrigger.go("/files/README.md")))
+    .node(UiTreeNode.of("t-pom", "pom.xml").icon("document").onClick(UiTrigger.go("/files/pom.xml")));`;
 
     const rich = {
         type: "tree", id: "tree-rich", title: "Nodes with rich content",
         nodes: [
-            { type: "tree-node", id: "r-order", label: "Order #1024", icon: "🧾", open: true, content: {
+            { type: "tree-node", id: "r-order", label: "Order #1024", icon: "document", open: true, content: {
                 type: "detail", id: "r-order-detail", fields: [
                     { type: "field", id: "r-cust",   label: "Customer", fieldType: "TEXT",   value: "Grace Hopper" },
                     { type: "field", id: "r-total",  label: "Total",    fieldType: "NUMBER", value: 249.0 },
                     { type: "field", id: "r-status", label: "Status",   fieldType: "TEXT",   value: "Shipped" },
                 ],
             } },
-            { type: "tree-node", id: "r-metrics", label: "Metrics", icon: "📊", content: {
+            { type: "tree-node", id: "r-metrics", label: "Metrics", icon: "chart", content: {
                 type: "chart", id: "r-chart", chartType: "BAR",
                 data: { labels: ["Mon", "Tue", "Wed", "Thu", "Fri"], series: [{ name: "Visits", values: [12, 19, 9, 22, 17] }] },
             }, children: [
-                { type: "tree-node", id: "r-child", label: "Drill down…", icon: "→", onClick: go("/metrics") },
+                { type: "tree-node", id: "r-child", label: "Drill down…", icon: "chevron-right", onClick: go("/metrics") },
             ] },
         ],
     };
@@ -125,14 +136,14 @@ series.setValues(List.of(12, 19, 9, 22, 17));
 visits.setSeries(List.of(series));
 
 UiTree.of("tree-rich", "Nodes with rich content")
-    .node(UiTreeNode.of("r-order", "Order #1024").icon("🧾").open(true)
+    .node(UiTreeNode.of("r-order", "Order #1024").icon("document").open(true)
         .content(UiDetail.of("r-order-detail", null)
             .field(UiField.text("r-cust",   "Customer", "Grace Hopper"))
             .field(UiField.number("r-total", "Total",    249.0))
             .field(UiField.text("r-status", "Status",   "Shipped"))))
-    .node(UiTreeNode.of("r-metrics", "Metrics").icon("📊")
+    .node(UiTreeNode.of("r-metrics", "Metrics").icon("chart")
         .content(UiChart.of("r-chart", null, UiChart.ChartType.BAR, visits))
-        .child(UiTreeNode.of("r-child", "Drill down…").icon("→").onClick(UiTrigger.go("/metrics"))));`;
+        .child(UiTreeNode.of("r-child", "Drill down…").icon("chevron-right").onClick(UiTrigger.go("/metrics"))));`;
 
     return stack("tab-tree", [
         text("tree-intro", "Nodes with children (or content) render as a native <details> disclosure with client-controlled state: expand/collapse survives re-renders. Click a twisty to toggle; click a label to fire its action."),
@@ -336,6 +347,68 @@ UiStack.of(
     ], { gap: 16 });
 }
 
+// ── Tab: Icons ───────────────────────────────────────────────────────────────
+function iconsTab() {
+    const buttons = {
+        type: "stack", id: "ic-buttons", direction: "HORIZONTAL", gap: 8, children: [
+            { type: "action", id: "ic-save",  label: "Save",   icon: "save",   style: "PRIMARY",   onClick: api("POST", "/save") },
+            { type: "action", id: "ic-add",   label: "Add",    icon: "add",    style: "SECONDARY", onClick: api("POST", "/add") },
+            { type: "action", id: "ic-del",   label: "Delete", icon: "delete", style: "DANGER", confirm: "Delete?", onClick: api("DELETE", "/x") },
+            { type: "action", id: "ic-edit",  label: "Edit",   icon: "pencil", appearance: "ICON", style: "SECONDARY", onClick: api("GET", "/edit") },
+            { type: "action", id: "ic-more",  label: "More",   icon: "more",   appearance: "ICON", style: "SECONDARY", onClick: api("GET", "/more") },
+        ],
+    };
+    const buttonsJava =
+`UiStack.of(
+    UiAction.primary("ic-save", "Save").icon("save").onClick(UiTrigger.api("POST", "/save")),
+    UiAction.secondary("ic-add", "Add").icon("add").onClick(UiTrigger.api("POST", "/add")),
+    UiAction.danger("ic-del", "Delete").icon("delete").confirm("Delete?").onClick(UiTrigger.api("DELETE", "/x")),
+    // Icon-only: label becomes the accessible name (aria-label).
+    UiAction.secondary("ic-edit", "Edit").icon("pencil").appearance(UiAction.Appearance.ICON).onClick(UiTrigger.api("GET", "/edit")),
+    UiAction.secondary("ic-more", "More").icon("more").appearance(UiAction.Appearance.ICON).onClick(UiTrigger.api("GET", "/more"))
+).direction(UiStack.Direction.HORIZONTAL).gap(8);`;
+
+    const field = {
+        type: "field", id: "ic-search", label: "Search", fieldType: "TEXT",
+        editable: true, icon: "search", placeholder: "Filter products…",
+    };
+    const fieldJava = `UiField.text("ic-search", "Search", null).asEditable().icon("search").placeholder("Filter products…");`;
+
+    const link = { type: "link", id: "ic-link", rel: "ref", href: "https://example.com", label: "External docs", icon: "external", external: true };
+    const linkJava = `UiLink.external("ref", "https://example.com", "External docs").icon("external");`;
+
+    // Standalone UiIcon nodes in a row, with status-colour cssClass helpers.
+    const gallery = {
+        type: "stack", id: "ic-gallery", direction: "HORIZONTAL", gap: 16, children: [
+            { type: "icon", id: "ic-ok",   name: "success", title: "Success", cssClass: "sui-icon--success" },
+            { type: "icon", id: "ic-warn", name: "warning", title: "Warning", cssClass: "sui-icon--warning" },
+            { type: "icon", id: "ic-err",  name: "error",   title: "Error",   cssClass: "sui-icon--danger" },
+            { type: "icon", id: "ic-user", name: "user",    title: "User" },
+            { type: "icon", id: "ic-star", name: "star",    title: "Star" },
+            { type: "icon", id: "ic-emoji", name: "🎉",     title: "Legacy emoji still works" },
+        ],
+    };
+    const galleryJava =
+`UiStack.of(
+    UiIcon.of("ic-ok",   "success").labelled("Success").withCssClass("sui-icon--success"),
+    UiIcon.of("ic-warn", "warning").labelled("Warning").withCssClass("sui-icon--warning"),
+    UiIcon.of("ic-err",  "error").labelled("Error").withCssClass("sui-icon--danger"),
+    UiIcon.of("ic-user", "user").labelled("User"),
+    UiIcon.of("ic-star", "star").labelled("Star"),
+    UiIcon.of("ic-emoji", "🎉").labelled("Legacy emoji still works")   // rendered verbatim
+).direction(UiStack.Direction.HORIZONTAL).gap(16);`;
+
+    return stack("tab-icons", [
+        text("ic-intro", "Icons are tokens (e.g. \"save\", \"delete\") resolved to a curated SVG sprite. They inherit text colour and size. The library is swappable via setIconResolver — the model never names a concrete library."),
+        specimen("sp-ic-buttons", "Buttons with icons (leading + icon-only)", buttons, buttonsJava),
+        specimen("sp-ic-field",   "In-field icon", field, fieldJava),
+        specimen("sp-ic-link",    "Link with icon", link, linkJava),
+        specimen("sp-ic-gallery", "UiIcon nodes — status colours + legacy emoji", gallery, galleryJava),
+        heading("All icons — search by name, click to copy"),
+        { type: "icon-gallery", id: "ic-library", icons: ALL_ICONS },
+    ], { gap: 16 });
+}
+
 function buildPage() {
     return stack("demo-root", [
         pageHeader(),
@@ -347,6 +420,7 @@ function buildPage() {
                 { type: "section-entry", id: "sec-data",   title: "Lists & Tables",  content: dataTab() },
                 { type: "section-entry", id: "sec-forms",  title: "Forms",           content: formsTab() },
                 { type: "section-entry", id: "sec-layout", title: "Layout & Charts", content: layoutTab() },
+                { type: "section-entry", id: "sec-icons",  title: "Icons",           icon: "star", content: iconsTab() },
             ],
         },
     ], { gap: 20 });
@@ -355,6 +429,56 @@ function buildPage() {
 // ── Custom node renderer: a syntax-neutral code block ───────────────────────
 function renderCode(node) {
     return `<pre class="demo-code" id="${escapeHtml(node.id)}"><code>${escapeHtml(node.code)}</code></pre>`;
+}
+
+// ── Custom node renderer: searchable icon gallery ───────────────────────────
+// A demo-only node type. Each cell uses the core's own renderIcon() so it goes
+// through the exact same (swappable) resolver as every other icon on the page.
+// Search + click-to-copy are wired post-mount in wireIconGallery().
+function renderIconGallery(node) {
+    const names = node.icons || [];
+    const cells = names.map(name =>
+        `<button type="button" class="icon-cell" data-name="${escapeHtml(name)}" title="Click to copy “${escapeHtml(name)}”">
+            ${renderIcon(name)}
+            <span class="icon-cell-name">${escapeHtml(name)}</span>
+        </button>`).join("");
+    return `<div class="icon-gallery" id="${escapeHtml(node.id)}">
+        <div class="icon-gallery-toolbar">
+            <input type="search" class="icon-gallery-search" placeholder="Search ${names.length} icons by name…" aria-label="Search icons">
+            <span class="icon-gallery-count" data-total="${names.length}">${names.length} icons</span>
+        </div>
+        <div class="icon-gallery-grid">${cells}</div>
+        <div class="icon-gallery-empty" hidden>No icons match.</div>
+    </div>`;
+}
+
+// Post-mount wiring for the icon gallery: pure-DOM filter + click-to-copy.
+function wireIconGallery(root) {
+    const gallery = root.querySelector(".icon-gallery");
+    if (!gallery) return;
+    const search = gallery.querySelector(".icon-gallery-search");
+    const count  = gallery.querySelector(".icon-gallery-count");
+    const empty  = gallery.querySelector(".icon-gallery-empty");
+    const cells  = [...gallery.querySelectorAll(".icon-cell")];
+    const total  = cells.length;
+    search.addEventListener("input", () => {
+        const q = search.value.trim().toLowerCase();
+        let shown = 0;
+        for (const c of cells) {
+            const match = !q || c.dataset.name.includes(q);
+            c.hidden = !match;
+            if (match) shown++;
+        }
+        count.textContent = shown === total ? `${total} icons` : `${shown} / ${total}`;
+        empty.hidden = shown !== 0;
+    });
+    gallery.addEventListener("click", (e) => {
+        const cell = e.target.closest(".icon-cell");
+        if (!cell) return;
+        const name = cell.dataset.name;
+        if (navigator.clipboard) navigator.clipboard.writeText(name).catch(() => {});
+        showToast(`Copied “${name}”`);
+    });
 }
 
 // ── A minimal inline-SVG chart handler ──────────────────────────────────────
@@ -448,11 +572,16 @@ export { buildPage, renderDemoChart, renderCode };
 // ── Boot ────────────────────────────────────────────────────────────────────
 // Guarded so the module can be imported in a non-DOM environment (e.g. a Node
 // smoke test that just renders buildPage() to a string).
-function boot() {
+async function boot() {
+    // Load the sprite's token list first so the icon-library gallery is
+    // populated on the initial render.
+    await loadIconList();
+
     const root = document.getElementById("sui-root");
     const renderer = createDefaultRenderer().attach(root);
-    renderer.register("chart", renderDemoChart); // custom inline-SVG charts
-    renderer.register("code", renderCode);        // custom code-block node
+    renderer.register("chart", renderDemoChart);          // custom inline-SVG charts
+    renderer.register("code", renderCode);                // custom code-block node
+    renderer.register("icon-gallery", renderIconGallery); // searchable icon grid
 
     const bus = new SuiEventBus(renderer, root);
     // No backend: show a toast for every dispatched trigger, and resolve the
@@ -465,6 +594,7 @@ function boot() {
     });
 
     renderer.mount(buildPage());
+    wireIconGallery(root);   // search + click-to-copy for the icon library
 
     // Theme switcher — toggles the class on <html>; the stylesheets are all loaded.
     const themeSelect = document.getElementById("demo-theme");

@@ -1,4 +1,5 @@
 import { escapeHtml, encodeTrigger } from "../renderer.js";
+import { renderIcon } from "./icon.js";
 import { cls } from "./util.js";
 /**
  * Renders a {@link UiTree}: a list of recursive {@link UiTreeNode}s.
@@ -36,7 +37,7 @@ function renderChild(node, r) {
     return node.type ? r.render(node) : renderTreeNode(node, r);
 }
 function renderLabel(node, r) {
-    const icon = node.icon ? `<span class="sui-tree-icon">${escapeHtml(node.icon)}</span>` : "";
+    const icon = node.icon ? `<span class="sui-tree-icon">${renderIcon(node.icon)}</span>` : "";
     const inner = node.labelNode ? r.render(node.labelNode) : escapeHtml(node.label ?? "");
     const labelCls = `sui-tree-label${node.selected ? " is-selected" : ""}`;
     // A clickable label is an anchor carrying the trigger; the event bus
