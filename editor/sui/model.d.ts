@@ -110,6 +110,14 @@ export interface UiAction {
      * the label becomes the accessible name. See {@link UiIcon}.
      */
     icon?: string;
+    /**
+     * Force the busy/loading state declaratively — renders with the
+     * `is-loading` spinner and disabled. Use this when the server drives the
+     * state (push `loading:true` via a patch, then replace with the result).
+     * The event bus already toggles the same class automatically for the
+     * duration of a click's own request, so you don't set this for that case.
+     */
+    loading?: boolean;
 }
 export interface UiLink {
     type: "link";
@@ -122,6 +130,13 @@ export interface UiLink {
     external?: boolean;
     /** Leading icon token rendered before the label. See {@link UiIcon}. */
     icon?: string;
+    /**
+     * Optional click behaviour dispatched via the event bus (a `data-trigger`
+     * anchor) — fires a fetch / patch instead of a plain navigation, and shows
+     * inline loading while in flight. `href` stays the no-JS fallback. Ignored
+     * for `external` links. See {@link UiTrigger}.
+     */
+    onClick?: UiTrigger;
 }
 export interface UiListItem {
     id: string;
@@ -191,6 +206,45 @@ export interface UiIcon {
     /** Icon token: semantic alias (`"delete"`) or raw sprite id (`"trash-2"`). */
     name: string;
     /** Accessible label; when absent the icon is decorative (aria-hidden). */
+    title?: string;
+    cssClass?: string;
+}
+/**
+ * A busy indicator — a spinning glyph, optionally with a label. Use it as a
+ * declarative placeholder while content loads, then replace it via a patch.
+ * Distinct from the transient `is-loading` feedback the event bus paints on the
+ * clicked control automatically (that one needs no node). Mirrors UiSpinner.java.
+ */
+export interface UiSpinner {
+    type: "spinner";
+    id?: string;
+    /** Glyph size. Defaults to `"MD"`. */
+    size?: "SM" | "MD" | "LG";
+    /** Optional visible text next to the glyph (e.g. `"Loading…"`). */
+    label?: string;
+    /** Accessible label (role="status"). */
+    title?: string;
+    cssClass?: string;
+}
+/**
+ * A progress indicator — a horizontal bar or a circular ring. Set `value`
+ * (against `max`, default 100) for determinate progress; leave `value`
+ * undefined for an indeterminate (looping) animation. `status` tints the fill.
+ * Mirrors UiProgress.java.
+ */
+export interface UiProgress {
+    type: "progress";
+    id?: string;
+    /** Current progress; undefined renders an indeterminate animation. */
+    value?: number;
+    /** Upper bound for `value`. Defaults to 100. */
+    max?: number;
+    /** Bar (default) or circular ring. */
+    variant?: "BAR" | "CIRCLE";
+    /** Colour intent of the fill. Defaults to `"NORMAL"`. */
+    status?: "NORMAL" | "SUCCESS" | "WARNING" | "ERROR";
+    /** Whether to show the `NN%` text. Defaults to true. */
+    showValue?: boolean;
     title?: string;
     cssClass?: string;
 }
@@ -270,6 +324,12 @@ export interface UiTable extends UiNodeBase {
     selectMode?: "NONE" | "SINGLE" | "MULTI";
     /** Pre-selected row ids — pre-checks the radio/checkbox at render time. */
     selectedRowIds?: string[];
+    /**
+     * When true the table collapses to stacked cards on a narrow screen (header
+     * hidden; each row a block of `Column: value` lines via per-cell
+     * `data-label`). Wide screens keep the normal table.
+     */
+    stackOnMobile?: boolean;
 }
 export interface UiList extends UiNodeBase {
     type: "list";
@@ -307,6 +367,60 @@ export interface UiTree extends UiNodeBase {
     nodes: UiTreeNode[];
 }
 /**
+ * One entry in a {@link UiMenu} — a leaf link or a nesting group. A full
+ * `UiNode` (type `"menu-item"`), so a patch can REPLACE a single entry (flip
+ * `selected`, swap a label) without re-rendering the menu. Mirrors
+ * UiMenuItem.java.
+ */
+export interface UiMenuItem extends UiNodeBase {
+    type: "menu-item";
+    label?: string;
+    /** Leading icon token — the only visible affordance in the rail. See {@link UiIcon}. */
+    icon?: string;
+    /** Navigation target for a leaf; the no-JS fallback when `onClick` is set. */
+    href?: string;
+    /** Optional click behaviour dispatched via the bus (else plain navigation). */
+    onClick?: UiTrigger;
+    /** Highlights the current item as active. */
+    selected?: boolean;
+    /** Trailing badge (a count or short status); shrinks to a dot in the rail. */
+    badge?: string;
+    /** When true (and the item has children), the group renders initially open. */
+    open?: boolean;
+    /** Nested entries; when present this item is a collapsible / fly-out group. */
+    children?: UiMenuItem[];
+}
+/**
+ * A vertical navigation menu (the collapsible admin sidebar). Toggles between
+ * EXPANDED (icon + label), RAIL (icon-only, groups as hover fly-outs) and
+ * HIDDEN (off-canvas) via a hamburger. `state` is the initial state; the SPA
+ * bus cycles + persists it client-side, and a server can drive it by patching.
+ * Mirrors UiMenu.java.
+ */
+export interface UiMenu extends UiNodeBase {
+    type: "menu";
+    items: UiMenuItem[];
+    /** Initial display state. Defaults to `"EXPANDED"`. */
+    state?: "EXPANDED" | "RAIL" | "HIDDEN";
+    /**
+     * `"PUSH"` (default) — the menu takes layout space and content reflows as
+     * it collapses; `"OVERLAY"` — a drawer floating over the content with a
+     * backdrop; `"RESPONSIVE"` — push on a wide screen (hamburger toggles
+     * expanded ⇄ rail), an overlay drawer on a narrow one (closed by default).
+     * Overlay/responsive need a `position:relative` container; pair with a
+     * header hamburger.
+     */
+    mode?: "PUSH" | "OVERLAY" | "RESPONSIVE";
+    /**
+     * Which edge the menu sits on — sets the border edge, the direction rail
+     * fly-outs/tooltips open, and the way an overlay drawer slides out. Defaults
+     * to `"LEFT"`. For a PUSH menu, also order it accordingly in the stack.
+     */
+    side?: "LEFT" | "RIGHT";
+    /** Whether to render the hamburger toggle. Defaults to true. */
+    toggle?: boolean;
+}
+/**
  * Plain composition container — children rendered one after another with no
  * chrome of its own. Parity with {@code UiStack.java}.
  */
@@ -338,6 +452,13 @@ export interface UiSection extends UiNodeBase {
     initialSection?: string;
     collapseSummary?: string;
     collapseOpen?: boolean;
+    /**
+     * Tab-bar overflow: `"WRAP"` (default) lets tabs flow onto more rows;
+     * `"MENU"` keeps one row and collapses the tabs that don't fit into a
+     * trailing "⋯ More" dropdown (needs the SPA; falls back to wrapping
+     * without JS).
+     */
+    tabOverflow?: "WRAP" | "MENU";
 }
 export interface UiChart extends UiNodeBase {
     type: "chart";
@@ -363,6 +484,12 @@ export interface UiHeader extends UiNodeBase {
     user?: UiHeaderUser;
     /** Extra widgets rendered between brand and user widget (e.g. theme picker). */
     extras?: UiNode[];
+    /**
+     * Id of a {@link UiMenu} this header controls. When set, a leading
+     * hamburger is rendered that toggles that menu (same `data-menu-toggle`
+     * hook as the menu's own). Moves the burger into the top bar.
+     */
+    menuToggle?: string;
 }
 export interface UiHeaderUser {
     name: string;
@@ -403,7 +530,7 @@ export interface UiFieldGroup extends UiNodeBase {
     hint?: string;
     content?: UiNode[];
 }
-export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiTreeNode | UiSection | UiStack | UiChart | UiHeader | UiText | UiIcon | UiLink | UiAction | UiField | UiDialog | UiUpload;
+export type UiNode = UiForm | UiFieldGroup | UiDetail | UiTable | UiList | UiTree | UiTreeNode | UiMenu | UiMenuItem | UiSection | UiStack | UiChart | UiHeader | UiText | UiIcon | UiSpinner | UiProgress | UiLink | UiAction | UiField | UiDialog | UiUpload;
 export interface UiPage {
     navigate?: string;
     node?: UiNode;

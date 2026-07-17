@@ -419,6 +419,17 @@ export declare class SuiEventBus {
      * according to {@link #setLoadingPolicy}.
      */
     dispatch(trigger: UiTrigger, sourceElement?: HTMLElement, files?: File[]): Promise<void>;
+    /**
+     * Marks the clicked control as busy: adds `.is-loading` (CSS spinner +
+     * pointer-events:none) and `aria-busy`. Skips the renderer root — that is
+     * the fallback source for element-less imperative dispatches, and painting
+     * a spinner across the whole surface is the global indicator's job, not
+     * this one's. Returns the element so {@link #clearBusy} can undo it, or
+     * null when nothing was marked.
+     */
+    private markBusy;
+    /** Reverts {@link #markBusy}. Safe on a since-detached element. */
+    private clearBusy;
     private shouldShowLoading;
     private installRootListeners;
     /** Pre-bound handler set; keeps {@code add/removeEventListener} symmetric. */

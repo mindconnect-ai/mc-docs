@@ -37,14 +37,16 @@ export function renderTable(node, r) {
                 : "";
         const cells = cols.map(c => {
             const key = c.dataKey ?? c.id;
+            // data-label lets the stacked-card mobile layout show "Column: value".
+            const label = c.label ? ` data-label="${escapeHtml(c.label)}"` : "";
             if (c.cellTemplate) {
                 // Clone, substitute, suffix ids, then dispatch through the
                 // renderer so handlers (link, action, text, …) take over.
                 const cloned = substituteCellTemplate(c.cellTemplate, ctx, rowSuffix);
-                return `<td>${r.render(cloned)}</td>`;
+                return `<td${label}>${r.render(cloned)}</td>`;
             }
             const v = data[key];
-            return `<td>${v != null ? escapeHtml(v) : ""}</td>`;
+            return `<td${label}>${v != null ? escapeHtml(v) : ""}</td>`;
         }).join("");
         // Row-actions get a context object that surfaces both the row's own
         // {@code id} (UiNode-level) and its {@code data} map — that way the
@@ -70,7 +72,8 @@ export function renderTable(node, r) {
     // the only way a single column swap can update every cell consistently.
     // Same data-node convention as renderForm.
     const nodeJson = escapeHtml(JSON.stringify(node));
-    return `<div class="${cls("sui-table", node)}" id="${escapeHtml(node.id)}" data-sui="table" data-node='${nodeJson}'>
+    const stackCls = node.stackOnMobile ? "sui-table sui-table--stack" : "sui-table";
+    return `<div class="${cls(stackCls, node)}" id="${escapeHtml(node.id)}" data-sui="table" data-node='${nodeJson}'>
         ${node.title ? `<div class="sui-table-header"><h2>${escapeHtml(node.title)}</h2>${renderActions(node.actions || [])}</div>` : ""}
         <table>
             <thead><tr>${thead}</tr></thead>

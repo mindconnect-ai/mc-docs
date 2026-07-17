@@ -1,3 +1,4 @@
+import { applyMenuState, nextMenuState } from "./renderers/menu.js";
 /**
  * Centralised event handling, behaviour dispatch and SPA navigation for
  * one semantic-ui root element. Owns one {@code click} and one
@@ -610,6 +611,13 @@ export class SuiEventBus {
             return;
         }
         const showLoading = this.shouldShowLoading(ctx);
+        // Inline feedback on the very control the user clicked: an `is-loading`
+        // class (CSS paints a small spinner and blocks re-clicks) plus
+        // `aria-busy`. Tied to the same policy/lifecycle as the global loading
+        // indicator, so a `manual` policy suppresses both. Only a concrete
+        // source element is marked — an imperative dispatch() with no element
+        // falls back to the root, which we never decorate.
+        const busyEl = showLoading ? this.markBusy(sourceElement) : null;
         if (showLoading)
             this.renderer.showLoading();
         try {
@@ -621,7 +629,29 @@ export class SuiEventBus {
         finally {
             if (showLoading)
                 this.renderer.hideLoading();
+            if (busyEl)
+                this.clearBusy(busyEl);
         }
+    }
+    /**
+     * Marks the clicked control as busy: adds `.is-loading` (CSS spinner +
+     * pointer-events:none) and `aria-busy`. Skips the renderer root — that is
+     * the fallback source for element-less imperative dispatches, and painting
+     * a spinner across the whole surface is the global indicator's job, not
+     * this one's. Returns the element so {@link #clearBusy} can undo it, or
+     * null when nothing was marked.
+     */
+    markBusy(el) {
+        if (!el || el === this.root)
+            return null;
+        el.classList.add("is-loading");
+        el.setAttribute("aria-busy", "true");
+        return el;
+    }
+    /** Reverts {@link #markBusy}. Safe on a since-detached element. */
+    clearBusy(el) {
+        el.classList.remove("is-loading");
+        el.removeAttribute("aria-busy");
     }
     shouldShowLoading(ctx) {
         if (this.loadingPolicy === "manual")
@@ -850,6 +880,29 @@ export class SuiEventBus {
         if (closeEl && closeEl.closest(".sui-dialog-host")) {
             e.preventDefault();
             this.closeDialogAround(closeEl);
+            return;
+        }
+        // Menu hamburger: a purely client-side state cycle (expanded → rail →
+        // hidden), like tab-switching. No server round-trip; the choice is
+        // persisted to localStorage by applyMenuState. Handled before the
+        // generic [data-trigger]/[data-action] paths so the toggle never
+        // dispatches a fetch.
+        const menuToggle = target.closest("[data-menu-toggle]");
+        if (menuToggle && this.inScope(menuToggle)) {
+            e.preventDefault();
+            const menu = document.getElementById(menuToggle.dataset.menuToggle)
+                ?? menuToggle.closest(".sui-menu");
+            if (menu)
+                applyMenuState(menu, nextMenuState(menu));
+            return;
+        }
+        // Overlay backdrop: close the drawer (→ hidden) without cycling.
+        const menuClose = target.closest("[data-menu-close]");
+        if (menuClose && this.inScope(menuClose)) {
+            e.preventDefault();
+            const menu = document.getElementById(menuClose.dataset.menuClose);
+            if (menu)
+                applyMenuState(menu, "hidden");
             return;
         }
         const tab = target.closest(".sui-tab");

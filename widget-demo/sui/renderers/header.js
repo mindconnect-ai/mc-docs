@@ -1,4 +1,5 @@
 import { escapeHtml } from "../renderer.js";
+import { renderIcon } from "./icon.js";
 import { cls } from "./util.js";
 /**
  * Page-level header: brand left, optional extras + user widget right.
@@ -11,6 +12,11 @@ import { cls } from "./util.js";
  */
 export function renderHeader(node, r) {
     const idAttr = node.id ? ` id="${escapeHtml(node.id)}"` : "";
+    // Leading hamburger that toggles a named menu (data-menu-toggle is handled
+    // by the event bus, targeting the menu by id). Moves the burger into the top bar.
+    const burger = node.menuToggle
+        ? `<button type="button" class="sui-menu-toggle sui-header-burger" data-menu-toggle="${escapeHtml(node.menuToggle)}" aria-label="Toggle menu">${renderIcon("menu")}</button>`
+        : "";
     const logo = node.brandLogo
         ? `<img class="sui-header-logo" src="${escapeHtml(node.brandLogo)}" alt="${escapeHtml(node.brand)}">`
         : "";
@@ -26,5 +32,5 @@ export function renderHeader(node, r) {
             <span class="sui-header-username">${escapeHtml(node.user.name)}</span>
           </a>`
         : "";
-    return `<header class="${cls("sui-header", node)}"${idAttr}>${brand}<div class="sui-header-right">${extras}${user}</div></header>`;
+    return `<header class="${cls("sui-header", node)}"${idAttr}>${burger}${brand}<div class="sui-header-right">${extras}${user}</div></header>`;
 }

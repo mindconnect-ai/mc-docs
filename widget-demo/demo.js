@@ -15,7 +15,7 @@
  *     import { createDefaultRenderer } from "./sui/renderer.js";
  *     createDefaultRenderer().attach(el).mount({ type: "text", id: "t", text: "hi" });
  */
-import { createDefaultRenderer, escapeHtml, renderIcon } from "./sui/renderer.js";
+import { createDefaultRenderer, escapeHtml, renderIcon, restoreMenuState, wireTabOverflow } from "./sui/renderer.js";
 import { SuiEventBus } from "./sui/eventbus.js";
 
 // All icon tokens in the sprite, filled at boot from ./sui/icons.svg so the
@@ -42,6 +42,28 @@ const codeNode = (id, code)       => ({ type: "code", id, code });
 let _uid = 0;
 const slug = (s) => s.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "") || `n${_uid++}`;
 
+// The product-form fields, defined once (clean). The Forms tab renders them
+// with errors on load; Cancel patches these clean versions back to clear them.
+const DEMO_FORM_ERRORS = {
+    "f-name": "Name is required.", "f-desc": "Add at least a short description.",
+    "f-price": "Price must be greater than 0.", "f-count": "Enter a whole number.",
+    "f-launch": "Launch date can't be in the past.", "f-cat": "Pick a category.",
+    "f-tags": "Choose at least one tag.", "f-active": "This must be confirmed.",
+};
+const DEMO_FORM_FIELDS = [
+    { type: "field", id: "f-name",  label: "Name",        fieldType: "TEXT",     required: true, editable: true, placeholder: "e.g. Widget" },
+    { type: "field", id: "f-desc",  label: "Description", fieldType: "TEXTAREA", editable: true, hint: "Markdown supported", placeholder: "Describe the product…" },
+    { type: "field", id: "f-price", label: "Price",       fieldType: "NUMBER",   editable: true, value: 19.0, step: "0.01" },
+    { type: "field", id: "f-count", label: "In stock",    fieldType: "NUMBER",   editable: true, value: 128, min: "0" },
+    { type: "field", id: "f-launch",label: "Launch date", fieldType: "DATE",     editable: true, value: "2026-07-06" },
+    { type: "field", id: "f-cat",   label: "Category",    fieldType: "SELECT",   editable: true, value: "tools",
+      options: [{ value: "tools", label: "Tools" }, { value: "toys", label: "Toys" }, { value: "home", label: "Home" }] },
+    { type: "field", id: "f-tags",  label: "Tags",        fieldType: "MULTISELECT", editable: true,
+      options: [{ value: "new", label: "New" }, { value: "sale", label: "Sale" }, { value: "eco", label: "Eco" }] },
+    { type: "field", id: "f-active",label: "Active",      fieldType: "BOOLEAN",  editable: true, value: true },
+];
+const withError = (f) => ({ ...f, validationError: DEMO_FORM_ERRORS[f.id] });
+
 // A collapsible "Show code" panel with JSON | Java tabs. The JSON is generated
 // straight from the node being rendered, so it can never drift from the widget.
 function codePanel(id, node, java) {
@@ -63,7 +85,7 @@ function specimen(id, headingText, node, java) {
 
 // ── Page header (chrome) ────────────────────────────────────────────────────
 function pageHeader() {
-    return { type: "header", id: "demo-header", brand: "Semantic UI", user: { name: "Ada Lovelace", initials: "AL" } };
+    return { type: "header", id: "demo-header", brand: "Semantic UI", brandLogo: "./mindconnect-logo.svg", user: { name: "Ada Lovelace", initials: "AL" } };
 }
 
 function introNote() {
@@ -177,7 +199,7 @@ function dataTab() {
 
     const table = {
         type: "table", id: "demo-table", title: "Products",
-        selectMode: "MULTI", selectedRowIds: ["p2"],
+        selectMode: "MULTI", selectedRowIds: ["p2"], stackOnMobile: true,
         rowActions: [{ type: "action", id: "row-edit", label: "Edit", style: "SECONDARY", onClick: api("GET", "/products/edit") }],
         columns: [
             { type: "column", id: "col-name",  label: "Name",  dataKey: "name" },
@@ -201,6 +223,7 @@ function dataTab() {
     .row(Map.of("id", "p3", "name", "Gizmo",  "price", "€ 99.00", "stock", "0"))
     .selectMode(UiTable.SelectMode.MULTI)
     .selectedRowIds(List.of("p2"))
+    .stackOnMobile(true)   // narrow screens: each row becomes a Column: value card
     .rowAction(UiAction.secondary("row-edit", "Edit").onClick(UiTrigger.api("GET", "/products/edit")))
     .paginate(1, 3, 57);`;
 
@@ -214,21 +237,10 @@ function dataTab() {
 function formsTab() {
     const form = {
         type: "form", id: "demo-form", title: "New product",
-        fields: [
-            { type: "field", id: "f-name",  label: "Name",        fieldType: "TEXT",     required: true, editable: true, placeholder: "e.g. Widget" },
-            { type: "field", id: "f-desc",  label: "Description", fieldType: "TEXTAREA", editable: true, hint: "Markdown supported", placeholder: "Describe the product…" },
-            { type: "field", id: "f-price", label: "Price",       fieldType: "NUMBER",   editable: true, value: 19.0, step: "0.01" },
-            { type: "field", id: "f-count", label: "In stock",    fieldType: "NUMBER",   editable: true, value: 128, min: "0" },
-            { type: "field", id: "f-launch",label: "Launch date", fieldType: "DATE",     editable: true, value: "2026-07-06" },
-            { type: "field", id: "f-cat",   label: "Category",    fieldType: "SELECT",   editable: true, value: "tools",
-              options: [{ value: "tools", label: "Tools" }, { value: "toys", label: "Toys" }, { value: "home", label: "Home" }] },
-            { type: "field", id: "f-tags",  label: "Tags",        fieldType: "MULTISELECT", editable: true,
-              options: [{ value: "new", label: "New" }, { value: "sale", label: "Sale" }, { value: "eco", label: "Eco" }] },
-            { type: "field", id: "f-active",label: "Active",      fieldType: "BOOLEAN",  editable: true, value: true },
-        ],
+        fields: DEMO_FORM_FIELDS.map(withError),
         actions: [
             { type: "action", id: "f-save",   label: "Save",   style: "PRIMARY",   onClick: api3("POST", "/products", "demo-form") },
-            { type: "action", id: "f-cancel", label: "Cancel", style: "SECONDARY", onClick: go("/products") },
+            { type: "action", id: "f-cancel", label: "Cancel", style: "SECONDARY", onClick: api("POST", "/form-reset") },
             { type: "action", id: "f-delete", label: "Delete", style: "DANGER", confirm: "Delete this product?", onClick: api("DELETE", "/products/1") },
         ],
         links: [{ type: "link", id: "f-help", rel: "ref", href: "#", label: "Need help?" }],
@@ -246,7 +258,7 @@ function formsTab() {
         UiField.Option.of("new", "New"), UiField.Option.of("sale", "Sale"), UiField.Option.of("eco", "Eco"))).asEditable())
     .field(UiField.bool("f-active", "Active", true).asEditable())
     .action(UiAction.primary("f-save", "Save").onClick(UiTrigger.api("POST", "/products", "demo-form")))
-    .action(UiAction.secondary("f-cancel", "Cancel").onClick(UiTrigger.go("/products")))
+    .action(UiAction.secondary("f-cancel", "Cancel").onClick(UiTrigger.api("POST", "/form-reset")))
     .action(UiAction.danger("f-delete", "Delete").confirm("Delete this product?").onClick(UiTrigger.api("DELETE", "/products/1")))
     .link(UiLink.of("ref", "#", "Need help?"));`;
 
@@ -267,6 +279,7 @@ function formsTab() {
     .link(UiLink.of("ref", "#", "View history"));`;
 
     return stack("tab-forms", [
+        text("forms-intro", "The form loads with every field flagged. Press Save and the “server” pushes an error onto each field via a patch; press Cancel and it patches them all back clean. Both are REPLACE patches targeting the fields — the canonical form-error-via-patch flow."),
         specimen("sp-form",   "Form — field types, action styles, links", form, formJava),
         specimen("sp-detail", "Detail — a read-only definition list", detail, detailJava),
     ], { gap: 16 });
@@ -409,17 +422,224 @@ function iconsTab() {
     ], { gap: 16 });
 }
 
+// ── Tab: Feedback (spinners, progress, inline loading) ──────────────────────
+function feedbackTab() {
+    // Spinners: three sizes + one labelled. Each is a plain UiSpinner node.
+    const spinners = {
+        type: "stack", id: "fb-spinners", direction: "HORIZONTAL", gap: 24, children: [
+            { type: "spinner", id: "fb-sp-sm", size: "SM", title: "Loading" },
+            { type: "spinner", id: "fb-sp-md", size: "MD", title: "Loading" },
+            { type: "spinner", id: "fb-sp-lg", size: "LG", title: "Loading" },
+            { type: "spinner", id: "fb-sp-lbl", label: "Loading…" },
+        ],
+    };
+    const spinnersJava =
+`UiStack.of(
+    UiSpinner.of().size(UiSpinner.Size.SM).labelled("Loading"),
+    UiSpinner.of().size(UiSpinner.Size.MD).labelled("Loading"),
+    UiSpinner.of().size(UiSpinner.Size.LG).labelled("Loading"),
+    UiSpinner.of("Loading…")
+).direction(UiStack.Direction.HORIZONTAL).gap(24);`;
+
+    // Progress bars: determinate at various values + status colours + one
+    // indeterminate. "fb-live-bar" is animated post-mount via patches.
+    const bars = {
+        type: "stack", id: "fb-bars", gap: 14, children: [
+            { type: "progress", id: "fb-bar-25", value: 25 },
+            { type: "progress", id: "fb-live-bar", value: 0 },
+            { type: "progress", id: "fb-bar-100", value: 100, status: "SUCCESS" },
+            { type: "progress", id: "fb-bar-warn", value: 80, status: "WARNING", showValue: false },
+            { type: "progress", id: "fb-bar-err", value: 45, status: "ERROR" },
+            { type: "progress", id: "fb-bar-ind" },
+        ],
+    };
+    const barsJava =
+`UiStack.of(
+    UiProgress.of(25),
+    UiProgress.of(0),                                   // animated live via patches
+    UiProgress.of(100).status(UiProgress.Status.SUCCESS),
+    UiProgress.of(80).status(UiProgress.Status.WARNING).showValue(false),
+    UiProgress.of(45).status(UiProgress.Status.ERROR),
+    UiProgress.indeterminate()
+).gap(14);`;
+
+    // Circular progress: determinate + success + indeterminate ring.
+    const rings = {
+        type: "stack", id: "fb-rings", direction: "HORIZONTAL", gap: 24, children: [
+            { type: "progress", id: "fb-live-ring", value: 0, variant: "CIRCLE" },
+            { type: "progress", id: "fb-ring-100", value: 100, variant: "CIRCLE", status: "SUCCESS" },
+            { type: "progress", id: "fb-ring-ind", variant: "CIRCLE" },
+        ],
+    };
+    const ringsJava =
+`UiStack.of(
+    UiProgress.of(0).variant(UiProgress.Variant.CIRCLE),   // animated live
+    UiProgress.of(100).variant(UiProgress.Variant.CIRCLE).status(UiProgress.Status.SUCCESS),
+    UiProgress.indeterminate().variant(UiProgress.Variant.CIRCLE)
+).direction(UiStack.Direction.HORIZONTAL).gap(24);`;
+
+    // Inline loading: clicking any of these fires a trigger; the event bus
+    // paints a spinner on the clicked control until the request resolves. The
+    // demo fetcher delays ~700ms so the effect is visible without a backend.
+    const buttons = {
+        type: "stack", id: "fb-load-btns", direction: "HORIZONTAL", gap: 8, children: [
+            { type: "action", id: "fb-load-save", label: "Save", icon: "save", style: "PRIMARY", onClick: api("POST", "/save") },
+            { type: "action", id: "fb-load-sync", label: "Sync", style: "SECONDARY", onClick: api("POST", "/sync") },
+            { type: "action", id: "fb-load-ref", label: "Refresh", icon: "refresh", appearance: "ICON", style: "SECONDARY", onClick: api("GET", "/refresh") },
+            // A UiLink can carry an onClick trigger too — it dispatches through
+            // the bus (and gets inline loading) instead of navigating.
+            { type: "link", id: "fb-load-link", rel: "more", href: "/more", label: "Load more", onClick: api("GET", "/more") },
+        ],
+    };
+    const buttonsJava =
+`// No node opts in — the bus adds an "is-loading" class to whatever control
+// the user clicked, for the duration of the dispatch. Suppress it per-page
+// with bus.setLoadingPolicy("manual").
+UiStack.of(
+    UiAction.primary("fb-load-save", "Save").icon("save").onClick(UiTrigger.api("POST", "/save")),
+    UiAction.secondary("fb-load-sync", "Sync").onClick(UiTrigger.api("POST", "/sync")),
+    UiAction.secondary("fb-load-ref", "Refresh").icon("refresh").appearance(UiAction.Appearance.ICON).onClick(UiTrigger.api("GET", "/refresh")),
+    UiLink.of("more", "/more", "Load more").onClick(UiTrigger.api("GET", "/more"))   // link with onClick
+).direction(UiStack.Direction.HORIZONTAL).gap(8);`;
+
+    // Declarative loading: a button forced into the busy state by the model
+    // (e.g. the server pushes loading:true, then replaces it with the result).
+    const stateful = {
+        type: "stack", id: "fb-state-btns", direction: "HORIZONTAL", gap: 8, children: [
+            { type: "action", id: "fb-state-idle", label: "Save", icon: "save", style: "PRIMARY", onClick: api("POST", "/x") },
+            { type: "action", id: "fb-state-busy", label: "Saving…", style: "PRIMARY", loading: true },
+        ],
+    };
+    const statefulJava =
+`UiStack.of(
+    UiAction.primary("fb-state-idle", "Save").icon("save").onClick(UiTrigger.api("POST", "/x")),
+    UiAction.primary("fb-state-busy", "Saving…").loading(true)   // forced busy + disabled
+).direction(UiStack.Direction.HORIZONTAL).gap(8);`;
+
+    return stack("tab-feedback", [
+        text("fb-intro", "Two kinds of loading feedback. A UiSpinner / UiProgress node is declarative — you place it in the tree and replace it via a patch when data arrives. Inline loading is automatic — the event bus marks the clicked control busy for the duration of its request. No node needed."),
+        specimen("sp-fb-spin", "Spinners — SM · MD · LG · labelled", spinners, spinnersJava),
+        specimen("sp-fb-bars", "Progress bars — determinate, status colours, indeterminate", bars, barsJava),
+        specimen("sp-fb-rings", "Circular progress", rings, ringsJava),
+        specimen("sp-fb-load", "Inline loading on click — press a button (demo delays ~700ms)", buttons, buttonsJava),
+        specimen("sp-fb-state", "Declarative loading — a button set busy by the model (loading:true)", stateful, statefulJava),
+    ], { gap: 16 });
+}
+
+// ── Tab: Navigation (collapsible sidebar menu) ──────────────────────────────
+function navTab() {
+    const menu = {
+        type: "menu", id: "demo-menu", title: "Admin", state: "EXPANDED",
+        items: [
+            { type: "menu-item", id: "nm-dash", label: "Dashboard", icon: "dashboard", href: "/dash", selected: true },
+            { type: "menu-item", id: "nm-cat", label: "Catalog", icon: "grid", open: true, children: [
+                { type: "menu-item", id: "nm-prod", label: "Products",  icon: "tag",      href: "/products" },
+                { type: "menu-item", id: "nm-cust", label: "Customers", icon: "users",    href: "/customers" },
+                { type: "menu-item", id: "nm-inv",  label: "Inventory", icon: "database", href: "/inventory" },
+            ] },
+            { type: "menu-item", id: "nm-orders", label: "Orders", icon: "table", onClick: api("GET", "/orders") },
+            { type: "menu-item", id: "nm-set", label: "Settings", icon: "settings", children: [
+                { type: "menu-item", id: "nm-users", label: "Users",    icon: "user", href: "/settings/users" },
+                { type: "menu-item", id: "nm-sec",   label: "Security", icon: "lock", href: "/settings/security" },
+            ] },
+            { type: "menu-item", id: "nm-logout", label: "Log out", icon: "logout", href: "/logout" },
+        ],
+    };
+    const menuJava =
+`UiMenu.of("demo-menu", "Admin",
+    UiMenuItem.link("nm-dash", "Dashboard", "/dash").icon("dashboard").selected(true),
+    UiMenuItem.group("nm-cat", "Catalog",
+        UiMenuItem.link("nm-prod", "Products",  "/products").icon("tag"),
+        UiMenuItem.link("nm-cust", "Customers", "/customers").icon("users"),
+        UiMenuItem.link("nm-inv",  "Inventory", "/inventory").icon("database")
+    ).icon("grid").open(true),
+    UiMenuItem.of("nm-orders", "Orders").icon("table").onClick(UiTrigger.api("GET", "/orders")),
+    UiMenuItem.group("nm-set", "Settings",
+        UiMenuItem.link("nm-users", "Users",    "/settings/users").icon("user"),
+        UiMenuItem.link("nm-sec",   "Security", "/settings/security").icon("lock")
+    ).icon("settings"),
+    UiMenuItem.link("nm-logout", "Log out", "/logout").icon("logout")
+).state(UiMenu.State.EXPANDED);`;
+
+    return stack("tab-nav", [
+        text("nav-intro", "A collapsible sidebar for admin shells. Click the ☰ hamburger to cycle three states: expanded (icon + label) → rail (icons only; hover a group for a fly-out submenu, hover a leaf for its tooltip) → hidden. The choice is remembered in localStorage. Groups nest arbitrarily and expand inline when expanded. Without JS the items are real links, groups are native <details>, and the hamburger still shows/hides via a checkbox."),
+        specimen("sp-nav-menu", "Sidebar menu — click ☰ to cycle expanded · rail · hidden", menu, menuJava),
+        heading("Complete app shell — header + sidebar + content"),
+        text("shell-intro", "Three ways the sidebar relates to the content, all the same node tree with a different mode. PUSH: the sidebar occupies layout space, so content reflows wider as it collapses (☰ cycles expanded → rail → gone). OVERLAY: a drawer floating over the content with a backdrop; content stays put (click the backdrop or ☰ to close). RESPONSIVE: push on a wide screen (☰ flips expanded ⇄ rail, never fully gone) and an overlay drawer on a narrow one (closed by default) — resize the preview narrow to see it flip. In all three the hamburger lives in the header (UiHeader.menuToggle)."),
+        specimen("sp-shell-push", "App shell — PUSH (content reflows)", appShell("shellA", "PUSH"), appShellJava("PUSH", "LEFT")),
+        specimen("sp-shell-overlay", "App shell — OVERLAY, right side (drawer from the right)", appShell("shellB", "OVERLAY", "RIGHT"), appShellJava("OVERLAY", "RIGHT")),
+        specimen("sp-shell-resp", "App shell — RESPONSIVE (rail on desktop · drawer on mobile)", appShell("shellC", "RESPONSIVE"), appShellJava("RESPONSIVE", "LEFT")),
+    ], { gap: 16 });
+}
+
+// A complete admin shell: header (with the hamburger) + [sidebar, content].
+// The body row is position:relative (.demo-shell-body) so an overlay menu can
+// float within it. The menu's own toggle is off — the header owns the burger.
+function appShell(id, mode, side) {
+    const menuId = `${id}-menu`;
+    const p = id;
+    const navItems = [
+        { type: "menu-item", id: `${p}-dash`, label: "Dashboard", icon: "dashboard", href: "#", selected: true },
+        { type: "menu-item", id: `${p}-cat`, label: "Catalog", icon: "grid", open: true, children: [
+            { type: "menu-item", id: `${p}-prod`, label: "Products",  icon: "tag",   href: "#" },
+            { type: "menu-item", id: `${p}-cust`, label: "Customers", icon: "users", href: "#" },
+        ] },
+        { type: "menu-item", id: `${p}-ord`, label: "Orders", icon: "table", href: "#", badge: "12" },
+        { type: "menu-item", id: `${p}-set`, label: "Settings", icon: "settings", href: "#" },
+    ];
+    const right = side === "RIGHT";
+    const menu = { type: "menu", id: menuId, title: "Acme", state: "EXPANDED", mode, side: side || "LEFT", toggle: false, items: navItems };
+    const header = { type: "header", id: `${p}-hdr`, brand: "Acme Admin", menuToggle: menuId,
+        user: { name: "Ada Lovelace", initials: "AL" } };
+    const content = { type: "stack", id: `${p}-content`, cssClass: "demo-shell-content", gap: 12, children: [
+        { type: "text", id: `${p}-h`, text: "Dashboard", cssClass: "demo-h" },
+        { type: "text", id: `${p}-t`, text:
+            mode === "OVERLAY" ? `The sidebar floats over this panel as a drawer${right ? " from the right" : ""}. Click ☰ to open it, then the dimmed backdrop (or ☰ again) to close — this text never moves.`
+            : mode === "RESPONSIVE" ? "On a wide screen ☰ flips the sidebar expanded ⇄ rail (it never fully disappears). Make the preview narrow (< 768px) and ☰ turns it into an overlay drawer that's hidden by default — the mobile pattern."
+            : "The sidebar shares the row with this panel. Click ☰ to collapse it to a rail, then away entirely — watch this panel reflow wider each time." },
+    ] };
+    // For a right-side push menu, place it after the content in the row.
+    const bodyChildren = right ? [content, menu] : [menu, content];
+    const body = { type: "stack", id: `${p}-body`, direction: "HORIZONTAL", gap: 0, cssClass: "demo-shell-body", children: bodyChildren };
+    return { type: "stack", id, cssClass: "demo-shell", gap: 0, children: [header, body] };
+}
+
+function appShellJava(mode, side) {
+    const sideCall = side === "RIGHT" ? ".side(UiMenu.Side.RIGHT)" : "";
+    const order = side === "RIGHT" ? "contentPanel,\n        menu" : "menu,\n        contentPanel";
+    return `var menuId = "nav";
+var menu = UiMenu.of(menuId, "Acme",
+    UiMenuItem.link("dash", "Dashboard", "/dash").icon("dashboard").selected(true),
+    UiMenuItem.group("cat", "Catalog",
+        UiMenuItem.link("prod", "Products",  "/products").icon("tag"),
+        UiMenuItem.link("cust", "Customers", "/customers").icon("users")
+    ).icon("grid").open(true),
+    UiMenuItem.link("ord", "Orders", "/orders").icon("table").badge("12"),
+    UiMenuItem.link("set", "Settings", "/settings").icon("settings")
+).mode(UiMenu.Mode.${mode})${sideCall}.toggle(false);      // header owns the burger
+
+UiStack.of(
+    UiHeader.of("Acme Admin").menuToggle(menuId)           // hamburger in the top bar
+        .user(UiHeader.User.of("Ada Lovelace", "AL", "/me")),
+    UiStack.of(
+        ${order}                                           // right side → menu after content
+    ).direction(UiStack.Direction.HORIZONTAL).withCssClass("app-body")  // position: relative
+).direction(UiStack.Direction.VERTICAL);`;
+}
+
 function buildPage() {
     return stack("demo-root", [
         pageHeader(),
         introNote(),
         {
-            type: "section", id: "demo-tabs", initialSection: "sec-tree",
+            type: "section", id: "demo-tabs", initialSection: "sec-tree", tabOverflow: "MENU",
             sections: [
                 { type: "section-entry", id: "sec-tree",   title: "Tree",            content: treeTab() },
+                { type: "section-entry", id: "sec-nav",    title: "Navigation", icon: "menu", content: navTab() },
                 { type: "section-entry", id: "sec-data",   title: "Lists & Tables",  content: dataTab() },
                 { type: "section-entry", id: "sec-forms",  title: "Forms",           content: formsTab() },
                 { type: "section-entry", id: "sec-layout", title: "Layout & Charts", content: layoutTab() },
+                { type: "section-entry", id: "sec-feedback", title: "Feedback", icon: "loading", content: feedbackTab() },
                 { type: "section-entry", id: "sec-icons",  title: "Icons",           icon: "star", content: iconsTab() },
             ],
         },
@@ -554,6 +774,25 @@ function donutSvg(values, labels, isDonut) {
     </div>`;
 }
 
+// Animate the "live" progress bar + ring by replacing their nodes via patches
+// — exactly how a server would push progress: a REPLACE op on the node id. This
+// is the idiomatic alternative to poking the DOM directly, and it exercises the
+// same patch path the SPA uses for real server-driven updates.
+function wireLiveProgress(renderer) {
+    let pct = 0;
+    setInterval(() => {
+        pct = (pct + 5) % 105;               // 0 → 100, then wrap back to 0
+        const v = Math.min(pct, 100);
+        const done = v === 100;
+        renderer.applyPatch({ patches: [
+            { op: "REPLACE", targetId: "fb-live-bar",
+              node: { type: "progress", id: "fb-live-bar", value: v, status: done ? "SUCCESS" : "NORMAL" } },
+            { op: "REPLACE", targetId: "fb-live-ring",
+              node: { type: "progress", id: "fb-live-ring", value: v, variant: "CIRCLE", status: done ? "SUCCESS" : "NORMAL" } },
+        ] });
+    }, 500);
+}
+
 // ── A tiny client-side toast, so triggers give visible feedback ─────────────
 function showToast(message) {
     const el = document.createElement("div");
@@ -572,7 +811,70 @@ export { buildPage, renderDemoChart, renderCode };
 // ── Boot ────────────────────────────────────────────────────────────────────
 // Guarded so the module can be imported in a non-DOM environment (e.g. a Node
 // smoke test that just renders buildPage() to a string).
+// Viewport toggle: swap the whole showcase for a phone-width iframe of itself,
+// so the REAL @media breakpoints fire (viewport-based rules like the stacked
+// table and the responsive sidebar drawer don't trigger from a narrow container
+// alone — they need a narrow viewport, which the iframe provides).
+function wireViewportToggle() {
+    const btn = document.getElementById("demo-viewport");
+    const main = document.querySelector(".demo-main");
+    const root = document.getElementById("sui-root");
+    if (!btn || !main || !root) return;
+    // Real sprite icons: a smartphone when offering the mobile preview, a
+    // monitor when offering to go back to desktop.
+    const setBtn = (offerMobile) => {
+        btn.innerHTML = offerMobile
+            ? `${renderIcon("smartphone")}<span>Mobile view</span>`
+            : `${renderIcon("monitor")}<span>Desktop view</span>`;
+    };
+    setBtn(true);
+    let device = null;
+    btn.addEventListener("click", () => {
+        if (device) {
+            device.remove(); device = null;
+            root.style.display = "";
+            setBtn(true);
+            btn.classList.remove("active");
+            return;
+        }
+        root.style.display = "none";
+        device = document.createElement("div");
+        device.className = "demo-device";
+        const sep = location.search ? "&" : "?";
+        device.innerHTML =
+            `<div class="demo-device-notch"></div>` +
+            `<iframe title="Mobile preview" src="${location.pathname}${location.search}${sep}embedded=1"></iframe>`;
+        main.appendChild(device);
+        // The iframe is a separate document — mirror the current theme into it
+        // once it loads (and every later theme switch is propagated too).
+        const frame = device.querySelector("iframe");
+        frame.addEventListener("load", () => applyDemoTheme(currentDemoTheme()));
+        setBtn(false);
+        btn.classList.add("active");
+    });
+}
+
+/** Current theme class from the top-bar selector (empty string = light). */
+function currentDemoTheme() {
+    const sel = document.getElementById("demo-theme");
+    return sel ? sel.value : "";
+}
+
+/** Applies a theme class to the shell AND the phone-frame iframe, if present. */
+function applyDemoTheme(value) {
+    document.documentElement.className = value;
+    const frame = document.querySelector(".demo-device iframe");
+    if (frame && frame.contentDocument) {
+        frame.contentDocument.documentElement.className = value;
+    }
+}
+
 async function boot() {
+    // Inside the phone-frame iframe: drop the outer chrome (top bar) so the
+    // preview shows just the app, and don't offer a nested viewport toggle.
+    const embedded = new URLSearchParams(location.search).has("embedded");
+    if (embedded) document.body.classList.add("embedded");
+
     // Load the sprite's token list first so the icon-library gallery is
     // populated on the initial render.
     await loadIconList();
@@ -584,23 +886,48 @@ async function boot() {
     renderer.register("icon-gallery", renderIconGallery); // searchable icon grid
 
     const bus = new SuiEventBus(renderer, root);
-    // No backend: show a toast for every dispatched trigger, and resolve the
-    // request to an empty patch so nothing errors on the missing server.
+    // No backend: fake the server. A small delay is deliberate — it lets the
+    // inline loading feedback (the spinner the bus paints on the clicked
+    // control) actually be visible before the response lands.
+    const jsonResponse = (obj) => new Promise(resolve => setTimeout(
+        () => resolve(new Response(JSON.stringify(obj), { headers: { "Content-Type": "application/json" } })),
+        700));
+
     bus.setFetcher((input, init = {}) => {
         const url = typeof input === "string" ? input : (input && input.url) || "";
         const method = (init && init.method) || "GET";
+
+        // Cancel → clear every field's error by patching the clean field back in.
+        if (method === "POST" && url === "/form-reset") {
+            showToast("Changes discarded");
+            return jsonResponse({ patches: DEMO_FORM_FIELDS.map(f => ({ op: "REPLACE", targetId: f.id, node: f })) });
+        }
+
+        // Product form Save → "server-side" validation fails everything: patch
+        // every field back with its error message (the counterpart to Cancel,
+        // which patches them all back clean). Shows form-error-via-patch across
+        // all field types at once.
+        if (method === "POST" && url === "/products") {
+            showToast("Please fix the errors below");
+            return jsonResponse({ patches: DEMO_FORM_FIELDS.map(f => ({ op: "REPLACE", targetId: f.id, node: withError(f) })) });
+        }
+
         showToast(`${method} ${url} — no backend (demo)`);
-        return Promise.resolve(new Response('{"patches":[]}', { headers: { "Content-Type": "application/json" } }));
+        return jsonResponse({ patches: [] });
     });
 
     renderer.mount(buildPage());
     wireIconGallery(root);   // search + click-to-copy for the icon library
+    wireLiveProgress(renderer);   // animate the "live" progress bar + ring
+    restoreMenuState(root);  // re-apply each sidebar menu's persisted collapse state
+    wireTabOverflow(root);   // collapse overflowing tabs into a "⋯ More" dropdown
+    if (!embedded) wireViewportToggle();   // 📱 phone-frame preview button
 
     // Theme switcher — toggles the class on <html>; the stylesheets are all loaded.
     const themeSelect = document.getElementById("demo-theme");
     if (themeSelect) {
         themeSelect.addEventListener("change", () => {
-            document.documentElement.className = themeSelect.value;
+            applyDemoTheme(themeSelect.value);   // shell + phone-frame iframe
         });
     }
 }

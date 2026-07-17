@@ -5,6 +5,7 @@ import { renderForm } from "./renderers/form.js";
 import { renderDetail } from "./renderers/detail.js";
 import { renderList } from "./renderers/list.js";
 import { renderTree, renderTreeNode } from "./renderers/tree.js";
+import { renderMenu, renderMenuItem } from "./renderers/menu.js";
 import { renderSection } from "./renderers/section.js";
 import { renderSectionEntry } from "./renderers/section-entry.js";
 import { renderStack } from "./renderers/stack.js";
@@ -21,9 +22,17 @@ import { renderFieldGroup } from "./renderers/fieldgroup.js";
 import { renderDialog } from "./renderers/dialog.js";
 import { renderUpload } from "./renderers/upload.js";
 import { renderIconNode } from "./renderers/icon.js";
+import { renderSpinner } from "./renderers/spinner.js";
+import { renderProgress } from "./renderers/progress.js";
 // Icon rendering is behind a swappable resolver — re-exported so apps can
 // point at a different sprite / inline SVG / icon font.
 export { renderIcon, setIconResolver, setIconSpriteUrl, spriteIconResolver, } from "./renderers/icon.js";
+// Menu state machine — re-exported so apps can restore a user's persisted
+// collapse choice after mount (restoreMenuState) and drive it programmatically.
+export { restoreMenuState, applyMenuState, cycleMenuState, menuStateOf, MENU_STATES, } from "./renderers/menu.js";
+// Tab-bar overflow enhancement — apps call it once after mount to activate the
+// "⋯ More" dropdown on sections with tabOverflow: "MENU".
+export { wireTabOverflow } from "./renderers/tabs.js";
 // Default item-handler for the UiList rendering — set on the SuiRenderer
 // at construction time. List items have no type discriminator so they
 // can't go through the dispatcher; they get their own handler slot.
@@ -521,6 +530,8 @@ export function installDefaultHandlers(renderer) {
         .register("list", renderList)
         .register("tree", renderTree)
         .register("tree-node", renderTreeNode)
+        .register("menu", renderMenu)
+        .register("menu-item", renderMenuItem)
         .register("form", renderForm)
         .register("detail", renderDetail)
         .register("section", renderSection)
@@ -544,7 +555,9 @@ export function installDefaultHandlers(renderer) {
         .register("fieldgroup", renderFieldGroup)
         .register("dialog", renderDialog)
         .register("upload", renderUpload)
-        .register("icon", renderIconNode);
+        .register("icon", renderIconNode)
+        .register("spinner", renderSpinner)
+        .register("progress", renderProgress);
 }
 /** Convenience: a fresh renderer pre-loaded with the default handlers. */
 export function createDefaultRenderer() {

@@ -29,6 +29,9 @@
         "label" : {
           "type" : "string"
         },
+        "loading" : {
+          "type" : "boolean"
+        },
         "onClick" : {
           "$ref" : "#/definitions/UiTrigger"
         },
@@ -127,11 +130,19 @@
           }, {
             "$ref" : "#/definitions/UiIcon"
           }, {
+            "$ref" : "#/definitions/UiSpinner"
+          }, {
+            "$ref" : "#/definitions/UiProgress"
+          }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
           }, {
             "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
+            "$ref" : "#/definitions/UiMenu"
+          }, {
+            "$ref" : "#/definitions/UiMenuItem-2"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -258,11 +269,19 @@
           }, {
             "$ref" : "#/definitions/UiIcon"
           }, {
+            "$ref" : "#/definitions/UiSpinner"
+          }, {
+            "$ref" : "#/definitions/UiProgress"
+          }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
           }, {
             "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
+            "$ref" : "#/definitions/UiMenu"
+          }, {
+            "$ref" : "#/definitions/UiMenuItem-2"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -410,11 +429,19 @@
             }, {
               "$ref" : "#/definitions/UiIcon"
             }, {
+              "$ref" : "#/definitions/UiSpinner"
+            }, {
+              "$ref" : "#/definitions/UiProgress"
+            }, {
               "$ref" : "#/definitions/UiList-2"
             }, {
               "$ref" : "#/definitions/UiTree-2"
             }, {
               "$ref" : "#/definitions/UiTreeNode-2"
+            }, {
+              "$ref" : "#/definitions/UiMenu"
+            }, {
+              "$ref" : "#/definitions/UiMenuItem-2"
             }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
@@ -496,11 +523,19 @@
             }, {
               "$ref" : "#/definitions/UiIcon"
             }, {
+              "$ref" : "#/definitions/UiSpinner"
+            }, {
+              "$ref" : "#/definitions/UiProgress"
+            }, {
               "$ref" : "#/definitions/UiList-2"
             }, {
               "$ref" : "#/definitions/UiTree-2"
             }, {
               "$ref" : "#/definitions/UiTreeNode-2"
+            }, {
+              "$ref" : "#/definitions/UiMenu"
+            }, {
+              "$ref" : "#/definitions/UiMenuItem-2"
             }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
@@ -603,11 +638,19 @@
             }, {
               "$ref" : "#/definitions/UiIcon"
             }, {
+              "$ref" : "#/definitions/UiSpinner"
+            }, {
+              "$ref" : "#/definitions/UiProgress"
+            }, {
               "$ref" : "#/definitions/UiList-2"
             }, {
               "$ref" : "#/definitions/UiTree-2"
             }, {
               "$ref" : "#/definitions/UiTreeNode-2"
+            }, {
+              "$ref" : "#/definitions/UiMenu"
+            }, {
+              "$ref" : "#/definitions/UiMenuItem-2"
             }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
@@ -632,6 +675,9 @@
           }
         },
         "id" : {
+          "type" : "string"
+        },
+        "menuToggle" : {
           "type" : "string"
         },
         "title" : {
@@ -708,6 +754,9 @@
         "label" : {
           "type" : "string"
         },
+        "onClick" : {
+          "$ref" : "#/definitions/UiTrigger"
+        },
         "rel" : {
           "type" : "string"
         },
@@ -778,11 +827,19 @@
                 }, {
                   "$ref" : "#/definitions/UiIcon"
                 }, {
+                  "$ref" : "#/definitions/UiSpinner"
+                }, {
+                  "$ref" : "#/definitions/UiProgress"
+                }, {
                   "$ref" : "#/definitions/UiList-2"
                 }, {
                   "$ref" : "#/definitions/UiTree-2"
                 }, {
                   "$ref" : "#/definitions/UiTreeNode-2"
+                }, {
+                  "$ref" : "#/definitions/UiMenu"
+                }, {
+                  "$ref" : "#/definitions/UiMenuItem-2"
                 }, {
                   "$ref" : "#/definitions/UiDetail"
                 }, {
@@ -837,11 +894,19 @@
                 }, {
                   "$ref" : "#/definitions/UiIcon"
                 }, {
+                  "$ref" : "#/definitions/UiSpinner"
+                }, {
+                  "$ref" : "#/definitions/UiProgress"
+                }, {
                   "$ref" : "#/definitions/UiList-2"
                 }, {
                   "$ref" : "#/definitions/UiTree-2"
                 }, {
                   "$ref" : "#/definitions/UiTreeNode-2"
+                }, {
+                  "$ref" : "#/definitions/UiMenu"
+                }, {
+                  "$ref" : "#/definitions/UiMenuItem-2"
                 }, {
                   "$ref" : "#/definitions/UiDetail"
                 }, {
@@ -905,6 +970,99 @@
         "required" : [ "type" ]
       } ]
     },
+    "UiMenu" : {
+      "type" : "object",
+      "properties" : {
+        "cssClass" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "items" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/UiMenuItem-2"
+          }
+        },
+        "mode" : {
+          "type" : "string",
+          "enum" : [ "PUSH", "OVERLAY", "RESPONSIVE" ]
+        },
+        "side" : {
+          "type" : "string",
+          "enum" : [ "LEFT", "RIGHT" ]
+        },
+        "state" : {
+          "type" : "string",
+          "enum" : [ "EXPANDED", "RAIL", "HIDDEN" ]
+        },
+        "title" : {
+          "type" : "string"
+        },
+        "toggle" : {
+          "type" : "boolean"
+        },
+        "type" : {
+          "const" : "menu"
+        }
+      },
+      "required" : [ "type" ]
+    },
+    "UiMenuItem-1" : {
+      "type" : "object",
+      "properties" : {
+        "badge" : {
+          "type" : "string"
+        },
+        "children" : {
+          "type" : "array",
+          "items" : {
+            "$ref" : "#/definitions/UiMenuItem-2"
+          }
+        },
+        "cssClass" : {
+          "type" : "string"
+        },
+        "href" : {
+          "type" : "string"
+        },
+        "icon" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "label" : {
+          "type" : "string"
+        },
+        "onClick" : {
+          "$ref" : "#/definitions/UiTrigger"
+        },
+        "open" : {
+          "type" : "boolean"
+        },
+        "selected" : {
+          "type" : "boolean"
+        },
+        "title" : {
+          "type" : "string"
+        }
+      }
+    },
+    "UiMenuItem-2" : {
+      "allOf" : [ {
+        "$ref" : "#/definitions/UiMenuItem-1"
+      }, {
+        "type" : "object",
+        "properties" : {
+          "type" : {
+            "const" : "menu-item"
+          }
+        },
+        "required" : [ "type" ]
+      } ]
+    },
     "UiPage-1" : {
       "type" : "object",
       "properties" : {
@@ -963,11 +1121,19 @@
           }, {
             "$ref" : "#/definitions/UiIcon"
           }, {
+            "$ref" : "#/definitions/UiSpinner"
+          }, {
+            "$ref" : "#/definitions/UiProgress"
+          }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
           }, {
             "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
+            "$ref" : "#/definitions/UiMenu"
+          }, {
+            "$ref" : "#/definitions/UiMenuItem-2"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -1014,6 +1180,41 @@
         "required" : [ "type" ]
       } ]
     },
+    "UiProgress" : {
+      "type" : "object",
+      "properties" : {
+        "cssClass" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "max" : {
+          "type" : "number"
+        },
+        "showValue" : {
+          "type" : "boolean"
+        },
+        "status" : {
+          "type" : "string",
+          "enum" : [ "NORMAL", "SUCCESS", "WARNING", "ERROR" ]
+        },
+        "title" : {
+          "type" : "string"
+        },
+        "value" : {
+          "type" : "number"
+        },
+        "variant" : {
+          "type" : "string",
+          "enum" : [ "BAR", "CIRCLE" ]
+        },
+        "type" : {
+          "const" : "progress"
+        }
+      },
+      "required" : [ "type" ]
+    },
     "UiRow" : {
       "type" : "object",
       "properties" : {
@@ -1059,6 +1260,10 @@
             "$ref" : "#/definitions/UiSectionEntry-2"
           }
         },
+        "tabOverflow" : {
+          "type" : "string",
+          "enum" : [ "WRAP", "MENU" ]
+        },
         "title" : {
           "type" : "string"
         }
@@ -1100,11 +1305,19 @@
           }, {
             "$ref" : "#/definitions/UiIcon"
           }, {
+            "$ref" : "#/definitions/UiSpinner"
+          }, {
+            "$ref" : "#/definitions/UiProgress"
+          }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
           }, {
             "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
+            "$ref" : "#/definitions/UiMenu"
+          }, {
+            "$ref" : "#/definitions/UiMenuItem-2"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -1157,6 +1370,31 @@
         "required" : [ "type" ]
       } ]
     },
+    "UiSpinner" : {
+      "type" : "object",
+      "properties" : {
+        "cssClass" : {
+          "type" : "string"
+        },
+        "id" : {
+          "type" : "string"
+        },
+        "label" : {
+          "type" : "string"
+        },
+        "size" : {
+          "type" : "string",
+          "enum" : [ "SM", "MD", "LG" ]
+        },
+        "title" : {
+          "type" : "string"
+        },
+        "type" : {
+          "const" : "spinner"
+        }
+      },
+      "required" : [ "type" ]
+    },
     "UiStack-1" : {
       "type" : "object",
       "properties" : {
@@ -1182,11 +1420,19 @@
             }, {
               "$ref" : "#/definitions/UiIcon"
             }, {
+              "$ref" : "#/definitions/UiSpinner"
+            }, {
+              "$ref" : "#/definitions/UiProgress"
+            }, {
               "$ref" : "#/definitions/UiList-2"
             }, {
               "$ref" : "#/definitions/UiTree-2"
             }, {
               "$ref" : "#/definitions/UiTreeNode-2"
+            }, {
+              "$ref" : "#/definitions/UiMenu"
+            }, {
+              "$ref" : "#/definitions/UiMenuItem-2"
             }, {
               "$ref" : "#/definitions/UiDetail"
             }, {
@@ -1303,6 +1549,9 @@
           "items" : {
             "type" : "string"
           }
+        },
+        "stackOnMobile" : {
+          "type" : "boolean"
         },
         "title" : {
           "type" : "string"
@@ -1423,11 +1672,19 @@
           }, {
             "$ref" : "#/definitions/UiIcon"
           }, {
+            "$ref" : "#/definitions/UiSpinner"
+          }, {
+            "$ref" : "#/definitions/UiProgress"
+          }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
           }, {
             "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
+            "$ref" : "#/definitions/UiMenu"
+          }, {
+            "$ref" : "#/definitions/UiMenuItem-2"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -1482,11 +1739,19 @@
           }, {
             "$ref" : "#/definitions/UiIcon"
           }, {
+            "$ref" : "#/definitions/UiSpinner"
+          }, {
+            "$ref" : "#/definitions/UiProgress"
+          }, {
             "$ref" : "#/definitions/UiList-2"
           }, {
             "$ref" : "#/definitions/UiTree-2"
           }, {
             "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
+            "$ref" : "#/definitions/UiMenu"
+          }, {
+            "$ref" : "#/definitions/UiMenuItem-2"
           }, {
             "$ref" : "#/definitions/UiDetail"
           }, {
@@ -1577,11 +1842,19 @@
                     }, {
                       "$ref" : "#/definitions/UiIcon"
                     }, {
+                      "$ref" : "#/definitions/UiSpinner"
+                    }, {
+                      "$ref" : "#/definitions/UiProgress"
+                    }, {
                       "$ref" : "#/definitions/UiList-2"
                     }, {
                       "$ref" : "#/definitions/UiTree-2"
                     }, {
                       "$ref" : "#/definitions/UiTreeNode-2"
+                    }, {
+                      "$ref" : "#/definitions/UiMenu"
+                    }, {
+                      "$ref" : "#/definitions/UiMenuItem-2"
                     }, {
                       "$ref" : "#/definitions/UiDetail"
                     }, {
@@ -1692,11 +1965,19 @@
   }, {
     "$ref" : "#/definitions/UiIcon"
   }, {
+    "$ref" : "#/definitions/UiSpinner"
+  }, {
+    "$ref" : "#/definitions/UiProgress"
+  }, {
     "$ref" : "#/definitions/UiList-2"
   }, {
     "$ref" : "#/definitions/UiTree-2"
   }, {
     "$ref" : "#/definitions/UiTreeNode-2"
+  }, {
+    "$ref" : "#/definitions/UiMenu"
+  }, {
+    "$ref" : "#/definitions/UiMenuItem-2"
   }, {
     "$ref" : "#/definitions/UiDetail"
   }, {

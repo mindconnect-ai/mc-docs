@@ -47,9 +47,13 @@ function renderSectionBody(node, r) {
         return `<button class="sui-tab${activeCls}" data-target="${escapeHtml(s.id)}">${tabLabel}</button>`;
     }).join("");
     const panels = node.sections.map(s => `<div class="sui-panel" id="${escapeHtml(s.id)}" ${s.id !== activeId ? "hidden" : ""}>${r.render(s.content)}</div>`).join("");
+    // MENU overflow: the bar keeps a single row and wireTabOverflow() moves the
+    // tabs that don't fit into a "⋯" dropdown. data-overflow marks it; with no
+    // JS the CSS still wraps, so the fallback stays usable.
+    const overflowAttr = node.tabOverflow === "MENU" ? ` data-overflow="menu"` : "";
     return `<div class="${cls("sui-section", node)}" id="${escapeHtml(node.id)}">
         ${titleHtml}
-        <nav class="sui-tabs">${tabs}</nav>
+        <nav class="sui-tabs"${overflowAttr}>${tabs}</nav>
         <div class="sui-panels">${panels}</div>
     </div>`;
 }

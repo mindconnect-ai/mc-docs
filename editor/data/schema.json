@@ -14,7 +14,7 @@
   "children" : [ {
     "property" : "node",
     "cardinality" : "SINGLE",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "link", "action", "field" ]
   }, {
     "property" : "dialogs",
     "cardinality" : "LIST",
@@ -45,7 +45,7 @@
   "children" : [ {
     "property" : "children",
     "cardinality" : "LIST",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "link", "action", "field" ]
   } ]
 }, {
   "type" : "form",
@@ -102,6 +102,11 @@
     "kind" : "STRING",
     "required" : false
   }, {
+    "name" : "tabOverflow",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "WRAP", "MENU" ]
+  }, {
     "name" : "collapseSummary",
     "kind" : "STRING",
     "required" : false
@@ -143,7 +148,7 @@
   "children" : [ {
     "property" : "content",
     "cardinality" : "SINGLE",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "link", "action", "field" ]
   } ]
 }, {
   "type" : "detail",
@@ -216,6 +221,10 @@
   }, {
     "name" : "selectedRowId",
     "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "stackOnMobile",
+    "kind" : "BOOLEAN",
     "required" : false
   }, {
     "name" : "selectMode",
@@ -329,6 +338,156 @@
   } ],
   "children" : [ ]
 }, {
+  "type" : "spinner",
+  "label" : "Spinner",
+  "category" : "display",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "size",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "SM", "MD", "LG" ]
+  }, {
+    "name" : "label",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ ]
+}, {
+  "type" : "progress",
+  "label" : "Progress",
+  "category" : "display",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "value",
+    "kind" : "NUMBER",
+    "required" : false
+  }, {
+    "name" : "max",
+    "kind" : "NUMBER",
+    "required" : false
+  }, {
+    "name" : "variant",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "BAR", "CIRCLE" ]
+  }, {
+    "name" : "status",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "NORMAL", "SUCCESS", "WARNING", "ERROR" ]
+  }, {
+    "name" : "showValue",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ ]
+}, {
+  "type" : "menu",
+  "label" : "Menu",
+  "category" : "chrome",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "title",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "state",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "EXPANDED", "RAIL", "HIDDEN" ]
+  }, {
+    "name" : "mode",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "PUSH", "OVERLAY", "RESPONSIVE" ]
+  }, {
+    "name" : "side",
+    "kind" : "ENUM",
+    "required" : false,
+    "enumValues" : [ "LEFT", "RIGHT" ]
+  }, {
+    "name" : "toggle",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "items",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "menu-item" ]
+  } ]
+}, {
+  "type" : "menu-item",
+  "label" : "Menu item",
+  "category" : "chrome",
+  "properties" : [ {
+    "name" : "id",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "label",
+    "kind" : "STRING",
+    "required" : true
+  }, {
+    "name" : "icon",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "href",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "badge",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "selected",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "open",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
+    "name" : "cssClass",
+    "kind" : "STRING",
+    "required" : false
+  } ],
+  "children" : [ {
+    "property" : "children",
+    "cardinality" : "LIST",
+    "allowedTypes" : [ "menu-item" ]
+  } ]
+}, {
   "type" : "header",
   "label" : "Header",
   "category" : "chrome",
@@ -342,6 +501,10 @@
     "required" : true
   }, {
     "name" : "brandHref",
+    "kind" : "STRING",
+    "required" : false
+  }, {
+    "name" : "menuToggle",
     "kind" : "STRING",
     "required" : false
   }, {
@@ -471,6 +634,10 @@
     "kind" : "BOOLEAN",
     "required" : false
   }, {
+    "name" : "loading",
+    "kind" : "BOOLEAN",
+    "required" : false
+  }, {
     "name" : "disabledReason",
     "kind" : "STRING",
     "required" : false
@@ -538,6 +705,6 @@
   "children" : [ {
     "property" : "node",
     "cardinality" : "SINGLE",
-    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "link", "action", "field" ]
+    "allowedTypes" : [ "stack", "section", "form", "detail", "list", "table", "chart", "header", "text", "icon", "spinner", "progress", "menu", "link", "action", "field" ]
   } ]
 } ]

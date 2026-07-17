@@ -28,6 +28,28 @@
         .demo-topbar label { font-size: 13px; color: var(--sui-color-text-muted); }
         .demo-topbar select { padding: 5px 8px; font-size: 13px; }
         .demo-main { max-width: 960px; margin: 0 auto; padding: 24px 20px 80px; }
+
+        /* Viewport toggle: previews the whole demo inside a phone-width iframe so
+           the real @media breakpoints fire (table → cards, sidebar → drawer, …). */
+        .demo-vp-btn {
+            font: inherit; font-size: 13px; padding: 5px 12px; cursor: pointer;
+            display: inline-flex; align-items: center; gap: 6px;
+            border: 1px solid var(--sui-color-border-strong); border-radius: var(--sui-radius-md);
+            background: var(--sui-color-surface); color: var(--sui-color-text-body);
+        }
+        .demo-vp-btn .sui-icon { width: 15px; height: 15px; }
+        .demo-vp-btn:hover { background: var(--sui-color-surface-alt); }
+        .demo-vp-btn.active { border-color: var(--sui-color-primary); color: var(--sui-color-primary); }
+        .demo-device {
+            width: 390px; max-width: 100%; margin: 0 auto;
+            border: 10px solid #111827; border-radius: 40px; overflow: hidden;
+            background: #111827; box-shadow: 0 16px 48px rgba(0,0,0,.28);
+        }
+        .demo-device-notch { height: 22px; background: #111827; }
+        .demo-device iframe { display: block; width: 100%; height: 760px; border: 0; background: var(--sui-color-bg); }
+        /* Embedded instance (inside the iframe): drop the outer chrome. */
+        body.embedded .demo-topbar { display: none; }
+        body.embedded .demo-main { max-width: none; padding: 12px 12px 40px; }
         /* Section sub-heading + spacing between showcased widgets. */
         .demo-h { display: block; font-size: 12px; font-weight: 700; letter-spacing: .06em;
                   text-transform: uppercase; color: var(--sui-color-text-subtle); margin: 8px 0 2px; }
@@ -62,10 +84,23 @@
             border-radius: var(--sui-radius-md); background: var(--sui-color-surface);
             cursor: pointer; font-family: inherit; transition: border-color .12s, background .12s;
         }
+        /* The search filter toggles the `hidden` attribute; `.icon-cell` sets an
+           explicit display, which would otherwise win over the UA `[hidden]`
+           rule and keep filtered-out cells visible. Re-assert it here. */
+        .icon-cell[hidden] { display: none; }
         .icon-cell:hover { border-color: var(--sui-color-primary); background: var(--sui-color-surface-alt); }
         .icon-cell .sui-icon { width: 24px; height: 24px; color: var(--sui-color-text-strong); }
         .icon-cell-name { font-size: 11px; color: var(--sui-color-text-muted); word-break: break-all; text-align: center; line-height: 1.3; }
         .icon-gallery-empty { padding: 24px; text-align: center; color: var(--sui-color-text-muted); font-size: 13px; }
+
+        /* Demo app-shell frame: header flush on top, [sidebar, content] below.
+           .demo-shell-body is the positioning context an overlay menu needs. */
+        .demo-shell { border: 1px solid var(--sui-color-border); border-radius: 8px; overflow: hidden; }
+        .demo-shell .sui-header { margin-bottom: 0; border-radius: 0; box-shadow: none; }
+        .demo-shell-body { position: relative; overflow: hidden; min-height: 300px; align-items: stretch; }
+        .demo-shell-body .sui-menu { border-radius: 0; box-shadow: none; border: none; border-right: 1px solid var(--sui-color-border); }
+        .demo-shell-body .sui-menu--right { border-right: none; border-left: 1px solid var(--sui-color-border); }
+        .demo-shell-content { flex: 1; padding: 20px; background: var(--sui-color-surface-alt); min-width: 0; }
     </style>
 </head>
 <body>
@@ -73,6 +108,7 @@
         <h1>Semantic UI · Widget Showcase</h1>
         <span class="demo-note">Static demo — no backend, no build step. Every widget below is a plain JS object.</span>
         <span class="demo-spacer"></span>
+        <button id="demo-viewport" class="demo-vp-btn" type="button" title="Preview the widgets at a phone width">Mobile view</button>
         <label for="demo-theme">Theme</label>
         <select id="demo-theme">
             <option value="">Light</option>

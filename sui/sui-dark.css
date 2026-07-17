@@ -25,9 +25,9 @@ html.sui-theme-dark {
     --sui-color-border-strong:   #475569;
 
     --sui-color-on-primary:      #ffffff;
-    --sui-color-primary:         #3b82f6;
-    --sui-color-primary-hover:   #60a5fa;
-    --sui-color-primary-soft:    #1e3a8a;
+    --sui-color-primary:         #6366f1;
+    --sui-color-primary-hover:   #818cf8;
+    --sui-color-primary-soft:    #312e81;
 
     --sui-color-danger:          #f87171;
     --sui-color-danger-bg:       #450a0a;
@@ -41,9 +41,14 @@ html.sui-theme-dark {
     --sui-color-blockquote-border: #475569;
 
     --sui-shadow-card:           0 1px 3px rgba(0, 0, 0, .4);
-    --sui-focus-ring:            0 0 0 2px rgba(59, 130, 246, .35);
+    --sui-focus-ring:            0 0 0 2px rgba(99, 102, 241, .35);
 }
 
 /* Native form controls (date pickers, select arrows, etc.) follow the
    browser's dark-mode hint when this scheme is declared. */
 html.sui-theme-dark { color-scheme: dark; }
+
+/* Lighter custom dropdown chevron on the dark surface. */
+html.sui-theme-dark .sui-field select:not([multiple]) {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+}

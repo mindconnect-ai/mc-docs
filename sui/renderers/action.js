@@ -11,8 +11,14 @@ export function renderAction(a) {
     const trigger = a.onClick ? `data-trigger='${encodeTrigger(a.onClick)}'` : "";
     const confirm = a.confirm ? `data-confirm="${escapeHtml(a.confirm)}"` : "";
     const title = escapeHtml(a.disabledReason || a.label);
-    const enabled = a.enabled !== false;
+    // A declaratively-loading action is busy: shows the spinner and can't be
+    // clicked. (The event bus toggles the same class automatically around a
+    // click's own request; this is the server-driven counterpart.)
+    const loading = a.loading === true;
+    const enabled = a.enabled !== false && !loading;
     const disabled = enabled ? "" : "disabled";
+    const busy = loading ? " is-loading" : "";
+    const busyAttr = loading ? ` aria-busy="true"` : "";
     const appearance = a.appearance || "BUTTON";
     const id = escapeHtml(a.id);
     const label = escapeHtml(a.label);
@@ -24,7 +30,7 @@ export function renderAction(a) {
     // the EventBus reads.
     switch (appearance) {
         case "LINK":
-            return `<a id="${id}" href="#" class="sui-link" data-action="${id}" ${trigger} ${confirm} title="${title}">${leadingIcon}${label}</a>`;
+            return `<a id="${id}" href="#" class="sui-link${busy}" data-action="${id}" ${trigger} ${confirm}${busyAttr} title="${title}">${leadingIcon}${label}</a>`;
         case "ICON": {
             // Icon-only: prefer the named icon; fall back to the label text
             // (keeps legacy emoji-as-label buttons working). aria-label makes
@@ -32,10 +38,10 @@ export function renderAction(a) {
             const glyph = a.icon
                 ? renderIcon(a.icon, { title: a.label })
                 : label;
-            return `<button id="${id}" type="button" class="sui-icon-btn sui-icon-btn--${style}" data-action="${id}" ${trigger} ${confirm} ${disabled} aria-label="${escapeHtml(a.label)}" title="${title}">${glyph}</button>`;
+            return `<button id="${id}" type="button" class="sui-icon-btn sui-icon-btn--${style}${busy}" data-action="${id}" ${trigger} ${confirm} ${disabled}${busyAttr} aria-label="${escapeHtml(a.label)}" title="${title}">${glyph}</button>`;
         }
         case "BUTTON":
         default:
-            return `<button id="${id}" type="button" class="sui-btn sui-btn--${style}" data-action="${id}" ${trigger} ${confirm} ${disabled} title="${title}">${leadingIcon}${label}</button>`;
+            return `<button id="${id}" type="button" class="sui-btn sui-btn--${style}${busy}" data-action="${id}" ${trigger} ${confirm} ${disabled}${busyAttr} title="${title}">${leadingIcon}${label}</button>`;
     }
 }

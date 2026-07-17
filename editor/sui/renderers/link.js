@@ -1,4 +1,4 @@
-import { escapeHtml } from "../renderer.js";
+import { escapeHtml, encodeTrigger } from "../renderer.js";
 import { renderIcon } from "./icon.js";
 import { cls } from "./util.js";
 /**
@@ -21,9 +21,15 @@ export function renderLink(node) {
     // External links open in a new browser tab. We deliberately OMIT
     // data-href so the EventBus click handler doesn't intercept and SPA-route
     // them — target="_blank" only works when the native click is allowed
-    // through.
+    // through. (onClick is ignored for external links.)
     if (node.external) {
         return `<a${idAttr} class="${cls("sui-link", node)}" href="${href}" target="_blank" rel="noopener noreferrer">${label}</a>`;
+    }
+    // A link with an onClick trigger dispatches through the bus (data-trigger) —
+    // it fires a fetch/patch and gets inline loading, with href as the no-JS
+    // fallback. Without onClick it's a plain navigation (data-href hint).
+    if (node.onClick) {
+        return `<a${idAttr} class="${cls("sui-link", node)}" href="${href}" data-trigger='${encodeTrigger(node.onClick)}'>${label}</a>`;
     }
     return `<a${idAttr} class="${cls("sui-link", node)}" href="${href}" data-href="${href}">${label}</a>`;
 }
