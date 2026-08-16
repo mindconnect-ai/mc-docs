@@ -398,6 +398,9 @@
         "title" : {
           "type" : "string"
         },
+        "trailing" : {
+          "$ref" : "#/definitions/UiAction-2"
+        },
         "validationError" : {
           "type" : "string"
         },
@@ -790,6 +793,63 @@
         },
         "cssClass" : {
           "type" : "string"
+        },
+        "headerExtra" : {
+          "anyOf" : [ {
+            "$ref" : "#/definitions/UiSection-2"
+          }, {
+            "$ref" : "#/definitions/UiSectionEntry-2"
+          }, {
+            "$ref" : "#/definitions/UiStack-2"
+          }, {
+            "$ref" : "#/definitions/UiForm-2"
+          }, {
+            "$ref" : "#/definitions/UiTable-2"
+          }, {
+            "$ref" : "#/definitions/UiColumn-2"
+          }, {
+            "$ref" : "#/definitions/UiRow"
+          }, {
+            "$ref" : "#/definitions/UiText"
+          }, {
+            "$ref" : "#/definitions/UiIcon"
+          }, {
+            "$ref" : "#/definitions/UiSpinner"
+          }, {
+            "$ref" : "#/definitions/UiProgress"
+          }, {
+            "$ref" : "#/definitions/UiList-2"
+          }, {
+            "$ref" : "#/definitions/UiTree-2"
+          }, {
+            "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
+            "$ref" : "#/definitions/UiMenu"
+          }, {
+            "$ref" : "#/definitions/UiMenuItem-2"
+          }, {
+            "$ref" : "#/definitions/UiMenuButton"
+          }, {
+            "$ref" : "#/definitions/UiDetail"
+          }, {
+            "$ref" : "#/definitions/UiChart"
+          }, {
+            "$ref" : "#/definitions/UiHeader-2"
+          }, {
+            "$ref" : "#/definitions/UiAction-2"
+          }, {
+            "$ref" : "#/definitions/UiField"
+          }, {
+            "$ref" : "#/definitions/UiFieldGroup-2"
+          }, {
+            "$ref" : "#/definitions/UiUpload"
+          }, {
+            "$ref" : "#/definitions/UiLink"
+          }, {
+            "$ref" : "#/definitions/UiDialog-2"
+          }, {
+            "$ref" : "#/definitions/UiPage-2"
+          } ]
         },
         "id" : {
           "type" : "string"
@@ -1571,6 +1631,63 @@
         },
         "cssClass" : {
           "type" : "string"
+        },
+        "headerExtra" : {
+          "anyOf" : [ {
+            "$ref" : "#/definitions/UiSection-2"
+          }, {
+            "$ref" : "#/definitions/UiSectionEntry-2"
+          }, {
+            "$ref" : "#/definitions/UiStack-2"
+          }, {
+            "$ref" : "#/definitions/UiForm-2"
+          }, {
+            "$ref" : "#/definitions/UiTable-2"
+          }, {
+            "$ref" : "#/definitions/UiColumn-2"
+          }, {
+            "$ref" : "#/definitions/UiRow"
+          }, {
+            "$ref" : "#/definitions/UiText"
+          }, {
+            "$ref" : "#/definitions/UiIcon"
+          }, {
+            "$ref" : "#/definitions/UiSpinner"
+          }, {
+            "$ref" : "#/definitions/UiProgress"
+          }, {
+            "$ref" : "#/definitions/UiList-2"
+          }, {
+            "$ref" : "#/definitions/UiTree-2"
+          }, {
+            "$ref" : "#/definitions/UiTreeNode-2"
+          }, {
+            "$ref" : "#/definitions/UiMenu"
+          }, {
+            "$ref" : "#/definitions/UiMenuItem-2"
+          }, {
+            "$ref" : "#/definitions/UiMenuButton"
+          }, {
+            "$ref" : "#/definitions/UiDetail"
+          }, {
+            "$ref" : "#/definitions/UiChart"
+          }, {
+            "$ref" : "#/definitions/UiHeader-2"
+          }, {
+            "$ref" : "#/definitions/UiAction-2"
+          }, {
+            "$ref" : "#/definitions/UiField"
+          }, {
+            "$ref" : "#/definitions/UiFieldGroup-2"
+          }, {
+            "$ref" : "#/definitions/UiUpload"
+          }, {
+            "$ref" : "#/definitions/UiLink"
+          }, {
+            "$ref" : "#/definitions/UiDialog-2"
+          }, {
+            "$ref" : "#/definitions/UiPage-2"
+          } ]
         },
         "id" : {
           "type" : "string"

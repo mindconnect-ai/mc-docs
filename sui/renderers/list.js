@@ -6,6 +6,7 @@ export function renderList(node, r) {
     return `<div class="${cls("sui-list", node)}" id="${escapeHtml(node.id)}">
         <div class="sui-list-header">
             ${node.title ? `<h2>${escapeHtml(node.title)}</h2>` : ""}
+            ${node.headerExtra ? `<div class="sui-header-extra">${r.render(node.headerExtra)}</div>` : ""}
             <div class="sui-actions">${renderActions(node.actions || [])}</div>
         </div>
         <ul>${items}</ul>

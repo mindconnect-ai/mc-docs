@@ -1,5 +1,6 @@
 import { escapeHtml, encodeTrigger } from "../renderer.js";
 import { renderIcon } from "./icon.js";
+import { renderActions } from "./shared.js";
 export function renderField(f) {
     let input = f.editable
         ? renderInput(f)
@@ -9,6 +10,10 @@ export function renderField(f) {
     // single-line controls; harmless otherwise.
     if (f.icon && f.editable) {
         input = `<div class="sui-input-icon">${renderIcon(f.icon)}${input}</div>`;
+    }
+    // Trailing action (e.g. a Browse… button) shares the control's row.
+    if (f.trailing && f.editable) {
+        input = `<div class="sui-field-row">${input}${renderActions([f.trailing])}</div>`;
     }
     // The wrapper carries the UiNode id so the editor's id-based selection
     // works symmetrically with every other node type. The inner control

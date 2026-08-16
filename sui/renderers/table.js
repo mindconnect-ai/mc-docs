@@ -74,7 +74,7 @@ export function renderTable(node, r) {
     const nodeJson = escapeHtml(JSON.stringify(node));
     const stackCls = node.stackOnMobile ? "sui-table sui-table--stack" : "sui-table";
     return `<div class="${cls(stackCls, node)}" id="${escapeHtml(node.id)}" data-sui="table" data-node='${nodeJson}'>
-        ${node.title ? `<div class="sui-table-header"><h2>${escapeHtml(node.title)}</h2>${renderActions(node.actions || [])}</div>` : ""}
+        ${node.title || node.headerExtra ? `<div class="sui-table-header">${node.title ? `<h2>${escapeHtml(node.title)}</h2>` : ""}${node.headerExtra ? `<div class="sui-header-extra">${r.render(node.headerExtra)}</div>` : ""}${renderActions(node.actions || [])}</div>` : ""}
         <table>
             <thead><tr>${thead}</tr></thead>
             <tbody>${tbody}${emptyRow}</tbody>
