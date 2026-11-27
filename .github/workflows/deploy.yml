@@ -1,0 +1,102 @@
+# Builds the portal from the projects' current docs and deploys it to GitHub Pages.
+#
+# The projects' repos are checked out into sources/<id>/ (gitignored) at build
+# time; nothing of their current docs is committed here. mc-architector is
+# private: it is only read when the DOCS_READ_TOKEN secret is set (see README),
+# otherwise the Architector section is a stub and the run carries a warning.
+#
+# Requires Settings → Pages → Source: "GitHub Actions".
+
+name: Build and deploy docs portal
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  # Sent by a project repo when its docs changed (see README).
+  repository_dispatch:
+    types: [docs-changed]
+  # Nightly, so the portal follows the projects' main branches without any hook.
+  schedule:
+    - cron: '23 3 * * *'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    env:
+      HAS_DOCS_READ_TOKEN: ${{ secrets.DOCS_READ_TOKEN != '' }}
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Check out mindconnect docs
+        uses: actions/checkout@v5
+        with:
+          repository: mindconnect-ai/mindconnect
+          ref: main
+          path: sources/mindconnect
+          sparse-checkout: website
+          persist-credentials: false
+
+      - name: Check out semantic-ui docs
+        uses: actions/checkout@v5
+        with:
+          repository: mindconnect-ai/mc-semantic-ui
+          ref: main
+          path: sources/semantic-ui
+          sparse-checkout: website
+          persist-credentials: false
+
+      - name: Check out Architector docs (private)
+        id: architector
+        if: env.HAS_DOCS_READ_TOKEN == 'true'
+        continue-on-error: true
+        uses: actions/checkout@v5
+        with:
+          repository: mindconnect-ai/mc-architector
+          ref: main
+          path: sources/architector
+          sparse-checkout: docs/site
+          token: ${{ secrets.DOCS_READ_TOKEN }}
+          persist-credentials: false
+
+      - name: Warn when Architector is skipped
+        if: env.HAS_DOCS_READ_TOKEN != 'true' || steps.architector.outcome == 'failure'
+        run: |
+          echo "::warning title=Architector docs skipped::DOCS_READ_TOKEN is missing or cannot read mindconnect-ai/mc-architector. The Architector section is built as a stub page."
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - run: npm run build
+
+      - uses: actions/upload-pages-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          path: build
+
+  deploy:
+    if: github.ref == 'refs/heads/main' && github.event_name != 'pull_request'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

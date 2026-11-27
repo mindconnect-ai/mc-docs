@@ -1,0 +1,5 @@
+{
+  "mindconnect": "~/workspace/private/mindconnect-ai/mindconnect/main/mindconnect",
+  "semantic-ui": "~/workspace/private/mindconnect-ai/mc-semantic-ui/main/mc-semantic-ui",
+  "architector": "~/workspace/private/mc-architector"
+}

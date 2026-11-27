@@ -1,0 +1,118 @@
+# Archives a released version of one project's docs in this repo.
+#
+# Checks the project out at its release tag, runs `npm run snapshot`, commits
+# <id>_versioned_docs/ etc. to main and starts a deploy. The current docs keep
+# coming live from the project's repo; only releases are archived here.
+#
+# Triggers:
+#   - manually (Actions → "Archive a docs version" → Run workflow)
+#   - repository_dispatch, type "docs-release", sent by a project's release
+#     workflow with client_payload {"project": "...", "version": "...", "ref": "..."}
+#     (see README, "Archiving a release").
+
+name: Archive a docs version
+
+on:
+  workflow_dispatch:
+    inputs:
+      project:
+        description: Project
+        type: choice
+        options: [mindconnect, semantic-ui, architector]
+        required: true
+      version:
+        description: Version to archive, e.g. 0.8.4 (a leading "v" is stripped)
+        type: string
+        required: true
+      ref:
+        description: Git ref in the project repo (default v<version>)
+        type: string
+        required: false
+  repository_dispatch:
+    types: [docs-release]
+
+permissions:
+  contents: write   # commit the snapshot to main
+  actions: write    # start the deploy workflow (pushes by GITHUB_TOKEN do not trigger it)
+
+concurrency:
+  group: docs-snapshot
+  cancel-in-progress: false
+
+jobs:
+  snapshot:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Resolve inputs
+        id: in
+        env:
+          PROJECT: ${{ github.event.inputs.project || github.event.client_payload.project }}
+          VERSION: ${{ github.event.inputs.version || github.event.client_payload.version }}
+          REF: ${{ github.event.inputs.ref || github.event.client_payload.ref }}
+        run: |
+          case "$PROJECT" in
+            mindconnect) repo=mindconnect-ai/mindconnect; private=false ;;
+            semantic-ui) repo=mindconnect-ai/mc-semantic-ui; private=false ;;
+            architector) repo=mindconnect-ai/mc-architector; private=true ;;
+            *) echo "::error::unknown project '$PROJECT'"; exit 1 ;;
+          esac
+          version="${VERSION#v}"
+          if ! [[ "$version" =~ ^[0-9A-Za-z][0-9A-Za-z._-]*$ ]]; then
+            echo "::error::invalid version '$VERSION'"; exit 1
+          fi
+          ref="${REF:-v$version}"
+          if ! [[ "$ref" =~ ^[0-9A-Za-z][0-9A-Za-z._/-]*$ ]]; then
+            echo "::error::invalid ref '$ref'"; exit 1
+          fi
+          {
+            echo "project=$PROJECT"
+            echo "version=$version"
+            echo "ref=$ref"
+            echo "repo=$repo"
+            echo "private=$private"
+          } >> "$GITHUB_OUTPUT"
+          echo "Archiving $PROJECT $version from $repo@$ref"
+
+      - uses: actions/checkout@v5
+        with:
+          ref: main
+
+      - name: Check out ${{ steps.in.outputs.repo }}@${{ steps.in.outputs.ref }}
+        uses: actions/checkout@v5
+        with:
+          repository: ${{ steps.in.outputs.repo }}
+          ref: ${{ steps.in.outputs.ref }}
+          path: sources/${{ steps.in.outputs.project }}
+          token: ${{ steps.in.outputs.private == 'true' && secrets.DOCS_READ_TOKEN || github.token }}
+          persist-credentials: false
+
+      - uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - run: npm ci
+
+      - name: Create snapshot
+        run: npm run snapshot -- "${{ steps.in.outputs.project }}" "${{ steps.in.outputs.version }}"
+
+      # Proves the snapshot builds. The other projects are not checked out
+      # here, so they render as stubs; that is fine for this check.
+      - run: npm run build
+
+      - name: Commit and push
+        env:
+          PROJECT: ${{ steps.in.outputs.project }}
+          VERSION: ${{ steps.in.outputs.version }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add "${PROJECT}_versioned_docs" "${PROJECT}_versioned_sidebars" "${PROJECT}_versions.json" "${PROJECT}_versions_meta.json"
+          [ -d versioned_static ] && git add versioned_static
+          git commit -m "docs(${PROJECT}): archive version ${VERSION}"
+          git push origin HEAD:main
+
+      - name: Start deploy
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh workflow run deploy.yml --ref main --repo "${{ github.repository }}"

@@ -1,0 +1,35 @@
+{
+  "name": "mc-docs",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Central documentation portal for the mindconnect projects",
+  "scripts": {
+    "docusaurus": "docusaurus",
+    "prepare-sources": "node --disable-warning=MODULE_TYPELESS_PACKAGE_JSON scripts/prepare.mjs",
+    "prestart": "npm run prepare-sources",
+    "start": "docusaurus start",
+    "prebuild": "npm run prepare-sources",
+    "build": "docusaurus build",
+    "serve": "docusaurus serve",
+    "clear": "docusaurus clear",
+    "snapshot": "node scripts/snapshot.mjs"
+  },
+  "dependencies": {
+    "@docusaurus/core": "^3.10.2",
+    "@docusaurus/plugin-content-docs": "^3.10.2",
+    "@docusaurus/preset-classic": "^3.10.2",
+    "@docusaurus/theme-mermaid": "^3.10.2",
+    "@mdx-js/react": "^3.0.0",
+    "clsx": "^2.0.0",
+    "prism-react-renderer": "^2.3.0",
+    "react": "^18.0.0",
+    "react-dom": "^18.0.0"
+  },
+  "browserslist": {
+    "production": [">0.5%", "not dead", "not op_mini all"],
+    "development": ["last 1 chrome version", "last 1 firefox version", "last 1 safari version"]
+  },
+  "engines": {
+    "node": ">=20.0"
+  }
+}
