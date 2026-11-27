@@ -7,7 +7,7 @@
 // archived in this repo as <id>_versioned_docs/, <id>_versioned_sidebars/ and
 // <id>_versions.json.
 
-import {existsSync, readFileSync} from 'node:fs';
+import {existsSync, readFileSync, realpathSync} from 'node:fs';
 import {join} from 'node:path';
 import {themes as prismThemes} from 'prism-react-renderer';
 import {projects} from './projects.mjs';
@@ -59,6 +59,16 @@ export default async function createConfig() {
     }),
   ]);
 
+  // Projects written as plain Markdown get their .md files (current and
+  // archived) parsed as CommonMark. The site default stays MDX, which the other
+  // projects need (e.g. semantic-ui imports @theme/Tabs in .md files).
+  const commonMarkDirs = sections
+    .filter((s) => s.markdownFormat === 'md')
+    .flatMap((s) => [s.docsDir, join(ROOT, `${s.id}_versioned_docs`)])
+    // Match both the configured and the real path (symlinks, /var vs /private/var).
+    .flatMap((d) => [d, existsSync(d) ? realpathSync(d) : d])
+    .map((d) => d.replace(/\/?$/, '/'));
+
   /** @type {import('@docusaurus/types').Config} */
   const config = {
     title: 'mindconnect docs',
@@ -77,6 +87,13 @@ export default async function createConfig() {
     markdown: {
       mermaid: true,
       hooks: {onBrokenMarkdownLinks: 'warn'},
+      parseFrontMatter: async (params) => {
+        const result = await params.defaultParseFrontMatter(params);
+        if (commonMarkDirs.some((d) => params.filePath.startsWith(d)) && !result.frontMatter.mdx?.format) {
+          result.frontMatter.mdx = {...result.frontMatter.mdx, format: 'md'};
+        }
+        return result;
+      },
     },
     themes: ['@docusaurus/theme-mermaid'],
 

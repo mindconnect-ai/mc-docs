@@ -24,7 +24,7 @@ const HOME = process.env.HOME ?? '';
  *   license: {name: string, href: string, note?: string},
  *   editUrlBase?: string,     // "Edit this page" base for current docs
  *   urlRewrites?: Array<[string, string]>, // absolute-URL prefixes to rewrite (links, src/href in JSX)
- *   rewriteHrefsInSidebar?: boolean,
+ *   markdownFormat?: 'md',   // 'md': parse every .md of this project as CommonMark, not MDX
  * }} Project */
 
 /** @type {Project[]} */
@@ -75,6 +75,9 @@ export const projects = [
     repo: 'mindconnect-ai/mc-architector',
     branch: 'main',
     private: true,
+    // Plain Markdown: the format reference has literal `{`, `<<stereotype>>`
+    // and `<b>` that MDX would reject.
+    markdownFormat: 'md',
     docsPath: 'docs/site',
     sidebarPaths: ['docs/site/sidebars.js', 'docs/site/sidebars.mjs', 'docs/site/sidebars.json'],
     staticImgPaths: ['docs/site/static/img', 'docs/site/img'],
