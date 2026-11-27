@@ -1,0 +1,18 @@
+# Dependencies and build output
+/node_modules
+/build
+/.docusaurus
+/.cache-loader
+
+# Generated from the project checkouts by scripts/prepare.mjs
+/.generated
+
+# Project checkouts made by CI (or by you) at build time. Never committed:
+# the projects' repos are the source of truth for their current docs.
+/sources
+
+# Local overrides for checkout locations
+/sources.local.json
+
+npm-debug.log*
+.DS_Store
